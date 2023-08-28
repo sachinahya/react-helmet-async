@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { HTMLAttributes, ReactElement } from 'react';
 import {
   HELMET_ATTRIBUTE,
   TAG_NAMES,
@@ -7,11 +7,11 @@ import {
   ATTRIBUTE_NAMES,
   SEO_PRIORITY_TAGS,
 } from './constants';
-import { flattenArray, prioritizer } from './utils';
+import { ReducedState, flattenArray, prioritizer } from './utils';
 
 const SELF_CLOSING_TAGS = [TAG_NAMES.NOSCRIPT, TAG_NAMES.SCRIPT, TAG_NAMES.STYLE];
 
-const encodeSpecialCharacters = (str, encode = true) => {
+const encodeSpecialCharacters = (str: string, encode = true): string => {
   if (encode === false) {
     return String(str);
   }
@@ -24,13 +24,18 @@ const encodeSpecialCharacters = (str, encode = true) => {
     .replace(/'/g, '&#x27;');
 };
 
-const generateElementAttributesAsString = attributes =>
+const generateElementAttributesAsString = (attributes: HTMLAttributes<HTMLElement>): string =>
   Object.keys(attributes).reduce((str, key) => {
     const attr = typeof attributes[key] !== 'undefined' ? `${key}="${attributes[key]}"` : `${key}`;
     return str ? `${str} ${attr}` : attr;
   }, '');
 
-const generateTitleAsString = (type, title, attributes, encode) => {
+const generateTitleAsString = (
+  type: string,
+  title: ReducedState['title'],
+  attributes: ReducedState['titleAttributes'],
+  encode: boolean
+) => {
   const attributeString = generateElementAttributesAsString(attributes);
   const flattenedTitle = flattenArray(title);
   return attributeString
@@ -44,8 +49,8 @@ const generateTitleAsString = (type, title, attributes, encode) => {
       )}</${type}>`;
 };
 
-const generateTagsAsString = (type, tags, encode) =>
-  tags.reduce((str, tag) => {
+const generateTagsAsString = (type: string, tags: any[], encode: boolean) =>
+  tags.reduce<string>((str, tag) => {
     const attributeHtml = Object.keys(tag)
       .filter(
         attribute =>
@@ -74,7 +79,12 @@ const convertElementAttributesToReactProps = (attributes, initProps = {}) =>
     return obj;
   }, initProps);
 
-const generateTitleAsReactComponent = (type, title, attributes) => {
+const generateTitleAsReactComponent = (
+  type: string,
+  title: ReducedState['title'],
+  attributes: ReducedState['titleAttributes'],
+  encode: boolean
+) => {
   // assigning into an array to define toString function on it
   const initProps = {
     key: title,
@@ -85,7 +95,12 @@ const generateTitleAsReactComponent = (type, title, attributes) => {
   return [React.createElement(TAG_NAMES.TITLE, props, title)];
 };
 
-const generateTagsAsReactComponent = (type, tags) =>
+const generateTagsAsReactComponent = (
+  type:
+    | (typeof TAG_NAMES)[keyof typeof TAG_NAMES]
+    | (typeof ATTRIBUTE_NAMES)[keyof typeof ATTRIBUTE_NAMES],
+  tags: any[]
+): ReactElement[] =>
   tags.map((tag, i) => {
     const mappedTag = {
       key: i,
@@ -109,7 +124,16 @@ const generateTagsAsReactComponent = (type, tags) =>
     return React.createElement(type, mappedTag);
   });
 
-const getMethodsForTag = (type, tags, encode) => {
+const getMethodsForTag = (
+  type:
+    | (typeof TAG_NAMES)[keyof typeof TAG_NAMES]
+    | (typeof ATTRIBUTE_NAMES)[keyof typeof ATTRIBUTE_NAMES],
+  tags: any,
+  encode: boolean
+): {
+  toComponent: () => any;
+  toString: () => string;
+} => {
   switch (type) {
     case TAG_NAMES.TITLE:
       return {
@@ -131,7 +155,20 @@ const getMethodsForTag = (type, tags, encode) => {
   }
 };
 
-const getPriorityMethods = ({ metaTags, linkTags, scriptTags, encode }) => {
+const getPriorityMethods = ({
+  metaTags,
+  linkTags,
+  scriptTags,
+  encode,
+}: ReducedState): {
+  priorityMethods: {
+    toComponent: () => any;
+    toString: () => string;
+  };
+  metaTags: ReducedState['metaTags'];
+  linkTags: ReducedState['linkTags'];
+  scriptTags: ReducedState['scriptTags'];
+} => {
   const meta = prioritizer(metaTags, SEO_PRIORITY_TAGS.meta);
   const link = prioritizer(linkTags, SEO_PRIORITY_TAGS.link);
   const script = prioritizer(scriptTags, SEO_PRIORITY_TAGS.script);
@@ -160,7 +197,7 @@ const getPriorityMethods = ({ metaTags, linkTags, scriptTags, encode }) => {
   };
 };
 
-const mapStateOnServer = props => {
+const mapStateOnServer = (props: ReducedState) => {
   const {
     baseTag,
     bodyAttributes,

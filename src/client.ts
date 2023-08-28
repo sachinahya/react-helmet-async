@@ -1,16 +1,31 @@
 import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES } from './constants';
-import { flattenArray } from './utils';
+import { ReducedState, flattenArray } from './utils';
 
-const updateTags = (type, tags) => {
+const updateTags = <
+  T extends Omit<typeof TAG_NAMES, 'FRAGMENT'>[keyof Omit<typeof TAG_NAMES, 'FRAGMENT'>],
+>(
+  type: T,
+  tags: ReducedState[
+    | 'baseTag'
+    | 'linkTags'
+    | 'metaTags'
+    | 'noscriptTags'
+    | 'scriptTags'
+    | 'styleTags']
+) => {
+  type Tag = (typeof tags)[number];
+
   const headElement = document.head || document.querySelector(TAG_NAMES.HEAD);
-  const tagNodes = headElement.querySelectorAll(`${type}[${HELMET_ATTRIBUTE}]`);
-  const oldTags = [].slice.call(tagNodes);
-  const newTags = [];
-  let indexToDelete;
+  const tagNodes = headElement.querySelectorAll<HTMLElementTagNameMap[T]>(
+    `${type}[${HELMET_ATTRIBUTE}]`
+  );
+  const oldTags: HTMLElementTagNameMap[T][] = [].slice.call(tagNodes);
+  const newTags: HTMLElementTagNameMap[T][] = [];
+  let indexToDelete: number;
 
   if (tags && tags.length) {
-    tags.forEach(tag => {
-      const newElement = document.createElement(type);
+    tags.forEach((tag: Tag) => {
+      const newElement = document.createElement<T>(type);
 
       // eslint-disable-next-line
       for (const attribute in tag) {
@@ -55,7 +70,10 @@ const updateTags = (type, tags) => {
   };
 };
 
-const updateAttributes = (tagName, attributes) => {
+const updateAttributes = <T extends keyof ReducedState>(
+  tagName: (typeof TAG_NAMES)[keyof typeof TAG_NAMES],
+  attributes: ReducedState[T]
+): void => {
   const elementTag = document.getElementsByTagName(tagName)[0];
 
   if (!elementTag) {
@@ -96,7 +114,7 @@ const updateAttributes = (tagName, attributes) => {
   }
 };
 
-const updateTitle = (title, attributes) => {
+const updateTitle = (title: string, attributes: ReducedState['titleAttributes']) => {
   if (typeof title !== 'undefined' && document.title !== title) {
     document.title = flattenArray(title);
   }
@@ -104,7 +122,7 @@ const updateTitle = (title, attributes) => {
   updateAttributes(TAG_NAMES.TITLE, attributes);
 };
 
-const commitTagChanges = (newState, cb) => {
+const commitTagChanges = (newState: ReducedState, cb?: () => void) => {
   const {
     baseTag,
     bodyAttributes,
@@ -156,7 +174,7 @@ const commitTagChanges = (newState, cb) => {
 // eslint-disable-next-line
 let _helmetCallback = null;
 
-const handleStateChangeOnClient = newState => {
+const handleStateChangeOnClient = (newState: ReducedState) => {
   if (_helmetCallback) {
     cancelAnimationFrame(_helmetCallback);
   }

@@ -9,13 +9,13 @@ export const TAG_PROPERTIES = {
   PROPERTY: 'property',
   REL: 'rel',
   SRC: 'src',
-};
+} as const;
 
 export const ATTRIBUTE_NAMES = {
   BODY: 'bodyAttributes',
   HTML: 'htmlAttributes',
   TITLE: 'titleAttributes',
-};
+} as const;
 
 export const TAG_NAMES = {
   BASE: 'base',
@@ -29,7 +29,7 @@ export const TAG_NAMES = {
   STYLE: 'style',
   TITLE: 'title',
   FRAGMENT: 'Symbol(react.fragment)',
-};
+} as const;
 
 export const SEO_PRIORITY_TAGS = {
   link: { rel: ['amphtml', 'canonical', 'alternate'] },

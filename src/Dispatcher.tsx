@@ -3,15 +3,14 @@ import shallowEqual from 'shallowequal';
 import handleStateChangeOnClient from './client';
 import mapStateOnServer from './server';
 import { reducePropsToState } from './utils';
-import Provider, { providerShape } from './Provider';
+import Provider, { HelmetContext } from './Provider';
+import { HelmetProps } from './index';
 
-export default class Dispatcher extends Component {
-  static propTypes = {
-    context: providerShape.isRequired,
-  };
+export interface DispatcherProps extends HelmetProps {
+  context: HelmetContext;
+}
 
-  static displayName = 'HelmetDispatcher';
-
+export default class Dispatcher extends Component<DispatcherProps> {
   rendered = false;
 
   shouldComponentUpdate(nextProps) {
@@ -31,13 +30,12 @@ export default class Dispatcher extends Component {
   emitChange() {
     const { helmetInstances, setHelmet } = this.props.context;
     let serverState = null;
-    const state = reducePropsToState(
-      helmetInstances.get().map(instance => {
-        const props = { ...instance.props };
-        delete props.context;
-        return props;
-      })
-    );
+    const propsList = helmetInstances.get().map(instance => {
+      const props = { ...instance.props };
+      delete props.context;
+      return props;
+    });
+    const state = reducePropsToState(propsList);
     if (Provider.canUseDOM) {
       handleStateChangeOnClient(state);
     } else if (mapStateOnServer) {

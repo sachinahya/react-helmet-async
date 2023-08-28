@@ -1,18 +1,61 @@
-import React, { Component } from 'react';
+import React, { Component, BaseHTMLAttributes, ReactNode, ReactElement } from 'react';
 import PropTypes from 'prop-types';
 import fastCompare from 'react-fast-compare';
 import invariant from 'invariant';
 import { Context } from './Provider';
 import HelmetData from './HelmetData';
 import Dispatcher from './Dispatcher';
-import { without } from './utils';
+import { ReducedState, without } from './utils';
 import { TAG_NAMES, VALID_TAG_NAMES, HTML_TAG_MAP } from './constants';
 
 export { default as HelmetData } from './HelmetData';
 export { default as HelmetProvider } from './Provider';
 
+interface OtherElementAttributes {
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+type HtmlProps = JSX.IntrinsicElements['html'] & OtherElementAttributes;
+
+type BodyProps = JSX.IntrinsicElements['body'] & OtherElementAttributes;
+
+type LinkProps = JSX.IntrinsicElements['link'];
+
+type MetaProps = JSX.IntrinsicElements['meta'];
+
+export type HelmetTags = Pick<
+  ReducedState,
+  'baseTag' | 'linkTags' | 'metaTags' | 'noscriptTags' | 'scriptTags' | 'styleTags'
+>;
+
+export interface HelmetProps {
+  children?: ReactNode[];
+  async?: boolean;
+  base?: BaseHTMLAttributes<HTMLBaseElement>;
+  bodyAttributes?: BodyProps;
+  defaultTitle?: string;
+  defer?: boolean;
+  encodeSpecialCharacters?: boolean;
+  helmetData: HelmetData;
+  htmlAttributes?: HtmlProps;
+  onChangeClientState?: (
+    newState: ReducedState,
+    addedTags: HelmetTags,
+    removedTags: HelmetTags
+  ) => void;
+  link?: LinkProps[];
+  meta?: MetaProps[];
+  noscript?: JSX.IntrinsicElements['noscript'][];
+  script?: JSX.IntrinsicElements['script'][];
+  style?: LinkProps[];
+  title?: string;
+  titleAttributes?: JSX.IntrinsicElements['title'];
+  titleTemplate?: string;
+  prioritizeSeoTags?: boolean;
+}
+
 /* eslint-disable class-methods-use-this */
-export class Helmet extends Component {
+export class Helmet extends Component<HelmetProps> {
   /**
    * @param {Object} base: {"target": "_blank", "href": "http://mysite.com/"}
    * @param {Object} bodyAttributes: {"className": "root"}
@@ -62,11 +105,14 @@ export class Helmet extends Component {
 
   static displayName = 'Helmet';
 
-  shouldComponentUpdate(nextProps) {
+  shouldComponentUpdate(nextProps: HelmetProps) {
     return !fastCompare(without(this.props, 'helmetData'), without(nextProps, 'helmetData'));
   }
 
-  mapNestedChildrenToProps(child, nestedChildren) {
+  mapNestedChildrenToProps(
+    child: ReactElement,
+    nestedChildren: ReactNode | ReactNode[] | undefined
+  ) {
     if (!nestedChildren) {
       return null;
     }
@@ -89,7 +135,17 @@ export class Helmet extends Component {
     }
   }
 
-  flattenArrayTypeChildren({ child, arrayTypeChildren, newChildProps, nestedChildren }) {
+  flattenArrayTypeChildren({
+    child,
+    arrayTypeChildren,
+    newChildProps,
+    nestedChildren,
+  }: {
+    child: ReactElement;
+    arrayTypeChildren;
+    newChildProps: HTMLElement;
+    nestedChildren: ReactNode | ReactNode[] | undefined;
+  }): Record<string, HTMLElement> {
     return {
       ...arrayTypeChildren,
       [child.type]: [
@@ -102,7 +158,17 @@ export class Helmet extends Component {
     };
   }
 
-  mapObjectTypeChildren({ child, newProps, newChildProps, nestedChildren }) {
+  mapObjectTypeChildren({
+    child,
+    newProps,
+    newChildProps,
+    nestedChildren,
+  }: {
+    child: ReactElement;
+    newProps: HelmetProps;
+    newChildProps: HTMLElement;
+    nestedChildren: ReactNode | ReactNode[] | undefined;
+  }): HelmetProps {
     switch (child.type) {
       case TAG_NAMES.TITLE:
         return {
@@ -130,7 +196,10 @@ export class Helmet extends Component {
     }
   }
 
-  mapArrayTypeChildrenToProps(arrayTypeChildren, newProps) {
+  mapArrayTypeChildrenToProps(
+    arrayTypeChildren: Record<string, HTMLElement>,
+    newProps: HelmetProps
+  ): HelmetProps {
     let newFlattenedProps = { ...newProps };
 
     Object.keys(arrayTypeChildren).forEach(arrayChildName => {
@@ -143,7 +212,7 @@ export class Helmet extends Component {
     return newFlattenedProps;
   }
 
-  warnOnInvalidChildren(child, nestedChildren) {
+  warnOnInvalidChildren(child: ReactElement, nestedChildren: ReactNode[] | undefined) {
     invariant(
       VALID_TAG_NAMES.some(name => child.type === name),
       typeof child.type === 'function'
@@ -166,23 +235,27 @@ export class Helmet extends Component {
     return true;
   }
 
-  mapChildrenToProps(children, newProps) {
-    let arrayTypeChildren = {};
+  mapChildrenToProps(children: ReactNode[], newProps: HelmetProps): HelmetProps {
+    let arrayTypeChildren: Record<string, HTMLElement> = {};
 
     React.Children.forEach(children, child => {
-      if (!child || !child.props) {
+      if (!child || typeof child !== 'object' || !('props' in child) || !child.props) {
         return;
       }
 
-      const { children: nestedChildren, ...childProps } = child.props;
+      const { children: _, ...childProps } = child.props;
+      const nestedChildren: ReactNode[] | undefined = child.props.children;
+
       // convert React props to HTML attributes
-      const newChildProps = Object.keys(childProps).reduce((obj, key) => {
+      const newChildProps = Object.keys(childProps).reduce<HTMLElement>((obj, key) => {
         obj[HTML_TAG_MAP[key] || key] = childProps[key];
         return obj;
-      }, {});
+      }, {} as HTMLElement);
 
       let { type } = child;
       if (typeof type === 'symbol') {
+        // @ts-expect-error -- This happens because type is a symbol representing a Fragment.
+        // This is an implementation detail of React and we should use isFragment from react-is instead.
         type = type.toString();
       } else {
         this.warnOnInvalidChildren(child, nestedChildren);

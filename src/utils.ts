@@ -1,3 +1,5 @@
+import { BaseHTMLAttributes } from 'react';
+import { HelmetProps } from '.';
 import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES } from './constants';
 
 const HELMET_PROPS = {
@@ -7,9 +9,12 @@ const HELMET_PROPS = {
   ON_CHANGE_CLIENT_STATE: 'onChangeClientState',
   TITLE_TEMPLATE: 'titleTemplate',
   PRIORITIZE_SEO_TAGS: 'prioritizeSeoTags',
-};
+} as const satisfies Record<string, keyof HelmetProps>;
 
-const getInnermostProperty = (propsList, property) => {
+const getInnermostProperty = <T extends keyof HelmetProps>(
+  propsList: HelmetProps[],
+  property: T
+): HelmetProps[T] | null => {
   for (let i = propsList.length - 1; i >= 0; i -= 1) {
     const props = propsList[i];
 
@@ -21,7 +26,7 @@ const getInnermostProperty = (propsList, property) => {
   return null;
 };
 
-const getTitleFromPropsList = propsList => {
+const getTitleFromPropsList = (propsList: HelmetProps[]): string | undefined => {
   let innermostTitle = getInnermostProperty(propsList, TAG_NAMES.TITLE);
   const innermostTemplate = getInnermostProperty(propsList, HELMET_PROPS.TITLE_TEMPLATE);
   if (Array.isArray(innermostTitle)) {
@@ -37,32 +42,38 @@ const getTitleFromPropsList = propsList => {
   return innermostTitle || innermostDefaultTitle || undefined;
 };
 
-const getOnChangeClientState = propsList =>
+const getOnChangeClientState = (propsList: HelmetProps[]) =>
   getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE) || (() => {});
 
-const getAttributesFromPropsList = (tagType, propsList) =>
+const getAttributesFromPropsList = <
+  T extends (typeof ATTRIBUTE_NAMES)[keyof typeof ATTRIBUTE_NAMES],
+>(
+  tagType: T,
+  propsList: HelmetProps[]
+): HelmetProps[T] =>
   propsList
     .filter(props => typeof props[tagType] !== 'undefined')
     .map(props => props[tagType])
-    .reduce((tagAttrs, current) => ({ ...tagAttrs, ...current }), {});
+    .reduce<HelmetProps[T]>((tagAttrs, current) => ({ ...tagAttrs, ...current }), {});
 
-const getBaseTagFromPropsList = (primaryAttributes, propsList) =>
+const getBaseTagFromPropsList = (
+  primaryAttributes: string[],
+  propsList: HelmetProps[]
+): BaseHTMLAttributes<HTMLBaseElement>[] =>
   propsList
     .filter(props => typeof props[TAG_NAMES.BASE] !== 'undefined')
     .map(props => props[TAG_NAMES.BASE])
     .reverse()
-    .reduce((innermostBaseTag, tag) => {
-      if (!innermostBaseTag.length) {
+    .reduce<BaseHTMLAttributes<HTMLBaseElement>[]>((innermostBaseTag, tag) => {
+      if (innermostBaseTag.length === 0) {
         const keys = Object.keys(tag);
 
         for (let i = 0; i < keys.length; i += 1) {
           const attributeKey = keys[i];
           const lowerCaseAttributeKey = attributeKey.toLowerCase();
 
-          if (
-            primaryAttributes.indexOf(lowerCaseAttributeKey) !== -1 &&
-            tag[lowerCaseAttributeKey]
-          ) {
+          if (primaryAttributes.includes(lowerCaseAttributeKey) && tag[lowerCaseAttributeKey]) {
+            // Only include a base tag if it has truthy values for all of the primaryAttributes.
             return innermostBaseTag.concat(tag);
           }
         }
@@ -74,7 +85,18 @@ const getBaseTagFromPropsList = (primaryAttributes, propsList) =>
 // eslint-disable-next-line no-console
 const warn = msg => console && typeof console.warn === 'function' && console.warn(msg);
 
-const getTagsFromPropsList = (tagName, primaryAttributes, propsList) => {
+const getTagsFromPropsList = <
+  T extends
+    | typeof TAG_NAMES.LINK
+    | typeof TAG_NAMES.META
+    | typeof TAG_NAMES.NOSCRIPT
+    | typeof TAG_NAMES.SCRIPT
+    | typeof TAG_NAMES.STYLE,
+>(
+  tagName: T,
+  primaryAttributes: string[],
+  propsList: HelmetProps[]
+): HelmetProps[T] => {
   // Calculate list of tags, giving priority innermost component (end of the propslist)
   const approvedSeenTags = {};
 
@@ -94,12 +116,12 @@ const getTagsFromPropsList = (tagName, primaryAttributes, propsList) => {
     })
     .map(props => props[tagName])
     .reverse()
-    .reduce((approvedTags, instanceTags) => {
+    .reduce<HelmetProps[T][]>((approvedTags, instanceTags) => {
       const instanceSeenTags = {};
 
       instanceTags
-        .filter(tag => {
-          let primaryAttributeKey;
+        .filter((tag: (typeof instanceTags)[number]) => {
+          let primaryAttributeKey: string;
           const keys = Object.keys(tag);
           for (let i = 0; i < keys.length; i += 1) {
             const attributeKey = keys[i];
@@ -152,7 +174,7 @@ const getTagsFromPropsList = (tagName, primaryAttributes, propsList) => {
           return false;
         })
         .reverse()
-        .forEach(tag => approvedTags.push(tag));
+        .forEach((tag: HelmetProps[T]) => approvedTags.push(tag));
 
       // Update seen tags with tags from this instance
       const keys = Object.keys(instanceSeenTags);
@@ -171,7 +193,7 @@ const getTagsFromPropsList = (tagName, primaryAttributes, propsList) => {
     .reverse();
 };
 
-const getAnyTrueFromPropsList = (propsList, checkedTag) => {
+const getAnyTrueFromPropsList = (propsList: HelmetProps[], checkedTag) => {
   if (Array.isArray(propsList) && propsList.length) {
     for (let index = 0; index < propsList.length; index += 1) {
       const prop = propsList[index];
@@ -183,7 +205,24 @@ const getAnyTrueFromPropsList = (propsList, checkedTag) => {
   return false;
 };
 
-const reducePropsToState = propsList => ({
+export interface ReducedState {
+  baseTag: BaseHTMLAttributes<HTMLBaseElement>[];
+  bodyAttributes: HelmetProps['bodyAttributes'];
+  defer: HelmetProps['defer'];
+  encode: HelmetProps['encodeSpecialCharacters'];
+  htmlAttributes: HelmetProps['htmlAttributes'];
+  linkTags: HelmetProps['link'];
+  metaTags: HelmetProps['meta'];
+  noscriptTags: HelmetProps['noscript'];
+  onChangeClientState: HelmetProps['onChangeClientState'];
+  scriptTags: HelmetProps['script'];
+  styleTags: HelmetProps['style'];
+  title: string | undefined;
+  titleAttributes: HelmetProps['titleAttributes'];
+  prioritizeSeoTags: HelmetProps['prioritizeSeoTags'];
+}
+
+export const reducePropsToState = (propsList: HelmetProps[]): ReducedState => ({
   baseTag: getBaseTagFromPropsList([TAG_PROPERTIES.HREF], propsList),
   bodyAttributes: getAttributesFromPropsList(ATTRIBUTE_NAMES.BODY, propsList),
   defer: getInnermostProperty(propsList, HELMET_PROPS.DEFER),
@@ -218,10 +257,8 @@ const reducePropsToState = propsList => ({
   prioritizeSeoTags: getAnyTrueFromPropsList(propsList, HELMET_PROPS.PRIORITIZE_SEO_TAGS),
 });
 
-export const flattenArray = possibleArray =>
+export const flattenArray = (possibleArray: string | string[]): string =>
   Array.isArray(possibleArray) ? possibleArray.join('') : possibleArray;
-
-export { reducePropsToState };
 
 const checkIfPropsMatch = (props, toMatch) => {
   const keys = Object.keys(props);
@@ -234,7 +271,15 @@ const checkIfPropsMatch = (props, toMatch) => {
   return false;
 };
 
-export const prioritizer = (elementsList, propsToMatch) => {
+export const prioritizer = <
+  T extends ReducedState['metaTags'] | ReducedState['linkTags'] | ReducedState['scriptTags'],
+>(
+  elementsList: T,
+  propsToMatch: any
+): {
+  priority?: T;
+  default: T;
+} => {
   if (Array.isArray(elementsList)) {
     return elementsList.reduce(
       (acc, elementAttrs) => {

@@ -1,39 +1,35 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import HelmetData from './HelmetData';
+import React, { Component, ReactNode } from 'react';
+import HelmetData, { HelmetDataContext } from './HelmetData';
+import Dispatcher from './Dispatcher';
 
 const defaultValue = {};
 
-export const Context = React.createContext(defaultValue);
+export interface HelmetInstancesMutation {
+  get: () => Dispatcher[];
+  add: (instance: Dispatcher) => void;
+  remove: (instance: Dispatcher) => void;
+}
 
-export const providerShape = PropTypes.shape({
-  setHelmet: PropTypes.func,
-  helmetInstances: PropTypes.shape({
-    get: PropTypes.func,
-    add: PropTypes.func,
-    remove: PropTypes.func,
-  }),
-});
+export interface HelmetContext {
+  setHelmet: (...args: any[]) => any;
+  helmetInstances: HelmetInstancesMutation;
+}
+
+export const Context = React.createContext<HelmetContext>(defaultValue as HelmetContext);
 
 const canUseDOM = typeof document !== 'undefined';
 
-export default class Provider extends Component {
+export interface ProviderProps {
+  children?: ReactNode;
+  context: HelmetDataContext;
+}
+
+export default class Provider extends Component<ProviderProps> {
   static canUseDOM = canUseDOM;
 
-  static propTypes = {
-    context: PropTypes.shape({
-      helmet: PropTypes.shape(),
-    }),
-    children: PropTypes.node.isRequired,
-  };
+  helmetData: HelmetData;
 
-  static defaultProps = {
-    context: {},
-  };
-
-  static displayName = 'HelmetProvider';
-
-  constructor(props) {
+  constructor(props: ProviderProps) {
     super(props);
 
     this.helmetData = new HelmetData(this.props.context, Provider.canUseDOM);
