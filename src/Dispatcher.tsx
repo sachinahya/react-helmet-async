@@ -4,8 +4,13 @@ import handleStateChangeOnClient from './client';
 import mapStateOnServer from './server';
 import { reducePropsToState } from './utils';
 import Provider, { providerShape } from './Provider';
+import { HelmetDataValue } from './HelmetData';
 
-export default class Dispatcher extends Component {
+export interface DispatcherProps {
+  context: HelmetDataValue;
+}
+
+export default class Dispatcher extends Component<DispatcherProps> {
   static propTypes = {
     context: providerShape.isRequired,
   };

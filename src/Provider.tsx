@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import HelmetData from './HelmetData';
 
@@ -17,7 +17,12 @@ export const providerShape = PropTypes.shape({
 
 const canUseDOM = typeof document !== 'undefined';
 
-export default class Provider extends Component {
+export interface ProviderProps {
+  context: any;
+  children?: ReactNode;
+}
+
+export default class Provider extends Component<ProviderProps> {
   static canUseDOM = canUseDOM;
 
   static propTypes = {
@@ -33,7 +38,9 @@ export default class Provider extends Component {
 
   static displayName = 'HelmetProvider';
 
-  constructor(props) {
+  helmetData: HelmetData;
+
+  constructor(props: ProviderProps) {
     super(props);
 
     this.helmetData = new HelmetData(this.props.context, Provider.canUseDOM);

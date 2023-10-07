@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import PropTypes from 'prop-types';
 import fastCompare from 'react-fast-compare';
 import invariant from 'invariant';
@@ -8,8 +8,51 @@ import Dispatcher from './Dispatcher';
 import { without } from './utils';
 import { TAG_NAMES, VALID_TAG_NAMES, HTML_TAG_MAP } from './constants';
 
+export interface OtherElementAttributes {
+  [key: string]: string | number | boolean | null | undefined;
+}
+
+export type BodyProps = JSX.IntrinsicElements['body'] & OtherElementAttributes;
+
+export type HtmlProps = JSX.IntrinsicElements['html'] & OtherElementAttributes;
+
+export type LinkProps = JSX.IntrinsicElements['link'];
+
+export type MetaProps = JSX.IntrinsicElements['meta'];
+
+export interface HelmetTags {
+  baseTag: Array<any>;
+  linkTags: Array<HTMLLinkElement>;
+  metaTags: Array<HTMLMetaElement>;
+  noscriptTags: Array<any>;
+  scriptTags: Array<HTMLScriptElement>;
+  styleTags: Array<HTMLStyleElement>;
+}
+
+export interface HelmetProps {
+  children?: ReactNode;
+  async?: boolean;
+  base?: any;
+  bodyAttributes?: BodyProps;
+  defaultTitle?: string;
+  defer?: boolean;
+  encodeSpecialCharacters?: boolean;
+  helmetData?: HelmetData;
+  htmlAttributes?: HtmlProps;
+  onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
+  link?: LinkProps[];
+  meta?: MetaProps[];
+  noscript?: Array<any>;
+  script?: Array<any>;
+  style?: Array<any>;
+  title?: string;
+  titleAttributes?: Object;
+  titleTemplate?: string;
+  prioritizeSeoTags?: boolean;
+}
+
 /* eslint-disable class-methods-use-this */
-export class Helmet extends Component {
+export class Helmet extends Component<HelmetProps> {
   /**
    * @param {Object} base: {"target": "_blank", "href": "http://mysite.com/"}
    * @param {Object} bodyAttributes: {"className": "root"}
@@ -227,6 +270,7 @@ export class Helmet extends Component {
     }
 
     if (helmetData && !(helmetData instanceof HelmetData)) {
+      // @ts-expect-error
       helmetData = new HelmetData(helmetData.context, helmetData.instances);
     }
 

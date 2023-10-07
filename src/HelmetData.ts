@@ -6,10 +6,23 @@ export function clearInstances() {
   instances.length = 0;
 }
 
-export default class HelmetData {
-  instances = [];
+export interface HelmetDataValue {
+  setHelmet: (serverState: any) => void;
+  helmetInstances: {
+    get: () => any[];
+    add: (instance: any) => void;
+    remove: (instance: any) => void;
+  };
+}
 
-  value = {
+export default class HelmetData {
+  context: any;
+
+  canUseDOM: boolean;
+
+  instances: any[] = [];
+
+  value: HelmetDataValue = {
     setHelmet: serverState => {
       this.context.helmet = serverState;
     },
@@ -25,7 +38,7 @@ export default class HelmetData {
     },
   };
 
-  constructor(context, canUseDOM = typeof document !== 'undefined') {
+  constructor(context: any, canUseDOM = typeof document !== 'undefined') {
     this.context = context;
     this.canUseDOM = canUseDOM;
 
