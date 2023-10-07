@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react';
+import React, { Component, ReactElement, ReactNode, isValidElement } from 'react';
 import PropTypes from 'prop-types';
 import fastCompare from 'react-fast-compare';
 import invariant from 'invariant';
@@ -42,9 +42,9 @@ export interface HelmetProps {
   onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
   link?: LinkProps[];
   meta?: MetaProps[];
-  noscript?: Array<any>;
-  script?: Array<any>;
-  style?: Array<any>;
+  noscript?: Array<{ innerHTML: string }>;
+  script?: Array<JSX.IntrinsicElements['script']>;
+  style?: Array<{ cssText: string }>;
   title?: string;
   titleAttributes?: Object;
   titleTemplate?: string;
@@ -64,7 +64,7 @@ export class Helmet extends Component<HelmetProps> {
    * @param {Array} meta: [{"name": "description", "content": "Test description"}]
    * @param {Array} noscript: [{"innerHTML": "<img src='http://mysite.com/js/test.js'"}]
    * @param {Function} onChangeClientState: "(newState) => console.log(newState)"
-   * @param {Array} script: [{"type": "text/javascript", "src": "http://mysite.com/js/test.js"}]
+   * @param {Array} script: [{"type": "text/javascript", "src": "http://mysite.com/js/test.js"}, "innerHTML": "console.log()"]
    * @param {Array} style: [{"type": "text/css", "cssText": "div { display: block; color: blue; }"}]
    * @param {String} title: "Title"
    * @param {Object} titleAttributes: {"itemprop": "name"}
@@ -106,7 +106,7 @@ export class Helmet extends Component<HelmetProps> {
     return !fastCompare(without(this.props, 'helmetData'), without(nextProps, 'helmetData'));
   }
 
-  mapNestedChildrenToProps(child, nestedChildren) {
+  mapNestedChildrenToProps(child: ReactElement, nestedChildren: ReactNode) {
     if (!nestedChildren) {
       return null;
     }
@@ -129,7 +129,21 @@ export class Helmet extends Component<HelmetProps> {
     }
   }
 
-  flattenArrayTypeChildren({ child, arrayTypeChildren, newChildProps, nestedChildren }) {
+  flattenArrayTypeChildren({
+    child,
+    arrayTypeChildren,
+    newChildProps,
+    nestedChildren,
+  }: {
+    child: ReactElement;
+    arrayTypeChildren: Record<string, any[]>;
+    newChildProps: Record<string, unknown>;
+    nestedChildren: ReactNode;
+  }): Record<string, any[]> {
+    if (typeof child.type !== 'string') {
+      return arrayTypeChildren;
+    }
+
     return {
       ...arrayTypeChildren,
       [child.type]: [
@@ -142,7 +156,17 @@ export class Helmet extends Component<HelmetProps> {
     };
   }
 
-  mapObjectTypeChildren({ child, newProps, newChildProps, nestedChildren }) {
+  mapObjectTypeChildren({
+    child,
+    newProps,
+    newChildProps,
+    nestedChildren,
+  }: {
+    child: ReactElement;
+    newProps: any;
+    newChildProps: Record<string, unknown>;
+    nestedChildren: ReactNode;
+  }) {
     switch (child.type) {
       case TAG_NAMES.TITLE:
         return {
@@ -170,20 +194,23 @@ export class Helmet extends Component<HelmetProps> {
     }
   }
 
-  mapArrayTypeChildrenToProps(arrayTypeChildren, newProps) {
+  mapArrayTypeChildrenToProps(arrayTypeChildren: Record<string, any[]>, newProps) {
     let newFlattenedProps = { ...newProps };
 
-    Object.keys(arrayTypeChildren).forEach(arrayChildName => {
+    Object.entries(arrayTypeChildren).forEach(([arrayChildName, arrayChild]) => {
       newFlattenedProps = {
         ...newFlattenedProps,
-        [arrayChildName]: arrayTypeChildren[arrayChildName],
+        [arrayChildName]: arrayChild,
       };
     });
 
     return newFlattenedProps;
   }
 
-  warnOnInvalidChildren(child, nestedChildren) {
+  warnOnInvalidChildren(
+    child: ReactElement,
+    nestedChildren: any
+  ): child is ReactElement<any, typeof VALID_TAG_NAMES[number]> {
     invariant(
       VALID_TAG_NAMES.some(name => child.type === name),
       typeof child.type === 'function'
@@ -206,18 +233,18 @@ export class Helmet extends Component<HelmetProps> {
     return true;
   }
 
-  mapChildrenToProps(children, newProps) {
+  mapChildrenToProps(children: ReactNode, newProps: HelmetProps): HelmetProps {
     let arrayTypeChildren = {};
 
     React.Children.forEach(children, child => {
-      if (!child || !child.props) {
+      if (!child || !isValidElement(child) || !child.props) {
         return;
       }
 
       const { children: nestedChildren, ...childProps } = child.props;
       // convert React props to HTML attributes
-      const newChildProps = Object.keys(childProps).reduce((obj, key) => {
-        obj[HTML_TAG_MAP[key] || key] = childProps[key];
+      const newChildProps = Object.entries(childProps).reduce((obj, [key, value]) => {
+        obj[HTML_TAG_MAP[key] || key] = value;
         return obj;
       }, {});
 

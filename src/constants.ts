@@ -1,3 +1,5 @@
+import { Entries } from 'type-fest';
+
 export const TAG_PROPERTIES = {
   CHARSET: 'charset',
   CSS_TEXT: 'cssText',
@@ -9,13 +11,13 @@ export const TAG_PROPERTIES = {
   PROPERTY: 'property',
   REL: 'rel',
   SRC: 'src',
-};
+} as const;
 
 export const ATTRIBUTE_NAMES = {
   BODY: 'bodyAttributes',
   HTML: 'htmlAttributes',
   TITLE: 'titleAttributes',
-};
+} as const;
 
 export const TAG_NAMES = {
   BASE: 'base',
@@ -29,7 +31,7 @@ export const TAG_NAMES = {
   STYLE: 'style',
   TITLE: 'title',
   FRAGMENT: 'Symbol(react.fragment)',
-};
+} as const;
 
 export const SEO_PRIORITY_TAGS = {
   link: { rel: ['amphtml', 'canonical', 'alternate'] },
@@ -53,9 +55,9 @@ export const SEO_PRIORITY_TAGS = {
       'twitter:site',
     ],
   },
-};
+} as const;
 
-export const VALID_TAG_NAMES = Object.keys(TAG_NAMES).map(name => TAG_NAMES[name]);
+export const VALID_TAG_NAMES = Object.values(TAG_NAMES);
 
 export const REACT_TAG_MAP = {
   accesskey: 'accessKey',
@@ -66,11 +68,16 @@ export const REACT_TAG_MAP = {
   'http-equiv': 'httpEquiv',
   itemprop: 'itemProp',
   tabindex: 'tabIndex',
+} as const;
+
+const swapKeysAndValues = <T extends Record<string | number | symbol, string | number | symbol>>(
+  obj: T
+): { [K in keyof T as T[K]]: K } => {
+  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [value, key])) as {
+    [K in keyof T as T[K]]: K;
+  };
 };
 
-export const HTML_TAG_MAP = Object.keys(REACT_TAG_MAP).reduce((obj, key) => {
-  obj[REACT_TAG_MAP[key]] = key;
-  return obj;
-}, {});
+export const HTML_TAG_MAP = swapKeysAndValues(REACT_TAG_MAP);
 
 export const HELMET_ATTRIBUTE = 'data-rh';
