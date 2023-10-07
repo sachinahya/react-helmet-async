@@ -32,10 +32,8 @@ export interface HelmetTags {
 
 export interface HelmetProps {
   children?: ReactNode;
-  async?: boolean;
   base?: JSX.IntrinsicElements['base'];
   bodyAttributes?: BodyProps;
-  defaultTitle?: string;
   defer?: boolean;
   encodeSpecialCharacters?: boolean;
   helmetData?: HelmetData;
@@ -48,20 +46,16 @@ export interface HelmetProps {
   style?: Array<{ cssText: string }>;
   title?: string;
   titleAttributes?: { itemprop?: string };
-  titleTemplate?: string;
   prioritizeSeoTags?: boolean;
 }
 
 export type HelmetComponentProps = Pick<
   HelmetProps,
   | 'children'
-  | 'async'
-  | 'defaultTitle'
   | 'defer'
   | 'encodeSpecialCharacters'
   | 'helmetData'
   | 'onChangeClientState'
-  | 'titleTemplate'
   | 'prioritizeSeoTags'
 >;
 
@@ -70,7 +64,6 @@ export class Helmet extends Component<HelmetComponentProps> {
   /**
    * @param {Object} base: {"target": "_blank", "href": "http://mysite.com/"}
    * @param {Object} bodyAttributes: {"className": "root"}
-   * @param {String} defaultTitle: "Default Title"
    * @param {Boolean} defer: true
    * @param {Boolean} encodeSpecialCharacters: true
    * @param {Object} htmlAttributes: {"lang": "en", "amp": undefined}
@@ -82,7 +75,6 @@ export class Helmet extends Component<HelmetComponentProps> {
    * @param {Array} style: [{"type": "text/css", "cssText": "div { display: block; color: blue; }"}]
    * @param {String} title: "Title"
    * @param {Object} titleAttributes: {"itemprop": "name"}
-   * @param {String} titleTemplate: "MySite.com - %s"
    * @param {Boolean} prioritizeSeoTags: false
    */
   /* eslint-disable react/forbid-prop-types, react/require-default-props */
@@ -90,7 +82,6 @@ export class Helmet extends Component<HelmetComponentProps> {
   //   base: PropTypes.object,
   //   bodyAttributes: PropTypes.object,
   //   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-  //   defaultTitle: PropTypes.string,
   //   defer: PropTypes.bool,
   //   encodeSpecialCharacters: PropTypes.bool,
   //   htmlAttributes: PropTypes.object,
@@ -102,7 +93,6 @@ export class Helmet extends Component<HelmetComponentProps> {
   //   style: PropTypes.arrayOf(PropTypes.object),
   //   title: PropTypes.string,
   //   titleAttributes: PropTypes.object,
-  //   titleTemplate: PropTypes.string,
   //   prioritizeSeoTags: PropTypes.bool,
   //   helmetData: PropTypes.object,
   // };

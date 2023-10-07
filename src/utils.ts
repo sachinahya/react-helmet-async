@@ -3,11 +3,9 @@ import { BodyProps, HelmetProps, HtmlProps } from './Helmet';
 import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES } from './constants';
 
 const HELMET_PROPS = {
-  DEFAULT_TITLE: 'defaultTitle',
   DEFER: 'defer',
   ENCODE_SPECIAL_CHARACTERS: 'encodeSpecialCharacters',
   ON_CHANGE_CLIENT_STATE: 'onChangeClientState',
-  TITLE_TEMPLATE: 'titleTemplate',
   PRIORITIZE_SEO_TAGS: 'prioritizeSeoTags',
 } as const;
 
@@ -25,16 +23,7 @@ const getInnermostProperty = <T extends keyof HelmetProps>(
 };
 
 const getTitleFromPropsList = (propsList: HelmetProps[]): string | undefined => {
-  const innermostTitle = getInnermostProperty(propsList, TAG_NAMES.TITLE);
-
-  const innermostTemplate = getInnermostProperty(propsList, HELMET_PROPS.TITLE_TEMPLATE);
-
-  if (innermostTemplate && innermostTitle) {
-    // use function arg to avoid need to escape $ characters
-    return innermostTemplate.replace(/%s/g, () => innermostTitle ?? '');
-  }
-
-  return innermostTitle || getInnermostProperty(propsList, HELMET_PROPS.DEFAULT_TITLE) || undefined;
+  return getInnermostProperty(propsList, TAG_NAMES.TITLE);
 };
 
 const getOnChangeClientState = (propsList: HelmetProps[]): HelmetProps['onChangeClientState'] => {
