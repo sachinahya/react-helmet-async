@@ -1,7 +1,8 @@
+import { HelmetTags } from './Helmet';
 import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES } from './constants';
-import { flattenArray } from './utils';
+import { HelmetInternalState, flattenArray } from './utils';
 
-const updateTags = <T extends keyof HTMLElementTagNameMap>(type: T, tags) => {
+const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: any[]) => {
   const headElement = document.head;
   const tagNodes = headElement.querySelectorAll<HTMLElementTagNameMap[T]>(
     `${type}[${HELMET_ATTRIBUTE}]`
@@ -42,7 +43,7 @@ const updateTags = <T extends keyof HTMLElementTagNameMap>(type: T, tags) => {
     });
   }
 
-  oldTags.forEach(tag => tag.parentNode.removeChild(tag));
+  oldTags.forEach(tag => tag.parentNode?.removeChild(tag));
   newTags.forEach(tag => headElement.appendChild(tag));
 
   return {
@@ -51,7 +52,12 @@ const updateTags = <T extends keyof HTMLElementTagNameMap>(type: T, tags) => {
   };
 };
 
-const updateAttributes = (tagName, attributes) => {
+const updateAttributes = (
+  tagName: string,
+  attributes: NonNullable<
+    HelmetInternalState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']
+  >
+) => {
   const elementTag = document.getElementsByTagName(tagName)[0];
 
   if (!elementTag) {
@@ -60,15 +66,11 @@ const updateAttributes = (tagName, attributes) => {
 
   const helmetAttributeString = elementTag.getAttribute(HELMET_ATTRIBUTE);
   const helmetAttributes = helmetAttributeString ? helmetAttributeString.split(',') : [];
-  const attributesToRemove = [].concat(helmetAttributes);
-  const attributeKeys = Object.keys(attributes);
+  const attributesToRemove = [...helmetAttributes];
 
-  for (let i = 0; i < attributeKeys.length; i += 1) {
-    const attribute = attributeKeys[i];
-    const value = attributes[attribute] || '';
-
+  for (const [attribute, value = ''] of Object.entries(attributes)) {
     if (elementTag.getAttribute(attribute) !== value) {
-      elementTag.setAttribute(attribute, value);
+      elementTag.setAttribute(attribute, String(value));
     }
 
     if (helmetAttributes.indexOf(attribute) === -1) {
@@ -81,18 +83,19 @@ const updateAttributes = (tagName, attributes) => {
     }
   }
 
-  for (let i = attributesToRemove.length - 1; i >= 0; i -= 1) {
-    elementTag.removeAttribute(attributesToRemove[i]);
+  for (const attribute of [...attributesToRemove.reverse()]) {
+    elementTag.removeAttribute(attribute);
   }
 
+  const attributeKeyHash = Object.keys(attributes).join(',');
   if (helmetAttributes.length === attributesToRemove.length) {
     elementTag.removeAttribute(HELMET_ATTRIBUTE);
-  } else if (elementTag.getAttribute(HELMET_ATTRIBUTE) !== attributeKeys.join(',')) {
-    elementTag.setAttribute(HELMET_ATTRIBUTE, attributeKeys.join(','));
+  } else if (elementTag.getAttribute(HELMET_ATTRIBUTE) !== attributeKeyHash) {
+    elementTag.setAttribute(HELMET_ATTRIBUTE, attributeKeyHash);
   }
 };
 
-const updateTitle = (title, attributes) => {
+const updateTitle = (title: HelmetInternalState['title'], attributes: any) => {
   if (typeof title !== 'undefined' && document.title !== title) {
     document.title = flattenArray(title);
   }
@@ -100,7 +103,7 @@ const updateTitle = (title, attributes) => {
   updateAttributes(TAG_NAMES.TITLE, attributes);
 };
 
-const commitTagChanges = (newState, cb) => {
+const commitTagChanges = (newState: HelmetInternalState, cb?: () => void) => {
   const {
     baseTag,
     bodyAttributes,
@@ -120,25 +123,25 @@ const commitTagChanges = (newState, cb) => {
   updateTitle(title, titleAttributes);
 
   const tagUpdates = {
-    baseTag: updateTags(TAG_NAMES.BASE, baseTag),
-    linkTags: updateTags(TAG_NAMES.LINK, linkTags),
-    metaTags: updateTags(TAG_NAMES.META, metaTags),
-    noscriptTags: updateTags(TAG_NAMES.NOSCRIPT, noscriptTags),
-    scriptTags: updateTags(TAG_NAMES.SCRIPT, scriptTags),
-    styleTags: updateTags(TAG_NAMES.STYLE, styleTags),
+    baseTag: updateTagsByType(TAG_NAMES.BASE, baseTag),
+    linkTags: updateTagsByType(TAG_NAMES.LINK, linkTags),
+    metaTags: updateTagsByType(TAG_NAMES.META, metaTags),
+    noscriptTags: updateTagsByType(TAG_NAMES.NOSCRIPT, noscriptTags),
+    scriptTags: updateTagsByType(TAG_NAMES.SCRIPT, scriptTags),
+    styleTags: updateTagsByType(TAG_NAMES.STYLE, styleTags),
   };
 
-  const addedTags = {};
-  const removedTags = {};
+  const addedTags = {} as HelmetTags;
+  const removedTags = {} as HelmetTags;
 
-  Object.keys(tagUpdates).forEach(tagType => {
+  (Object.keys(tagUpdates) as (keyof typeof tagUpdates)[]).forEach(tagType => {
     const { newTags, oldTags } = tagUpdates[tagType];
 
     if (newTags.length) {
       addedTags[tagType] = newTags;
     }
     if (oldTags.length) {
-      removedTags[tagType] = tagUpdates[tagType].oldTags;
+      removedTags[tagType] = oldTags;
     }
   });
 
@@ -146,13 +149,13 @@ const commitTagChanges = (newState, cb) => {
     cb();
   }
 
-  onChangeClientState(newState, addedTags, removedTags);
+  onChangeClientState?.(newState, addedTags, removedTags);
 };
 
 // eslint-disable-next-line
 let _helmetCallback: number | null = null;
 
-const handleStateChangeOnClient = newState => {
+export const handleStateChangeOnClient = (newState: HelmetInternalState): void => {
   if (_helmetCallback) {
     cancelAnimationFrame(_helmetCallback);
   }
@@ -168,5 +171,3 @@ const handleStateChangeOnClient = newState => {
     _helmetCallback = null;
   }
 };
-
-export default handleStateChangeOnClient;

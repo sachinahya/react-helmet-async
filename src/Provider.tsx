@@ -1,10 +1,8 @@
 import React, { Component, ReactNode } from 'react';
 import PropTypes from 'prop-types';
-import HelmetData from './HelmetData';
+import HelmetData, { HelmetDataValue } from './HelmetData';
 
-const defaultValue = {};
-
-export const Context = React.createContext(defaultValue);
+export const Context = React.createContext<HelmetDataValue>({} as HelmetDataValue);
 
 export const providerShape = PropTypes.shape({
   setHelmet: PropTypes.func,
@@ -46,7 +44,7 @@ export default class Provider extends Component<ProviderProps> {
     this.helmetData = new HelmetData(this.props.context, Provider.canUseDOM);
   }
 
-  render() {
+  override render() {
     return <Context.Provider value={this.helmetData.value}>{this.props.children}</Context.Provider>;
   }
 }

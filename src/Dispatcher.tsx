@@ -1,12 +1,13 @@
 import { Component } from 'react';
 import shallowEqual from 'shallowequal';
-import handleStateChangeOnClient from './client';
+import { handleStateChangeOnClient } from './client';
 import mapStateOnServer from './server';
 import { reducePropsToState } from './utils';
 import Provider, { providerShape } from './Provider';
 import { HelmetDataValue, HelmetServerState } from './HelmetData';
+import { HelmetProps } from './Helmet';
 
-export interface DispatcherProps {
+export interface DispatcherProps extends HelmetProps {
   context: HelmetDataValue;
 }
 
@@ -19,15 +20,15 @@ export default class Dispatcher extends Component<DispatcherProps> {
 
   rendered = false;
 
-  shouldComponentUpdate(nextProps) {
+  override shouldComponentUpdate(nextProps: DispatcherProps) {
     return !shallowEqual(nextProps, this.props);
   }
 
-  componentDidUpdate() {
+  override componentDidUpdate() {
     this.emitChange();
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     const { helmetInstances } = this.props.context;
     helmetInstances.remove(this);
     this.emitChange();
@@ -35,20 +36,17 @@ export default class Dispatcher extends Component<DispatcherProps> {
 
   emitChange() {
     const { helmetInstances, setHelmet } = this.props.context;
-    let serverState: HelmetServerState | null = null;
-    const state = reducePropsToState(
-      helmetInstances.get().map(instance => {
-        const props = { ...instance.props };
-        delete props.context;
-        return props;
-      })
-    );
+    const propsList = helmetInstances.get().map(instance => {
+      const { context, ...props } = instance.props;
+      return props;
+    });
+    const state = reducePropsToState(propsList);
     if (Provider.canUseDOM) {
       handleStateChangeOnClient(state);
     } else if (mapStateOnServer) {
-      serverState = mapStateOnServer(state);
+      const serverState = mapStateOnServer(state);
+      setHelmet(serverState);
     }
-    setHelmet(serverState);
   }
 
   // componentWillMount will be deprecated
@@ -66,7 +64,7 @@ export default class Dispatcher extends Component<DispatcherProps> {
     this.emitChange();
   }
 
-  render() {
+  override render() {
     this.init();
 
     return null;

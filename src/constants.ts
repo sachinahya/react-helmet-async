@@ -1,4 +1,4 @@
-import { Entries } from 'type-fest';
+import { LiteralUnion } from 'type-fest';
 
 export const TAG_PROPERTIES = {
   CHARSET: 'charset',

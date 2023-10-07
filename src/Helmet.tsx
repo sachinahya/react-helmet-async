@@ -1,7 +1,8 @@
 import React, { Component, ReactElement, ReactNode, isValidElement } from 'react';
+import { isFragment } from 'react-is';
 import PropTypes from 'prop-types';
 import fastCompare from 'react-fast-compare';
-import invariant from 'invariant';
+import invariant from 'tiny-invariant';
 import { Context } from './Provider';
 import HelmetData from './HelmetData';
 import Dispatcher from './Dispatcher';
@@ -32,7 +33,7 @@ export interface HelmetTags {
 export interface HelmetProps {
   children?: ReactNode;
   async?: boolean;
-  base?: any;
+  base?: JSX.IntrinsicElements['base'];
   bodyAttributes?: BodyProps;
   defaultTitle?: string;
   defer?: boolean;
@@ -46,7 +47,7 @@ export interface HelmetProps {
   script?: Array<JSX.IntrinsicElements['script']>;
   style?: Array<{ cssText: string }>;
   title?: string;
-  titleAttributes?: Object;
+  titleAttributes?: { itemprop?: string };
   titleTemplate?: string;
   prioritizeSeoTags?: boolean;
 }
@@ -102,7 +103,7 @@ export class Helmet extends Component<HelmetProps> {
 
   static displayName = 'Helmet';
 
-  shouldComponentUpdate(nextProps) {
+  override shouldComponentUpdate(nextProps: HelmetProps) {
     return !fastCompare(without(this.props, 'helmetData'), without(nextProps, 'helmetData'));
   }
 
@@ -187,14 +188,16 @@ export class Helmet extends Component<HelmetProps> {
           htmlAttributes: { ...newChildProps },
         };
       default:
-        return {
-          ...newProps,
-          [child.type]: { ...newChildProps },
-        };
+        return typeof child.type === 'string'
+          ? {
+              ...newProps,
+              [child.type]: { ...newChildProps },
+            }
+          : newProps;
     }
   }
 
-  mapArrayTypeChildrenToProps(arrayTypeChildren: Record<string, any[]>, newProps) {
+  mapArrayTypeChildrenToProps(arrayTypeChildren: Record<string, any[]>, newProps: HelmetProps) {
     let newFlattenedProps = { ...newProps };
 
     Object.entries(arrayTypeChildren).forEach(([arrayChildName, arrayChild]) => {
@@ -243,51 +246,49 @@ export class Helmet extends Component<HelmetProps> {
 
       const { children: nestedChildren, ...childProps } = child.props;
       // convert React props to HTML attributes
-      const newChildProps = Object.entries(childProps).reduce((obj, [key, value]) => {
-        obj[HTML_TAG_MAP[key] || key] = value;
-        return obj;
-      }, {});
+      const newChildProps = Object.entries(childProps).reduce<Record<string, unknown>>(
+        (obj, [key, value]) => {
+          obj[HTML_TAG_MAP[key] || key] = value;
+          return obj;
+        },
+        {}
+      );
 
-      let { type } = child;
-      if (typeof type === 'symbol') {
-        type = type.toString();
+      if (isFragment(child)) {
+        newProps = this.mapChildrenToProps(nestedChildren, newProps);
       } else {
         this.warnOnInvalidChildren(child, nestedChildren);
-      }
 
-      switch (type) {
-        case TAG_NAMES.FRAGMENT:
-          newProps = this.mapChildrenToProps(nestedChildren, newProps);
-          break;
+        switch ((child as ReactElement).type) {
+          case TAG_NAMES.LINK:
+          case TAG_NAMES.META:
+          case TAG_NAMES.NOSCRIPT:
+          case TAG_NAMES.SCRIPT:
+          case TAG_NAMES.STYLE:
+            arrayTypeChildren = this.flattenArrayTypeChildren({
+              child,
+              arrayTypeChildren,
+              newChildProps,
+              nestedChildren,
+            });
+            break;
 
-        case TAG_NAMES.LINK:
-        case TAG_NAMES.META:
-        case TAG_NAMES.NOSCRIPT:
-        case TAG_NAMES.SCRIPT:
-        case TAG_NAMES.STYLE:
-          arrayTypeChildren = this.flattenArrayTypeChildren({
-            child,
-            arrayTypeChildren,
-            newChildProps,
-            nestedChildren,
-          });
-          break;
-
-        default:
-          newProps = this.mapObjectTypeChildren({
-            child,
-            newProps,
-            newChildProps,
-            nestedChildren,
-          });
-          break;
+          default:
+            newProps = this.mapObjectTypeChildren({
+              child,
+              newProps,
+              newChildProps,
+              nestedChildren,
+            });
+            break;
+        }
       }
     });
 
     return this.mapArrayTypeChildrenToProps(arrayTypeChildren, newProps);
   }
 
-  render() {
+  override render() {
     const { children, ...props } = this.props;
     let newProps = { ...props };
     let { helmetData } = props;

@@ -1,9 +1,10 @@
+import { ReactElement } from 'react';
 import Dispatcher from './Dispatcher';
 import mapStateOnServer from './server';
 
 export interface HelmetDatum {
   toString(): string;
-  toComponent(): React.Component<any>;
+  toComponent(): ReactElement[];
 }
 
 export interface HelmetHTMLBodyDatum {
@@ -41,7 +42,7 @@ export function clearInstances() {
 }
 
 export interface HelmetDataValue {
-  setHelmet: (serverState: HelmetServerState | null) => void;
+  setHelmet: (serverState: HelmetServerState) => void;
   helmetInstances: {
     get: () => Dispatcher[];
     add: (instance: Dispatcher) => void;
@@ -80,7 +81,6 @@ export default class HelmetData {
       context.helmet = mapStateOnServer({
         baseTag: [],
         bodyAttributes: {},
-        encodeSpecialCharacters: true,
         htmlAttributes: {},
         linkTags: [],
         metaTags: [],
