@@ -28,11 +28,16 @@ const encodeSpecialCharacters = (str: string, encode = true): string => {
     .replace(/'/g, '&#x27;');
 };
 
-const generateElementAttributesAsString = (attributes: Record<string, unknown>): string =>
-  Object.keys(attributes).reduce((str, key) => {
-    const attr = typeof attributes[key] !== 'undefined' ? `${key}="${attributes[key]}"` : `${key}`;
-    return str ? `${str} ${attr}` : attr;
-  }, '');
+const generateElementAttributesAsString = (attributes: Record<string, unknown>): string => {
+  let str = '';
+
+  for (const [key, value] of Object.entries(attributes)) {
+    const attr = value != null ? `${key}="${value}"` : `${key}`;
+    str += str ? ` ${attr}` : attr;
+  }
+
+  return str;
+};
 
 const generateTitleAsString = (
   type: typeof TAG_NAMES.TITLE,
@@ -41,63 +46,58 @@ const generateTitleAsString = (
   encode: boolean | undefined
 ) => {
   const attributeString = generateElementAttributesAsString(attributes);
-  const flattenedTitle = flattenArray(title) || '';
-  return attributeString
-    ? `<${type} ${HELMET_ATTRIBUTE}="true" ${attributeString}>${encodeSpecialCharacters(
-        flattenedTitle,
-        encode
-      )}</${type}>`
-    : `<${type} ${HELMET_ATTRIBUTE}="true">${encodeSpecialCharacters(
-        flattenedTitle,
-        encode
-      )}</${type}>`;
+  const flattenedTitle = encodeSpecialCharacters(flattenArray(title) || '', encode);
+
+  return `<${type} ${HELMET_ATTRIBUTE}="true"${
+    attributeString ? ` ${attributeString}` : ''
+  }>${flattenedTitle}</${type}>`;
 };
 
-const generateTagsAsString = (
+const generateTagsAsString = <
+  T extends 'baseTag' | 'linkTags' | 'metaTags' | 'noscriptTags' | 'scriptTags' | 'styleTags'
+>(
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetInternalState[
-    | 'baseTag'
-    | 'linkTags'
-    | 'metaTags'
-    | 'noscriptTags'
-    | 'scriptTags'
-    | 'styleTags'],
+  tags: HelmetInternalState[T],
   encode: boolean | undefined
-): string =>
-  tags.reduce((str, tag) => {
-    const attributeHtml = (Object.keys(tag) as (keyof typeof tag)[])
-      .filter(
-        attribute =>
-          !(attribute === TAG_PROPERTIES.INNER_HTML || attribute === TAG_PROPERTIES.CSS_TEXT)
-      )
-      .reduce((string, attribute) => {
-        const attr =
-          typeof tag[attribute] === 'undefined'
-            ? attribute
-            : `${attribute}="${encodeSpecialCharacters(tag[attribute], encode)}"`;
-        return string ? `${string} ${attr}` : attr;
-      }, '');
+): string => {
+  let str = '';
 
-    const tagContent = tag.innerHTML || tag.cssText || '';
+  for (const tag of tags) {
+    let tagContent = '';
+    let attributeHtml = '';
+
+    for (const [attribute, value] of Object.entries(tag)) {
+      if (attribute === TAG_PROPERTIES.INNER_HTML || attribute === TAG_PROPERTIES.CSS_TEXT) {
+        tagContent = value || '';
+      } else {
+        const attr =
+          value == null ? attribute : `${attribute}="${encodeSpecialCharacters(value, encode)}"`;
+        attributeHtml += attributeHtml ? ` ${attr}` : attr;
+      }
+    }
 
     const isNotSelfClosing = !SELF_CLOSING_TAGS.includes(type);
 
-    return `${str}<${type} ${HELMET_ATTRIBUTE}="true" ${attributeHtml}${
+    str += `<${type} ${HELMET_ATTRIBUTE}="true" ${attributeHtml}${
       isNotSelfClosing ? `/>` : `>${tagContent}</${type}>`
     }`;
-  }, '');
+  }
+
+  return str;
+};
 
 const convertElementAttributesToReactProps = <T extends keyof React.JSX.IntrinsicElements>(
   attributes: HelmetInternalState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes'],
   initProps?: React.JSX.IntrinsicElements[T]
-): React.JSX.IntrinsicElements[T] =>
-  (Object.keys(attributes) as (keyof typeof attributes)[]).reduce<React.JSX.IntrinsicElements[T]>(
-    (obj, key) => {
-      obj[REACT_TAG_MAP[key] || key] = attributes[key];
-      return obj;
-    },
-    initProps ?? {}
-  );
+): React.JSX.IntrinsicElements[T] => {
+  const props: React.JSX.IntrinsicElements[T] = initProps ?? {};
+
+  for (const [key, value] of Object.entries(attributes)) {
+    props[REACT_TAG_MAP[key] || key] = value;
+  }
+
+  return props;
+};
 
 const generateTitleAsReactComponent = (
   title: string | undefined,
@@ -123,7 +123,9 @@ const generateTagsAsReactComponent = (
     | 'scriptTags'
     | 'styleTags']
 ): ReactElement[] => {
-  return tags.map((tag, i) => {
+  const elements: ReactElement[] = [];
+
+  for (const [i, tag] of tags.entries()) {
     const mappedTag: Attributes & {
       [HELMET_ATTRIBUTE]: boolean;
     } & HTMLAttributes<HTMLElement> = {
@@ -131,7 +133,7 @@ const generateTagsAsReactComponent = (
       [HELMET_ATTRIBUTE]: true,
     };
 
-    (Object.keys(tag) as (keyof typeof tag)[]).forEach(attribute => {
+    for (const [attribute, value] of Object.entries(tag)) {
       const mappedAttribute = REACT_TAG_MAP[attribute] || attribute;
 
       if (
@@ -141,12 +143,14 @@ const generateTagsAsReactComponent = (
         const content = tag.innerHTML || tag.cssText;
         mappedTag.dangerouslySetInnerHTML = { __html: content };
       } else {
-        mappedTag[mappedAttribute] = tag[attribute];
+        mappedTag[mappedAttribute] = value;
       }
-    });
+    }
 
-    return React.createElement(type, mappedTag);
-  });
+    elements.push(React.createElement(type, mappedTag));
+  }
+
+  return elements;
 };
 
 const getMethodsForTag = (
