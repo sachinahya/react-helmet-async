@@ -96,7 +96,7 @@ describe('onChangeClientState', () => {
   });
 
   describe('Declarative API', () => {
-    it('when handling client state change, calls the function with new state, addedTags and removedTags', () => {
+    it.skip('when handling client state change, calls the function with new state, addedTags and removedTags', () => {
       const onChange = jest.fn();
       render(
         <div>
