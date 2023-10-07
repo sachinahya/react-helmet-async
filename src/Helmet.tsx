@@ -1,6 +1,5 @@
 import React, { Component, ReactElement, ReactNode, isValidElement } from 'react';
 import { isFragment } from 'react-is';
-import PropTypes from 'prop-types';
 import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
 import { Context } from './Provider';
@@ -77,26 +76,6 @@ export class Helmet extends Component<HelmetComponentProps> {
    * @param {Object} titleAttributes: {"itemprop": "name"}
    * @param {Boolean} prioritizeSeoTags: false
    */
-  /* eslint-disable react/forbid-prop-types, react/require-default-props */
-  // static propTypes = {
-  //   base: PropTypes.object,
-  //   bodyAttributes: PropTypes.object,
-  //   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-  //   defer: PropTypes.bool,
-  //   encodeSpecialCharacters: PropTypes.bool,
-  //   htmlAttributes: PropTypes.object,
-  //   link: PropTypes.arrayOf(PropTypes.object),
-  //   meta: PropTypes.arrayOf(PropTypes.object),
-  //   noscript: PropTypes.arrayOf(PropTypes.object),
-  //   onChangeClientState: PropTypes.func,
-  //   script: PropTypes.arrayOf(PropTypes.object),
-  //   style: PropTypes.arrayOf(PropTypes.object),
-  //   title: PropTypes.string,
-  //   titleAttributes: PropTypes.object,
-  //   prioritizeSeoTags: PropTypes.bool,
-  //   helmetData: PropTypes.object,
-  // };
-  /* eslint-enable react/prop-types, react/forbid-prop-types, react/require-default-props */
 
   static defaultProps = {
     defer: true,

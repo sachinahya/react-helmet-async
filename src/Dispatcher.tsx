@@ -3,8 +3,8 @@ import shallowEqual from 'shallowequal';
 import { handleStateChangeOnClient } from './client';
 import mapStateOnServer from './server';
 import { reducePropsToState } from './utils';
-import Provider, { providerShape } from './Provider';
-import { HelmetDataValue, HelmetServerState } from './HelmetData';
+import Provider from './Provider';
+import { HelmetDataValue } from './HelmetData';
 import { HelmetProps } from './Helmet';
 
 export interface DispatcherProps extends HelmetProps {
@@ -12,10 +12,6 @@ export interface DispatcherProps extends HelmetProps {
 }
 
 export default class Dispatcher extends Component<DispatcherProps> {
-  static propTypes = {
-    context: providerShape.isRequired,
-  };
-
   static displayName = 'HelmetDispatcher';
 
   rendered = false;
