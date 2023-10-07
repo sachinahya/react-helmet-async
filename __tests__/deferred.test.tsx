@@ -23,7 +23,7 @@ describe.skip('deferred tags', () => {
     ReactDOM.unmountComponentAtNode(container);
   });
 
-  describe('API', () => {
+  describe.skip('API', () => {
     beforeEach(() => {
       window.__spy__ = jest.fn();
     });

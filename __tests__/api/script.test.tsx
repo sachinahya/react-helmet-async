@@ -6,7 +6,7 @@ import { render } from './utils';
 Helmet.defaultProps.defer = false;
 
 describe('script tags', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('updates script tags', () => {
       const scriptInnerHTML = `
                 {

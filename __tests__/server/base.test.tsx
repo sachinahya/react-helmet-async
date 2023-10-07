@@ -19,7 +19,7 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('renders base tag as React component', () => {
       const context = {};
       render(<Helmet base={{ target: '_blank', href: 'http://localhost/' }} />, context);

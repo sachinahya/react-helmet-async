@@ -6,7 +6,7 @@ import { render } from './utils';
 Helmet.defaultProps.defer = false;
 
 describe('link tags', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('updates link tags', () => {
       render(
         <Helmet

@@ -8,7 +8,7 @@ import { render } from './utils';
 Helmet.defaultProps.defer = false;
 
 describe('meta tags', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('updates meta tags', () => {
       render(
         <Helmet

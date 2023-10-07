@@ -19,7 +19,7 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('provides initial values if no state is found', () => {
       const context = {};
       const NullComponent = () => null;

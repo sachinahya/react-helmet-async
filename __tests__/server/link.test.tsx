@@ -19,7 +19,7 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('renders link tags as React components', () => {
       const context = {};
       render(

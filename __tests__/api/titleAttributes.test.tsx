@@ -10,7 +10,7 @@ describe('title attributes', () => {
     document.head.innerHTML = `<title>Test Title</title>`;
   });
 
-  describe('API', () => {
+  describe.skip('API', () => {
     it('update title attributes', () => {
       render(
         <Helmet

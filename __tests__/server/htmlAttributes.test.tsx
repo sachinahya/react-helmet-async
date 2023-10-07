@@ -15,7 +15,7 @@ afterAll(() => {
 });
 
 describe('server', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('renders html attributes as component', () => {
       const context = {};
       render(

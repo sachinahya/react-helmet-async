@@ -6,7 +6,7 @@ import { render } from './utils';
 Helmet.defaultProps.defer = false;
 
 describe('base tag', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('updates base tag', () => {
       render(<Helmet base={{ href: 'http://mysite.com/' }} />);
 

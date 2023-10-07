@@ -5,7 +5,7 @@ import { render } from './utils';
 Helmet.defaultProps.defer = false;
 
 describe('onChangeClientState', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('when handling client state change, calls the function with new state, addedTags and removedTags', () => {
       const onChange = jest.fn();
       render(

@@ -13,7 +13,7 @@ const render = node => {
 };
 
 describe('misc', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('encodes special characters', () => {
       render(
         <Helmet

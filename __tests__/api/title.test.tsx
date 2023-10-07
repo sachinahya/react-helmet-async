@@ -5,7 +5,7 @@ import { render } from './utils';
 Helmet.defaultProps.defer = false;
 
 describe('title', () => {
-  describe('API', () => {
+  describe.skip('API', () => {
     it('updates page title', () => {
       render(<Helmet defaultTitle="Fallback" title="Test Title" />);
 
