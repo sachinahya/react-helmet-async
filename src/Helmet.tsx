@@ -8,9 +8,6 @@ import Dispatcher from './Dispatcher';
 import { without } from './utils';
 import { TAG_NAMES, VALID_TAG_NAMES, HTML_TAG_MAP } from './constants';
 
-export { default as HelmetData } from './HelmetData';
-export { default as HelmetProvider } from './Provider';
-
 /* eslint-disable class-methods-use-this */
 export class Helmet extends Component {
   /**
