@@ -13,17 +13,12 @@ const render = node => {
 };
 
 describe('misc', () => {
-  describe.skip('API', () => {
+  describe('API', () => {
     it('encodes special characters', () => {
       render(
-        <Helmet
-          meta={[
-            {
-              name: 'description',
-              content: 'This is "quoted" text and & and \'.',
-            },
-          ]}
-        />
+        <Helmet>
+          <meta name="description" content={`This is "quoted" text and & and \'.`} />
+        </Helmet>
       );
 
       const existingTags = document.head.querySelectorAll(`meta[${HELMET_ATTRIBUTE}]`);
@@ -42,20 +37,18 @@ describe('misc', () => {
     it('does not change the DOM if it recevies identical props', () => {
       const onChange = jest.fn();
       render(
-        <Helmet
-          meta={[{ name: 'description', content: 'Test description' }]}
-          title="Test Title"
-          onChangeClientState={onChange}
-        />
+        <Helmet onChangeClientState={onChange}>
+          <meta name="description" content="Test description" />
+          <title>Test Title</title>
+        </Helmet>
       );
 
       // Re-rendering will pass new props to an already mounted Helmet
       render(
-        <Helmet
-          meta={[{ name: 'description', content: 'Test description' }]}
-          title="Test Title"
-          onChangeClientState={onChange}
-        />
+        <Helmet onChangeClientState={onChange}>
+          <meta name="description" content="Test description" />
+          <title>Test Title</title>
+        </Helmet>
       );
 
       expect(onChange.mock.calls).toHaveLength(1);
@@ -66,15 +59,9 @@ describe('misc', () => {
 
       const onChange = jest.fn();
       render(
-        <Helmet
-          script={[
-            {
-              src: 'http://localhost/test.js',
-              type: 'text/javascript',
-            },
-          ]}
-          onChangeClientState={onChange}
-        />
+        <Helmet onChangeClientState={onChange}>
+          <script src="http://localhost/test.js" type="text/javascript" />
+        </Helmet>
       );
 
       expect(onChange).toHaveBeenCalled();
@@ -90,17 +77,10 @@ describe('misc', () => {
       let addedTags;
       let removedTags;
       render(
-        <Helmet
-          link={[
-            {
-              href: 'http://localhost/style.css',
-              rel: 'stylesheet',
-              type: 'text/css',
-            },
-          ]}
-          meta={[{ name: 'description', content: 'Test description' }]}
-          onChangeClientState={onChange}
-        />
+        <Helmet onChangeClientState={onChange}>
+          <link href="http://localhost/style.css" rel="stylesheet" type="text/css" />
+          <meta name="description" content="Test description" />
+        </Helmet>
       );
 
       expect(onChange).toHaveBeenCalled();
@@ -120,22 +100,11 @@ describe('misc', () => {
 
       // Re-rendering will pass new props to an already mounted Helmet
       render(
-        <Helmet
-          link={[
-            {
-              href: 'http://localhost/style.css',
-              rel: 'stylesheet',
-              type: 'text/css',
-            },
-            {
-              href: 'http://localhost/style2.css',
-              rel: 'stylesheet',
-              type: 'text/css',
-            },
-          ]}
-          meta={[{ name: 'description', content: 'New description' }]}
-          onChangeClientState={onChange}
-        />
+        <Helmet onChangeClientState={onChange}>
+          <link href="http://localhost/style.css" rel="stylesheet" type="text/css" />
+          <link href="http://localhost/style2.css" rel="stylesheet" type="text/css" />
+          <meta name="description" content="New description" />
+        </Helmet>
       );
 
       expect(onChange.mock.calls).toHaveLength(2);
@@ -163,22 +132,27 @@ describe('misc', () => {
 
       const renderInvalid = () => {
         render(
-          <Helmet title="Test Title">
-            <Helmet title={"Title you'll never see"} />
+          <Helmet>
+            <title>Test Title</title>
+            <Helmet>Title you will never see</Helmet>
           </Helmet>
         );
       };
 
       expect(renderInvalid).toThrow(
         Error,
-        'Invariant Violation: You may be attempting to nest <Helmet> components within each other, which is not allowed. Refer to our API for more information.'
+        'Invariant Violation: You may be attempting t nest <Helmet> components within each other, which is not allowed. Refer to our API for more information.'
       );
 
       global.console.error = consoleError;
     });
 
     it('recognizes valid tags regardless of attribute ordering', () => {
-      render(<Helmet meta={[{ content: 'Test Description', name: 'description' }]} />);
+      render(
+        <Helmet>
+          <meta content="Test Description" name="description" />
+        </Helmet>
+      );
 
       const existingTags = document.head.querySelectorAll(`meta[${HELMET_ATTRIBUTE}]`);
       const existingTag = existingTags[0];

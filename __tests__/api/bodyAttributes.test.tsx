@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from '../../src';
-import { HELMET_ATTRIBUTE, HTML_TAG_MAP } from '../../src/constants';
+import { HELMET_ATTRIBUTE, getHtmlAttributeName } from '../../src/constants';
 import { render } from './utils';
 
 Helmet.defaultProps.defer = false;
@@ -42,7 +42,7 @@ describe('body attributes', () => {
 
         const bodyTag = document.body;
 
-        const reactCompatAttr = HTML_TAG_MAP[attribute] || attribute;
+        const reactCompatAttr = getHtmlAttributeName(attribute);
 
         expect(bodyTag.getAttribute(reactCompatAttr)).toEqual(attrValue);
         expect(bodyTag.getAttribute(HELMET_ATTRIBUTE)).toEqual(reactCompatAttr);

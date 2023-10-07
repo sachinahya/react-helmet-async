@@ -1,5 +1,5 @@
 import { HelmetTags } from './Helmet';
-import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES } from './constants';
+import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from './constants';
 import { HelmetInternalState, flattenArray } from './utils';
 
 const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: any[]) => {
@@ -23,7 +23,7 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
           (newElement as HTMLStyleElement).appendChild(document.createTextNode(tag.cssText));
         } else {
           const value = typeof tag[attribute] === 'undefined' ? '' : tag[attribute];
-          newElement.setAttribute(attribute, value);
+          newElement.setAttribute(getHtmlAttributeName(attribute), value);
         }
       }
 
@@ -66,18 +66,21 @@ const updateAttributes = (
 
   const helmetAttributeString = elementTag.getAttribute(HELMET_ATTRIBUTE);
   const helmetAttributes = helmetAttributeString ? helmetAttributeString.split(',') : [];
-  const attributesToRemove = [...helmetAttributes];
 
-  for (const [attribute, value = ''] of Object.entries(attributes)) {
-    if (elementTag.getAttribute(attribute) !== value) {
-      elementTag.setAttribute(attribute, String(value));
+  const attributesToRemove = [...helmetAttributes].map(getHtmlAttributeName);
+
+  for (const [key, value = ''] of Object.entries(attributes)) {
+    const htmlAttribute = getHtmlAttributeName(key);
+
+    if (elementTag.getAttribute(htmlAttribute) !== value) {
+      elementTag.setAttribute(htmlAttribute, String(value));
     }
 
-    if (helmetAttributes.indexOf(attribute) === -1) {
-      helmetAttributes.push(attribute);
+    if (helmetAttributes.indexOf(htmlAttribute) === -1) {
+      helmetAttributes.push(htmlAttribute);
     }
 
-    const indexToSave = attributesToRemove.indexOf(attribute);
+    const indexToSave = attributesToRemove.indexOf(htmlAttribute);
     if (indexToSave !== -1) {
       attributesToRemove.splice(indexToSave, 1);
     }
@@ -87,7 +90,7 @@ const updateAttributes = (
     elementTag.removeAttribute(attribute);
   }
 
-  const attributeKeyHash = Object.keys(attributes).join(',');
+  const attributeKeyHash = Object.keys(attributes).map(getHtmlAttributeName).join(',');
   if (helmetAttributes.length === attributesToRemove.length) {
     elementTag.removeAttribute(HELMET_ATTRIBUTE);
   } else if (elementTag.getAttribute(HELMET_ATTRIBUTE) !== attributeKeyHash) {

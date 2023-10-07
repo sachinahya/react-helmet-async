@@ -107,7 +107,7 @@ const getTagsFromPropsList = <T extends 'link' | 'meta' | 'noscript' | 'script' 
           let primaryAttributeKey: TagAttributeKey | undefined;
 
           for (const attributeKey of Object.keys(tag) as TagAttributeKey[]) {
-            const lowerCaseAttributeKey = attributeKey.toLowerCase() as TagAttributeKey;
+            const lowerCaseAttributeKey = attributeKey; // .toLowerCase() as TagAttributeKey;
 
             // Special rule with link tags, since rel and href are both primary tags, rel takes priority
             if (

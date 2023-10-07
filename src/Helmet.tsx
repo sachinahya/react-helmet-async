@@ -7,7 +7,7 @@ import { Context } from './Provider';
 import HelmetData from './HelmetData';
 import Dispatcher from './Dispatcher';
 import { without } from './utils';
-import { TAG_NAMES, VALID_TAG_NAMES, HTML_TAG_MAP } from './constants';
+import { TAG_NAMES, VALID_TAG_NAMES } from './constants';
 
 export interface OtherElementAttributes {
   [key: string]: string | number | boolean | null | undefined;
@@ -52,8 +52,21 @@ export interface HelmetProps {
   prioritizeSeoTags?: boolean;
 }
 
+export type HelmetComponentProps = Pick<
+  HelmetProps,
+  | 'children'
+  | 'async'
+  | 'defaultTitle'
+  | 'defer'
+  | 'encodeSpecialCharacters'
+  | 'helmetData'
+  | 'onChangeClientState'
+  | 'titleTemplate'
+  | 'prioritizeSeoTags'
+>;
+
 /* eslint-disable class-methods-use-this */
-export class Helmet extends Component<HelmetProps> {
+export class Helmet extends Component<HelmetComponentProps> {
   /**
    * @param {Object} base: {"target": "_blank", "href": "http://mysite.com/"}
    * @param {Object} bodyAttributes: {"className": "root"}
@@ -73,26 +86,26 @@ export class Helmet extends Component<HelmetProps> {
    * @param {Boolean} prioritizeSeoTags: false
    */
   /* eslint-disable react/forbid-prop-types, react/require-default-props */
-  static propTypes = {
-    base: PropTypes.object,
-    bodyAttributes: PropTypes.object,
-    children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
-    defaultTitle: PropTypes.string,
-    defer: PropTypes.bool,
-    encodeSpecialCharacters: PropTypes.bool,
-    htmlAttributes: PropTypes.object,
-    link: PropTypes.arrayOf(PropTypes.object),
-    meta: PropTypes.arrayOf(PropTypes.object),
-    noscript: PropTypes.arrayOf(PropTypes.object),
-    onChangeClientState: PropTypes.func,
-    script: PropTypes.arrayOf(PropTypes.object),
-    style: PropTypes.arrayOf(PropTypes.object),
-    title: PropTypes.string,
-    titleAttributes: PropTypes.object,
-    titleTemplate: PropTypes.string,
-    prioritizeSeoTags: PropTypes.bool,
-    helmetData: PropTypes.object,
-  };
+  // static propTypes = {
+  //   base: PropTypes.object,
+  //   bodyAttributes: PropTypes.object,
+  //   children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]),
+  //   defaultTitle: PropTypes.string,
+  //   defer: PropTypes.bool,
+  //   encodeSpecialCharacters: PropTypes.bool,
+  //   htmlAttributes: PropTypes.object,
+  //   link: PropTypes.arrayOf(PropTypes.object),
+  //   meta: PropTypes.arrayOf(PropTypes.object),
+  //   noscript: PropTypes.arrayOf(PropTypes.object),
+  //   onChangeClientState: PropTypes.func,
+  //   script: PropTypes.arrayOf(PropTypes.object),
+  //   style: PropTypes.arrayOf(PropTypes.object),
+  //   title: PropTypes.string,
+  //   titleAttributes: PropTypes.object,
+  //   titleTemplate: PropTypes.string,
+  //   prioritizeSeoTags: PropTypes.bool,
+  //   helmetData: PropTypes.object,
+  // };
   /* eslint-enable react/prop-types, react/forbid-prop-types, react/require-default-props */
 
   static defaultProps = {
@@ -248,7 +261,7 @@ export class Helmet extends Component<HelmetProps> {
       // convert React props to HTML attributes
       const newChildProps = Object.entries(childProps).reduce<Record<string, unknown>>(
         (obj, [key, value]) => {
-          obj[HTML_TAG_MAP[key] || key] = value;
+          obj[key] = value;
           return obj;
         },
         {}

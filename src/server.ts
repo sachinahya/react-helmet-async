@@ -2,9 +2,9 @@ import React, { Attributes, HTMLAttributes, ReactElement } from 'react';
 import {
   HELMET_ATTRIBUTE,
   TAG_NAMES,
-  REACT_TAG_MAP,
   TAG_PROPERTIES,
   SEO_PRIORITY_TAGS,
+  getHtmlAttributeName,
 } from './constants';
 import { HelmetInternalState, flattenArray, prioritizer } from './utils';
 import { HelmetDatum, HelmetServerState } from './HelmetData';
@@ -28,11 +28,20 @@ const encodeSpecialCharacters = (str: string, encode = true): string => {
     .replace(/'/g, '&#x27;');
 };
 
-const generateElementAttributesAsString = (attributes: Record<string, unknown>): string => {
+const generateElementAttributesAsString = (attributes: object, encode?: boolean): string => {
   let str = '';
 
   for (const [key, value] of Object.entries(attributes)) {
-    const attr = value != null ? `${key}="${value}"` : `${key}`;
+    if (key === TAG_PROPERTIES.INNER_HTML || key === TAG_PROPERTIES.CSS_TEXT) {
+      continue;
+    }
+
+    const htmlAttributeName = getHtmlAttributeName(key);
+
+    const attr =
+      value != null
+        ? `${htmlAttributeName}="${encodeSpecialCharacters(value, encode)}"`
+        : `${htmlAttributeName}`;
     str += str ? ` ${attr}` : attr;
   }
 
@@ -63,22 +72,12 @@ const generateTagsAsString = <
   let str = '';
 
   for (const tag of tags) {
-    let tagContent = '';
-    let attributeHtml = '';
-
-    for (const [attribute, value] of Object.entries(tag)) {
-      if (attribute === TAG_PROPERTIES.INNER_HTML || attribute === TAG_PROPERTIES.CSS_TEXT) {
-        tagContent = value || '';
-      } else {
-        const attr =
-          value == null ? attribute : `${attribute}="${encodeSpecialCharacters(value, encode)}"`;
-        attributeHtml += attributeHtml ? ` ${attr}` : attr;
-      }
-    }
+    const attributeString = generateElementAttributesAsString(tag, encode);
+    const tagContent = tag.innerHTML || tag.cssText || '';
 
     const isNotSelfClosing = !SELF_CLOSING_TAGS.includes(type);
 
-    str += `<${type} ${HELMET_ATTRIBUTE}="true" ${attributeHtml}${
+    str += `<${type} ${HELMET_ATTRIBUTE}="true" ${attributeString}${
       isNotSelfClosing ? `/>` : `>${tagContent}</${type}>`
     }`;
   }
@@ -90,13 +89,13 @@ const convertElementAttributesToReactProps = <T extends keyof React.JSX.Intrinsi
   attributes: HelmetInternalState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes'],
   initProps?: React.JSX.IntrinsicElements[T]
 ): React.JSX.IntrinsicElements[T] => {
-  const props: React.JSX.IntrinsicElements[T] = initProps ?? {};
+  const props: React.JSX.IntrinsicElements[T] = {};
 
   for (const [key, value] of Object.entries(attributes)) {
-    props[REACT_TAG_MAP[key] || key] = value;
+    props[key] = value;
   }
 
-  return props;
+  return { ...initProps, ...props };
 };
 
 const generateTitleAsReactComponent = (
@@ -134,7 +133,7 @@ const generateTagsAsReactComponent = (
     };
 
     for (const [attribute, value] of Object.entries(tag)) {
-      const mappedAttribute = REACT_TAG_MAP[attribute] || attribute;
+      const mappedAttribute = attribute;
 
       if (
         mappedAttribute === TAG_PROPERTIES.INNER_HTML ||

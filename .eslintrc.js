@@ -13,6 +13,7 @@ module.exports = {
     'no-unused-vars': 0,
     'no-restricted-syntax': 0,
     'no-use-before-define': 0,
+    'no-continue': 0,
   },
 
   overrides: [
