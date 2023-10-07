@@ -1,15 +1,12 @@
 module.exports = {
   presets: [
+    '@babel/preset-react',
+    '@babel/preset-typescript',
     [
-      'babel-preset-kyt-react',
+      '@babel/preset-env',
       {
-        includeRuntime: true,
+        modules: 'commonjs',
       },
     ],
   ],
-  env: {
-    test: {
-      plugins: [['@babel/plugin-proposal-private-property-in-object', { loose: true }]],
-    },
-  },
 };
