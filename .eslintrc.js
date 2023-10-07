@@ -12,6 +12,7 @@ module.exports = {
     'comma-dangle': 0,
     'no-unused-vars': 0,
     'no-restricted-syntax': 0,
+    'no-use-before-define': 0,
   },
 
   overrides: [
