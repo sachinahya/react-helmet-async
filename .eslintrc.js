@@ -9,6 +9,8 @@ module.exports = {
     'react/require-default-props': 0,
     'react/jsx-filename-extension': 0,
     'prettier/prettier': 0,
+    'comma-dangle': 0,
+    'no-unused-vars': 0,
   },
 
   overrides: [

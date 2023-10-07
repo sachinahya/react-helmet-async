@@ -4,7 +4,7 @@ import handleStateChangeOnClient from './client';
 import mapStateOnServer from './server';
 import { reducePropsToState } from './utils';
 import Provider, { providerShape } from './Provider';
-import { HelmetDataValue } from './HelmetData';
+import { HelmetDataValue, HelmetServerState } from './HelmetData';
 
 export interface DispatcherProps {
   context: HelmetDataValue;
@@ -35,7 +35,7 @@ export default class Dispatcher extends Component<DispatcherProps> {
 
   emitChange() {
     const { helmetInstances, setHelmet } = this.props.context;
-    let serverState = null;
+    let serverState: HelmetServerState | null = null;
     const state = reducePropsToState(
       helmetInstances.get().map(instance => {
         const props = { ...instance.props };

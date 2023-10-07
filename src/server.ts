@@ -8,6 +8,7 @@ import {
   SEO_PRIORITY_TAGS,
 } from './constants';
 import { flattenArray, prioritizer } from './utils';
+import { HelmetDatum, HelmetServerState } from './HelmetData';
 
 const SELF_CLOSING_TAGS = [TAG_NAMES.NOSCRIPT, TAG_NAMES.SCRIPT, TAG_NAMES.STYLE];
 
@@ -160,7 +161,7 @@ const getPriorityMethods = ({ metaTags, linkTags, scriptTags, encode }) => {
   };
 };
 
-const mapStateOnServer = props => {
+const mapStateOnServer = (props): HelmetServerState => {
   const {
     baseTag,
     bodyAttributes,
@@ -173,7 +174,7 @@ const mapStateOnServer = props => {
     prioritizeSeoTags,
   } = props;
   let { linkTags, metaTags, scriptTags } = props;
-  let priorityMethods = {
+  let priorityMethods: HelmetDatum = {
     toComponent: () => {},
     toString: () => '',
   };
