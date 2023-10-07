@@ -11,6 +11,7 @@ module.exports = {
     'prettier/prettier': 0,
     'comma-dangle': 0,
     'no-unused-vars': 0,
+    'no-restricted-syntax': 0,
   },
 
   overrides: [

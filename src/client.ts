@@ -1,32 +1,28 @@
 import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES } from './constants';
 import { flattenArray } from './utils';
 
-const updateTags = (type, tags) => {
-  const headElement = document.head || document.querySelector(TAG_NAMES.HEAD);
-  const tagNodes = headElement.querySelectorAll(`${type}[${HELMET_ATTRIBUTE}]`);
-  const oldTags = [].slice.call(tagNodes);
-  const newTags = [];
-  let indexToDelete;
+const updateTags = <T extends keyof HTMLElementTagNameMap>(type: T, tags) => {
+  const headElement = document.head;
+  const tagNodes = headElement.querySelectorAll<HTMLElementTagNameMap[T]>(
+    `${type}[${HELMET_ATTRIBUTE}]`
+  );
+  const oldTags = [...tagNodes];
+  const newTags: HTMLElement[] = [];
+  let indexToDelete: number;
 
   if (tags && tags.length) {
     tags.forEach(tag => {
       const newElement = document.createElement(type);
 
-      // eslint-disable-next-line
-      for (const attribute in tag) {
-        if (Object.prototype.hasOwnProperty.call(tag, attribute)) {
-          if (attribute === TAG_PROPERTIES.INNER_HTML) {
-            newElement.innerHTML = tag.innerHTML;
-          } else if (attribute === TAG_PROPERTIES.CSS_TEXT) {
-            if (newElement.styleSheet) {
-              newElement.styleSheet.cssText = tag.cssText;
-            } else {
-              newElement.appendChild(document.createTextNode(tag.cssText));
-            }
-          } else {
-            const value = typeof tag[attribute] === 'undefined' ? '' : tag[attribute];
-            newElement.setAttribute(attribute, value);
-          }
+      for (const attribute of Object.keys(tag)) {
+        if (attribute === TAG_PROPERTIES.INNER_HTML) {
+          newElement.innerHTML = tag.innerHTML;
+        } else if (attribute === TAG_PROPERTIES.CSS_TEXT) {
+          // Assuming newElement is instance of HTMLStyleElement
+          (newElement as HTMLStyleElement).appendChild(document.createTextNode(tag.cssText));
+        } else {
+          const value = typeof tag[attribute] === 'undefined' ? '' : tag[attribute];
+          newElement.setAttribute(attribute, value);
         }
       }
 
@@ -154,7 +150,7 @@ const commitTagChanges = (newState, cb) => {
 };
 
 // eslint-disable-next-line
-let _helmetCallback = null;
+let _helmetCallback: number | null = null;
 
 const handleStateChangeOnClient = newState => {
   if (_helmetCallback) {
