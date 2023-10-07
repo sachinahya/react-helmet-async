@@ -3,6 +3,7 @@ module.exports = {
 
   rules: {
     'react/static-property-placement': 0,
+    'import/no-unresolved': 0,
   },
 
   overrides: [
