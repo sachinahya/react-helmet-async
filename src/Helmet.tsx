@@ -1,12 +1,14 @@
-import React, { Component, ReactElement, ReactNode, isValidElement } from 'react';
+import React, { Component, ContextType, ReactElement, ReactNode, isValidElement } from 'react';
 import { isFragment } from 'react-is';
 import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
-import { Context } from './Provider';
+import Provider, { Context } from './Provider';
 import HelmetData from './HelmetData';
-import Dispatcher from './Dispatcher';
 import { without } from './utils';
 import { TAG_NAMES, VALID_TAG_NAMES } from './constants';
+import { reducePropsToState } from './state';
+import { handleStateChangeOnClient } from './client';
+import mapStateOnServer from './server';
 
 export interface OtherElementAttributes {
   [key: string]: string | number | boolean | null | undefined;
@@ -52,19 +54,13 @@ export interface HelmetProps extends HelmetPropsTags, HelmetPropsAttributes, Hel
   children?: ReactNode;
   defer?: boolean;
   encodeSpecialCharacters?: boolean;
-  helmetData?: HelmetData;
   onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
   prioritizeSeoTags?: boolean;
 }
 
 export type HelmetComponentProps = Pick<
   HelmetProps,
-  | 'children'
-  | 'defer'
-  | 'encodeSpecialCharacters'
-  | 'helmetData'
-  | 'onChangeClientState'
-  | 'prioritizeSeoTags'
+  'children' | 'defer' | 'encodeSpecialCharacters' | 'onChangeClientState' | 'prioritizeSeoTags'
 >;
 
 function mapNestedChildrenToProps(child: ReactElement, nestedChildren: ReactNode) {
@@ -276,35 +272,63 @@ export class Helmet extends Component<HelmetComponentProps> {
     prioritizeSeoTags: false,
   };
 
+  static override contextType = Context;
+
   static displayName = 'Helmet';
 
+  // @ts-expect-error
+  override context!: React.ContextType<typeof Context>;
+
+  rendered = false;
+
   override shouldComponentUpdate(nextProps: HelmetProps) {
-    return !fastCompare(without(this.props, 'helmetData'), without(nextProps, 'helmetData'));
+    return !fastCompare(this.props, nextProps);
+  }
+
+  override componentDidUpdate() {
+    const { children, ...props } = this.props;
+    const mappedProps = mapChildrenToProps(children, { ...props });
+
+    this.context.helmetInstances.update(this, mappedProps);
+
+    this.emitChange();
+  }
+
+  override componentWillUnmount() {
+    const { helmetInstances } = this.context;
+    helmetInstances.remove(this);
+    this.emitChange();
+  }
+
+  emitChange() {
+    const { helmetInstances, setHelmet } = this.context;
+    const propsList = helmetInstances.get().map(instance => {
+      // const { ...props } = instance[1];
+      return instance[1];
+    });
+    const state = reducePropsToState(propsList);
+    if (Provider.canUseDOM) {
+      handleStateChangeOnClient(state);
+    } else if (mapStateOnServer) {
+      const serverState = mapStateOnServer(state);
+      setHelmet(serverState);
+    }
   }
 
   override render() {
+    if (this.rendered) {
+      return null;
+    }
+
+    this.rendered = true;
+
     const { children, ...props } = this.props;
-    let newProps = { ...props };
-    let { helmetData } = props;
+    const mappedProps = mapChildrenToProps(children, { ...props });
 
-    if (children) {
-      newProps = mapChildrenToProps(children, newProps);
-    }
+    const { helmetInstances } = this.context;
+    helmetInstances.add(this, mappedProps);
+    this.emitChange();
 
-    if (helmetData && !(helmetData instanceof HelmetData)) {
-      // @ts-expect-error
-      helmetData = new HelmetData(helmetData.context, helmetData.instances);
-    }
-
-    return helmetData ? (
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      <Dispatcher {...newProps} context={helmetData.value} helmetData={undefined} />
-    ) : (
-      <Context.Consumer>
-        {(
-          context // eslint-disable-next-line react/jsx-props-no-spreading
-        ) => <Dispatcher {...newProps} context={context} />}
-      </Context.Consumer>
-    );
+    return null;
   }
 }

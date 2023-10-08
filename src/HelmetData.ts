@@ -1,6 +1,6 @@
 import { HTMLAttributes, ReactElement } from 'react';
-import Dispatcher from './Dispatcher';
 import mapStateOnServer from './server';
+import { Helmet, HelmetProps } from './Helmet';
 
 export interface HelmetDatum {
   toString(): string;
@@ -30,19 +30,22 @@ export interface FilledContext {
   helmet: HelmetServerState;
 }
 
-const instances: Dispatcher[] = [];
+const instances: [Helmet, HelmetProps][] = [];
 
 export function clearInstances() {
   instances.length = 0;
 }
 
+interface HelmetInstances {
+  get: () => [Helmet, HelmetProps][];
+  add: (instance: Helmet, props: HelmetProps) => void;
+  update: (instance: Helmet, props: HelmetProps) => void;
+  remove: (instance: Helmet) => void;
+}
+
 export interface HelmetDataValue {
   setHelmet: (serverState: HelmetServerState) => void;
-  helmetInstances: {
-    get: () => Dispatcher[];
-    add: (instance: Dispatcher) => void;
-    remove: (instance: Dispatcher) => void;
-  };
+  helmetInstances: HelmetInstances;
 }
 
 export default class HelmetData {
@@ -50,7 +53,7 @@ export default class HelmetData {
 
   canUseDOM: boolean;
 
-  instances: Dispatcher[] = [];
+  instances: [Helmet, HelmetProps][] = [];
 
   value: HelmetDataValue = {
     setHelmet: serverState => {
@@ -58,11 +61,22 @@ export default class HelmetData {
     },
     helmetInstances: {
       get: () => (this.canUseDOM ? instances : this.instances),
-      add: instance => {
-        (this.canUseDOM ? instances : this.instances).push(instance);
+      add: (instance, props) => {
+        (this.canUseDOM ? instances : this.instances).push([instance, props]);
+      },
+      update: (instance, props) => {
+        const int = this.canUseDOM ? instances : this.instances;
+
+        const instanceToUpdate = int.find(i => i[0] === instance);
+
+        if (instanceToUpdate) {
+          instanceToUpdate[1] = props;
+        }
       },
       remove: instance => {
-        const index = (this.canUseDOM ? instances : this.instances).indexOf(instance);
+        const index = (this.canUseDOM ? instances : this.instances).findIndex(
+          i => i[0] === instance
+        );
         (this.canUseDOM ? instances : this.instances).splice(index, 1);
       },
     },

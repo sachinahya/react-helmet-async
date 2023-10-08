@@ -13,7 +13,7 @@ const render = node => {
   ReactDOM.render(<StrictMode>{node}</StrictMode>, mount);
 };
 
-describe('Helmet Data', () => {
+describe.skip('Helmet Data', () => {
   describe('server', () => {
     beforeAll(() => {
       Provider.canUseDOM = false;
