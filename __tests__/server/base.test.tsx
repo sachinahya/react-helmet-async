@@ -19,41 +19,6 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('renders base tag as React component', () => {
-      const context = {};
-      render(<Helmet base={{ target: '_blank', href: 'http://localhost/' }} />, context);
-      const head = context.helmet;
-
-      expect(head.base).toBeDefined();
-      expect(head.base.toComponent).toBeDefined();
-
-      const baseComponent = head.base.toComponent();
-
-      expect(baseComponent).toEqual(isArray);
-      expect(baseComponent).toHaveLength(1);
-
-      baseComponent.forEach(base => {
-        expect(base).toEqual(expect.objectContaining({ type: 'base' }));
-      });
-
-      const markup = ReactServer.renderToStaticMarkup(baseComponent);
-
-      expect(markup).toMatchSnapshot();
-    });
-
-    it('renders base tags as string', () => {
-      const context = {};
-      render(<Helmet base={{ target: '_blank', href: 'http://localhost/' }} />, context);
-
-      const head = context.helmet;
-
-      expect(head.base).toBeDefined();
-      expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toMatchSnapshot();
-    });
-  });
-
   describe('Declarative API', () => {
     it('renders base tag as React component', () => {
       const context = {};
@@ -80,7 +45,9 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(baseComponent);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(
+        `"<base data-rh=\\"true\\" target=\\"_blank\\" href=\\"http://localhost/\\"/>"`
+      );
     });
 
     it('renders base tags as string', () => {
@@ -96,7 +63,9 @@ describe('server', () => {
 
       expect(head.base).toBeDefined();
       expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toMatchSnapshot();
+      expect(head.base.toString()).toMatchInlineSnapshot(
+        `"<base data-rh=\\"true\\" target=\\"_blank\\" href=\\"http://localhost/\\"/>"`
+      );
     });
   });
 });

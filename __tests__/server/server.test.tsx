@@ -19,277 +19,169 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('rewind() provides a fallback object for empty Helmet state', () => {
-      const context = {};
-      render(<div />, context);
+  it('provides initial values if no state is found', () => {
+    const context = {};
+    render(<div />, context);
+    const head = context.helmet;
 
-      const head = context.helmet;
+    expect(head.meta).toBeDefined();
+    expect(head.meta.toString).toBeDefined();
 
-      expect(head.htmlAttributes).toBeDefined();
-      expect(head.htmlAttributes.toString).toBeDefined();
-      expect(head.htmlAttributes.toString()).toBe('');
-      expect(head.htmlAttributes.toComponent).toBeDefined();
-      expect(head.htmlAttributes.toComponent()).toEqual({});
-
-      expect(head.title).toBeDefined();
-      expect(head.title.toString).toBeDefined();
-      expect(head.title.toString()).toMatchSnapshot();
-      expect(head.title.toComponent).toBeDefined();
-
-      const markup = ReactServer.renderToStaticMarkup(head.title.toComponent());
-
-      expect(markup).toMatchSnapshot();
-
-      expect(head.base).toBeDefined();
-      expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toBe('');
-      expect(head.base.toComponent).toBeDefined();
-
-      const baseComponent = head.base.toComponent();
-
-      expect(baseComponent).toEqual(isArray);
-      expect(baseComponent).toHaveLength(0);
-
-      expect(head.meta).toBeDefined();
-      expect(head.meta.toString).toBeDefined();
-      expect(head.meta.toString()).toBe('');
-      expect(head.meta.toComponent).toBeDefined();
-
-      const metaComponent = head.meta.toComponent();
-
-      expect(metaComponent).toEqual(isArray);
-      expect(metaComponent).toHaveLength(0);
-
-      expect(head.link).toBeDefined();
-      expect(head.link.toString).toBeDefined();
-      expect(head.link.toString()).toBe('');
-      expect(head.link.toComponent).toBeDefined();
-
-      const linkComponent = head.link.toComponent();
-
-      expect(linkComponent).toEqual(isArray);
-      expect(linkComponent).toHaveLength(0);
-
-      expect(head.script).toBeDefined();
-      expect(head.script.toString).toBeDefined();
-      expect(head.script.toString()).toBe('');
-      expect(head.script.toComponent).toBeDefined();
-
-      const scriptComponent = head.script.toComponent();
-
-      expect(scriptComponent).toEqual(isArray);
-      expect(scriptComponent).toHaveLength(0);
-
-      expect(head.noscript).toBeDefined();
-      expect(head.noscript.toString).toBeDefined();
-      expect(head.noscript.toString()).toBe('');
-      expect(head.noscript.toComponent).toBeDefined();
-
-      const noscriptComponent = head.noscript.toComponent();
-
-      expect(noscriptComponent).toEqual(isArray);
-      expect(noscriptComponent).toHaveLength(0);
-
-      expect(head.style).toBeDefined();
-      expect(head.style.toString).toBeDefined();
-      expect(head.style.toString()).toBe('');
-      expect(head.style.toComponent).toBeDefined();
-
-      const styleComponent = head.style.toComponent();
-
-      expect(styleComponent).toEqual(isArray);
-      expect(styleComponent).toHaveLength(0);
-
-      expect(head.priority).toBeDefined();
-      expect(head.priority.toString).toBeDefined();
-      expect(head.priority.toString()).toBe('');
-      expect(head.priority.toComponent).toBeDefined();
-    });
-
-    it('does not render undefined attribute values', () => {
-      const context = {};
-      render(
-        <Helmet
-          script={[
-            {
-              src: 'foo.js',
-              async: undefined,
-            },
-          ]}
-        />,
-        context
-      );
-
-      const { script } = context.helmet;
-
-      expect(script.toString()).toMatchSnapshot();
-    });
+    expect(head.meta.toString()).toBe('');
   });
 
-  describe('Declarative API', () => {
-    it('provides initial values if no state is found', () => {
-      const context = {};
-      render(<div />, context);
-      const head = context.helmet;
+  it('rewind() provides a fallback object for empty Helmet state', () => {
+    const context = {};
+    render(<div />, context);
 
-      expect(head.meta).toBeDefined();
-      expect(head.meta.toString).toBeDefined();
+    const head = context.helmet;
 
-      expect(head.meta.toString()).toBe('');
-    });
+    expect(head.htmlAttributes).toBeDefined();
+    expect(head.htmlAttributes.toString).toBeDefined();
+    expect(head.htmlAttributes.toString()).toBe('');
+    expect(head.htmlAttributes.toComponent).toBeDefined();
+    expect(head.htmlAttributes.toComponent()).toEqual({});
 
-    it('rewind() provides a fallback object for empty Helmet state', () => {
-      const context = {};
-      render(<div />, context);
+    expect(head.title).toBeDefined();
+    expect(head.title.toString).toBeDefined();
+    expect(head.title.toString()).toMatchInlineSnapshot(`"<title data-rh=\\"true\\"></title>"`);
+    expect(head.title.toComponent).toBeDefined();
 
-      const head = context.helmet;
+    const markup = ReactServer.renderToStaticMarkup(head.title.toComponent());
 
-      expect(head.htmlAttributes).toBeDefined();
-      expect(head.htmlAttributes.toString).toBeDefined();
-      expect(head.htmlAttributes.toString()).toBe('');
-      expect(head.htmlAttributes.toComponent).toBeDefined();
-      expect(head.htmlAttributes.toComponent()).toEqual({});
+    expect(markup).toMatchInlineSnapshot(`"<title data-rh=\\"true\\"></title>"`);
 
-      expect(head.title).toBeDefined();
-      expect(head.title.toString).toBeDefined();
-      expect(head.title.toString()).toMatchSnapshot();
-      expect(head.title.toComponent).toBeDefined();
+    expect(head.base).toBeDefined();
+    expect(head.base.toString).toBeDefined();
+    expect(head.base.toString()).toBe('');
+    expect(head.base.toComponent).toBeDefined();
 
-      const markup = ReactServer.renderToStaticMarkup(head.title.toComponent());
+    const baseComponent = head.base.toComponent();
 
-      expect(markup).toMatchSnapshot();
+    expect(baseComponent).toEqual(isArray);
+    expect(baseComponent).toHaveLength(0);
 
-      expect(head.base).toBeDefined();
-      expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toBe('');
-      expect(head.base.toComponent).toBeDefined();
+    expect(head.meta).toBeDefined();
+    expect(head.meta.toString).toBeDefined();
+    expect(head.meta.toString()).toBe('');
+    expect(head.meta.toComponent).toBeDefined();
 
-      const baseComponent = head.base.toComponent();
+    const metaComponent = head.meta.toComponent();
 
-      expect(baseComponent).toEqual(isArray);
-      expect(baseComponent).toHaveLength(0);
+    expect(metaComponent).toEqual(isArray);
+    expect(metaComponent).toHaveLength(0);
 
-      expect(head.meta).toBeDefined();
-      expect(head.meta.toString).toBeDefined();
-      expect(head.meta.toString()).toBe('');
-      expect(head.meta.toComponent).toBeDefined();
+    expect(head.link).toBeDefined();
+    expect(head.link.toString).toBeDefined();
+    expect(head.link.toString()).toBe('');
+    expect(head.link.toComponent).toBeDefined();
 
-      const metaComponent = head.meta.toComponent();
+    const linkComponent = head.link.toComponent();
 
-      expect(metaComponent).toEqual(isArray);
-      expect(metaComponent).toHaveLength(0);
+    expect(linkComponent).toEqual(isArray);
+    expect(linkComponent).toHaveLength(0);
 
-      expect(head.link).toBeDefined();
-      expect(head.link.toString).toBeDefined();
-      expect(head.link.toString()).toBe('');
-      expect(head.link.toComponent).toBeDefined();
+    expect(head.script).toBeDefined();
+    expect(head.script.toString).toBeDefined();
+    expect(head.script.toString()).toBe('');
+    expect(head.script.toComponent).toBeDefined();
 
-      const linkComponent = head.link.toComponent();
+    const scriptComponent = head.script.toComponent();
 
-      expect(linkComponent).toEqual(isArray);
-      expect(linkComponent).toHaveLength(0);
+    expect(scriptComponent).toEqual(isArray);
+    expect(scriptComponent).toHaveLength(0);
 
-      expect(head.script).toBeDefined();
-      expect(head.script.toString).toBeDefined();
-      expect(head.script.toString()).toBe('');
-      expect(head.script.toComponent).toBeDefined();
+    expect(head.noscript).toBeDefined();
+    expect(head.noscript.toString).toBeDefined();
+    expect(head.noscript.toString()).toBe('');
+    expect(head.noscript.toComponent).toBeDefined();
 
-      const scriptComponent = head.script.toComponent();
+    const noscriptComponent = head.noscript.toComponent();
 
-      expect(scriptComponent).toEqual(isArray);
-      expect(scriptComponent).toHaveLength(0);
+    expect(noscriptComponent).toEqual(isArray);
+    expect(noscriptComponent).toHaveLength(0);
 
-      expect(head.noscript).toBeDefined();
-      expect(head.noscript.toString).toBeDefined();
-      expect(head.noscript.toString()).toBe('');
-      expect(head.noscript.toComponent).toBeDefined();
+    expect(head.style).toBeDefined();
+    expect(head.style.toString).toBeDefined();
+    expect(head.style.toString()).toBe('');
+    expect(head.style.toComponent).toBeDefined();
 
-      const noscriptComponent = head.noscript.toComponent();
+    const styleComponent = head.style.toComponent();
 
-      expect(noscriptComponent).toEqual(isArray);
-      expect(noscriptComponent).toHaveLength(0);
+    expect(styleComponent).toEqual(isArray);
+    expect(styleComponent).toHaveLength(0);
 
-      expect(head.style).toBeDefined();
-      expect(head.style.toString).toBeDefined();
-      expect(head.style.toString()).toBe('');
-      expect(head.style.toComponent).toBeDefined();
+    expect(head.priority).toBeDefined();
+    expect(head.priority.toString).toBeDefined();
+    expect(head.priority.toString()).toBe('');
+    expect(head.priority.toComponent).toBeDefined();
+  });
 
-      const styleComponent = head.style.toComponent();
+  it('does not render undefined attribute values', () => {
+    const context = {};
+    render(
+      <Helmet>
+        <script src="foo.js" async={undefined} />
+      </Helmet>,
+      context
+    );
 
-      expect(styleComponent).toEqual(isArray);
-      expect(styleComponent).toHaveLength(0);
+    const { script } = context.helmet;
 
-      expect(head.priority).toBeDefined();
-      expect(head.priority.toString).toBeDefined();
-      expect(head.priority.toString()).toBe('');
-      expect(head.priority.toComponent).toBeDefined();
-    });
+    expect(script.toString()).toMatchInlineSnapshot(
+      `"<script data-rh=\\"true\\" src=\\"foo.js\\" async></script>"`
+    );
+  });
 
-    it('does not render undefined attribute values', () => {
-      const context = {};
-      render(
-        <Helmet>
-          <script src="foo.js" async={undefined} />
-        </Helmet>,
-        context
-      );
+  it('prioritizes SEO tags when asked to', () => {
+    const context = {};
+    render(
+      <Helmet prioritizeSeoTags>
+        <link rel="notImportant" href="https://www.chipotle.com" />
+        <link rel="canonical" href="https://www.tacobell.com" />
+        <meta property="og:title" content="A very important title" />
+      </Helmet>,
+      context
+    );
 
-      const { script } = context.helmet;
+    expect(context.helmet.priority.toString()).toContain(
+      'rel="canonical" href="https://www.tacobell.com"'
+    );
+    expect(context.helmet.link.toString()).not.toContain(
+      'rel="canonical" href="https://www.tacobell.com"'
+    );
 
-      expect(script.toString()).toMatchSnapshot();
-    });
+    expect(context.helmet.priority.toString()).toContain(
+      'property="og:title" content="A very important title"'
+    );
+    expect(context.helmet.meta.toString()).not.toContain(
+      'property="og:title" content="A very important title"'
+    );
+  });
 
-    it('prioritizes SEO tags when asked to', () => {
-      const context = {};
-      render(
-        <Helmet prioritizeSeoTags>
-          <link rel="notImportant" href="https://www.chipotle.com" />
-          <link rel="canonical" href="https://www.tacobell.com" />
-          <meta property="og:title" content="A very important title" />
-        </Helmet>,
-        context
-      );
+  it('does not prioritize SEO unless asked to', () => {
+    const context = {};
+    render(
+      <Helmet>
+        <link rel="notImportant" href="https://www.chipotle.com" />
+        <link rel="canonical" href="https://www.tacobell.com" />
+        <meta property="og:title" content="A very important title" />
+      </Helmet>,
+      context
+    );
 
-      expect(context.helmet.priority.toString()).toContain(
-        'rel="canonical" href="https://www.tacobell.com"'
-      );
-      expect(context.helmet.link.toString()).not.toContain(
-        'rel="canonical" href="https://www.tacobell.com"'
-      );
+    expect(context.helmet.priority.toString()).not.toContain(
+      'rel="canonical" href="https://www.tacobell.com"'
+    );
+    expect(context.helmet.link.toString()).toContain(
+      'rel="canonical" href="https://www.tacobell.com"'
+    );
 
-      expect(context.helmet.priority.toString()).toContain(
-        'property="og:title" content="A very important title"'
-      );
-      expect(context.helmet.meta.toString()).not.toContain(
-        'property="og:title" content="A very important title"'
-      );
-    });
-
-    it('does not prioritize SEO unless asked to', () => {
-      const context = {};
-      render(
-        <Helmet>
-          <link rel="notImportant" href="https://www.chipotle.com" />
-          <link rel="canonical" href="https://www.tacobell.com" />
-          <meta property="og:title" content="A very important title" />
-        </Helmet>,
-        context
-      );
-
-      expect(context.helmet.priority.toString()).not.toContain(
-        'rel="canonical" href="https://www.tacobell.com"'
-      );
-      expect(context.helmet.link.toString()).toContain(
-        'rel="canonical" href="https://www.tacobell.com"'
-      );
-
-      expect(context.helmet.priority.toString()).not.toContain(
-        'property="og:title" content="A very important title"'
-      );
-      expect(context.helmet.meta.toString()).toContain(
-        'property="og:title" content="A very important title"'
-      );
-    });
+    expect(context.helmet.priority.toString()).not.toContain(
+      'property="og:title" content="A very important title"'
+    );
+    expect(context.helmet.meta.toString()).toContain(
+      'property="og:title" content="A very important title"'
+    );
   });
 });

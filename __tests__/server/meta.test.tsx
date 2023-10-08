@@ -19,70 +19,6 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('renders meta tags as React components', () => {
-      const context = {};
-      render(
-        <Helmet
-          meta={[
-            { charset: 'utf-8' },
-            {
-              name: 'description',
-              content: 'Test description & encoding of special characters like \' " > < `',
-            },
-            { 'http-equiv': 'content-type', content: 'text/html' },
-            { property: 'og:type', content: 'article' },
-            { itemprop: 'name', content: 'Test name itemprop' },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.meta).toBeDefined();
-      expect(head.meta.toComponent).toBeDefined();
-
-      const metaComponent = head.meta.toComponent();
-
-      expect(metaComponent).toEqual(isArray);
-      expect(metaComponent).toHaveLength(5);
-
-      metaComponent.forEach(meta => {
-        expect(meta).toEqual(expect.objectContaining({ type: 'meta' }));
-      });
-
-      const markup = ReactServer.renderToStaticMarkup(metaComponent);
-
-      expect(markup).toMatchSnapshot();
-    });
-
-    it('renders meta tags as string', () => {
-      const context = {};
-      render(
-        <Helmet
-          meta={[
-            { charset: 'utf-8' },
-            {
-              name: 'description',
-              content: 'Test description & encoding of special characters like \' " > < `',
-            },
-            { 'http-equiv': 'content-type', content: 'text/html' },
-            { property: 'og:type', content: 'article' },
-            { itemprop: 'name', content: 'Test name itemprop' },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.meta).toBeDefined();
-      expect(head.meta.toString).toBeDefined();
-      expect(head.meta.toString()).toMatchSnapshot();
-    });
-  });
-
   describe('Declarative API', () => {
     it('renders meta tags as React components', () => {
       const context = {};
@@ -116,7 +52,9 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(metaComponent);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(
+        `"<meta data-rh=\\"true\\" charSet=\\"utf-8\\"/><meta data-rh=\\"true\\" name=\\"description\\" content=\\"Test description &amp; encoding of special characters like &#x27; &quot; &gt; &lt; \`\\"/><meta data-rh=\\"true\\" http-equiv=\\"content-type\\" content=\\"text/html\\"/><meta data-rh=\\"true\\" property=\\"og:type\\" content=\\"article\\"/><meta data-rh=\\"true\\" itemProp=\\"name\\" content=\\"Test name itemprop\\"/>"`
+      );
     });
 
     it('renders meta tags as string', () => {
@@ -139,7 +77,9 @@ describe('server', () => {
 
       expect(head.meta).toBeDefined();
       expect(head.meta.toString).toBeDefined();
-      expect(head.meta.toString()).toMatchSnapshot();
+      expect(head.meta.toString()).toMatchInlineSnapshot(
+        `"<meta data-rh=\\"true\\" charset=\\"utf-8\\"/><meta data-rh=\\"true\\" name=\\"description\\" content=\\"Test description &amp; encoding of special characters like &#x27; &quot; &gt; &lt; \`\\"/><meta data-rh=\\"true\\" http-equiv=\\"content-type\\" content=\\"text/html\\"/><meta data-rh=\\"true\\" property=\\"og:type\\" content=\\"article\\"/><meta data-rh=\\"true\\" itemprop=\\"name\\" content=\\"Test name itemprop\\"/>"`
+      );
     });
   });
 });

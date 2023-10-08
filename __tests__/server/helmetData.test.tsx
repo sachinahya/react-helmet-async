@@ -36,7 +36,9 @@ describe('Helmet Data', () => {
 
       expect(head.base).toBeDefined();
       expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toMatchSnapshot();
+      expect(head.base.toString()).toMatchInlineSnapshot(
+        `"<base data-rh=\\"true\\" target=\\"_blank\\" href=\\"http://localhost/\\"/>"`
+      );
     });
 
     it('renders declarative without context', () => {
@@ -52,7 +54,9 @@ describe('Helmet Data', () => {
 
       expect(head.base).toBeDefined();
       expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toMatchSnapshot();
+      expect(head.base.toString()).toMatchInlineSnapshot(
+        `"<base data-rh=\\"true\\" target=\\"_blank\\" href=\\"http://localhost/\\"/>"`
+      );
     });
 
     it('sets base tag based on deepest nested component', () => {
@@ -73,7 +77,9 @@ describe('Helmet Data', () => {
 
       expect(head.base).toBeDefined();
       expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toMatchSnapshot();
+      expect(head.base.toString()).toMatchInlineSnapshot(
+        `"<base data-rh=\\"true\\" href=\\"http://mysite.com/public\\"/>"`
+      );
     });
 
     it('works with the same context object but separate HelmetData instances', () => {
@@ -94,7 +100,9 @@ describe('Helmet Data', () => {
 
       expect(head.base).toBeDefined();
       expect(head.base.toString).toBeDefined();
-      expect(head.base.toString()).toMatchSnapshot();
+      expect(head.base.toString()).toMatchInlineSnapshot(
+        `"<base data-rh=\\"true\\" href=\\"http://mysite.com/public\\"/>"`
+      );
     });
   });
 
@@ -117,7 +125,9 @@ describe('Helmet Data', () => {
       expect(firstTag).toBeInstanceOf(Element);
       expect(firstTag.getAttribute).toBeDefined();
       expect(firstTag.getAttribute('href')).toBe('http://localhost/');
-      expect(firstTag.outerHTML).toMatchSnapshot();
+      expect(firstTag.outerHTML).toMatchInlineSnapshot(
+        `"<base target=\\"_blank\\" href=\\"http://localhost/\\" data-rh=\\"true\\">"`
+      );
     });
 
     it('renders declarative without context', () => {
@@ -138,7 +148,9 @@ describe('Helmet Data', () => {
       expect(firstTag).toBeInstanceOf(Element);
       expect(firstTag.getAttribute).toBeDefined();
       expect(firstTag.getAttribute('href')).toBe('http://localhost/');
-      expect(firstTag.outerHTML).toMatchSnapshot();
+      expect(firstTag.outerHTML).toMatchInlineSnapshot(
+        `"<base target=\\"_blank\\" href=\\"http://localhost/\\" data-rh=\\"true\\">"`
+      );
     });
 
     it('sets base tag based on deepest nested component', () => {
@@ -164,7 +176,9 @@ describe('Helmet Data', () => {
       expect(firstTag).toBeInstanceOf(Element);
       expect(firstTag.getAttribute).toBeDefined();
       expect(firstTag.getAttribute('href')).toBe('http://mysite.com/public');
-      expect(firstTag.outerHTML).toMatchSnapshot();
+      expect(firstTag.outerHTML).toMatchInlineSnapshot(
+        `"<base href=\\"http://mysite.com/public\\" data-rh=\\"true\\">"`
+      );
     });
   });
 });

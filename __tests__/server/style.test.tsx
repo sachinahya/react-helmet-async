@@ -19,66 +19,6 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('renders style tags as React components', () => {
-      const context = {};
-      render(
-        <Helmet
-          style={[
-            {
-              type: 'text/css',
-              cssText: `body {background-color: green;}`,
-            },
-            {
-              type: 'text/css',
-              cssText: `p {font-size: 12px;}`,
-            },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.style).toBeDefined();
-      expect(head.style.toComponent).toBeDefined();
-
-      const styleComponent = head.style.toComponent();
-
-      expect(styleComponent).toEqual(isArray);
-      expect(styleComponent).toHaveLength(2);
-
-      const markup = ReactServer.renderToStaticMarkup(styleComponent);
-
-      expect(markup).toMatchSnapshot();
-    });
-
-    it('renders style tags as string', () => {
-      const context = {};
-      render(
-        <Helmet
-          style={[
-            {
-              type: 'text/css',
-              cssText: `body {background-color: green;}`,
-            },
-            {
-              type: 'text/css',
-              cssText: `p {font-size: 12px;}`,
-            },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.style).toBeDefined();
-      expect(head.style.toString).toBeDefined();
-      expect(head.style.toString()).toMatchSnapshot();
-    });
-  });
-
   describe('Declarative API', () => {
     it('renders style tags as React components', () => {
       const context = {};
@@ -102,7 +42,9 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(styleComponent);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(
+        `"<style data-rh=\\"true\\" type=\\"text/css\\">body {background-color: green;}</style><style data-rh=\\"true\\" type=\\"text/css\\">p {font-size: 12px;}</style>"`
+      );
     });
 
     it('renders style tags as string', () => {
@@ -119,7 +61,9 @@ describe('server', () => {
 
       expect(head.style).toBeDefined();
       expect(head.style.toString).toBeDefined();
-      expect(head.style.toString()).toMatchSnapshot();
+      expect(head.style.toString()).toMatchInlineSnapshot(
+        `"<style data-rh=\\"true\\" type=\\"text/css\\">body {background-color: green;}</style><style data-rh=\\"true\\" type=\\"text/css\\">p {font-size: 12px;}</style>"`
+      );
     });
   });
 });

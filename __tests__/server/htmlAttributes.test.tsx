@@ -15,49 +15,6 @@ afterAll(() => {
 });
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('renders html attributes as component', () => {
-      const context = {};
-      render(
-        <Helmet
-          htmlAttributes={{
-            lang: 'ga',
-            className: 'myClassName',
-          }}
-        />,
-        context
-      );
-
-      const { htmlAttributes } = context.helmet;
-      const attrs = htmlAttributes.toComponent();
-
-      expect(attrs).toBeDefined();
-
-      const markup = ReactServer.renderToStaticMarkup(<html lang="en" {...attrs} />);
-
-      expect(markup).toMatchSnapshot();
-    });
-
-    it('renders html attributes as string', () => {
-      const context = {};
-      render(
-        <Helmet
-          htmlAttributes={{
-            lang: 'ga',
-            class: 'myClassName',
-          }}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.htmlAttributes).toBeDefined();
-      expect(head.htmlAttributes.toString).toBeDefined();
-      expect(head.htmlAttributes.toString()).toMatchSnapshot();
-    });
-  });
-
   describe('Declarative API', () => {
     it('renders html attributes as component', () => {
       const context = {};
@@ -75,7 +32,7 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(<html lang="en" {...attrs} />);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(`"<html lang=\\"ga\\" class=\\"myClassName\\"></html>"`);
     });
 
     it('renders html attributes as string', () => {
@@ -91,7 +48,9 @@ describe('server', () => {
 
       expect(head.htmlAttributes).toBeDefined();
       expect(head.htmlAttributes.toString).toBeDefined();
-      expect(head.htmlAttributes.toString()).toMatchSnapshot();
+      expect(head.htmlAttributes.toString()).toMatchInlineSnapshot(
+        `"lang=\\"ga\\" class=\\"myClassName\\""`
+      );
     });
   });
 });

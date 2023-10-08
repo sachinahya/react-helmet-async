@@ -1,15 +1,8 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Helmet } from '../src';
-import Provider from '../src/Provider';
+import { render } from './api/utils';
 
 Helmet.defaultProps.defer = false;
-
-const mount = document.getElementById('mount');
-
-const render = node => {
-  ReactDOM.render(<Provider>{node}</Provider>, mount);
-};
 
 describe('fragments', () => {
   it('parses Fragments', () => {
@@ -22,7 +15,7 @@ describe('fragments', () => {
       </Helmet>
     );
 
-    expect(document.title).toMatchSnapshot();
+    expect(document.title).toMatchInlineSnapshot(`"Hello"`);
   });
 
   it('parses nested Fragments', () => {
@@ -38,6 +31,6 @@ describe('fragments', () => {
       </Helmet>
     );
 
-    expect(document.title).toMatchSnapshot();
+    expect(document.title).toMatchInlineSnapshot(`"Baz"`);
   });
 });

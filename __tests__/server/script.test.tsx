@@ -19,70 +19,6 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('renders script tags as React components', () => {
-      const context = {};
-      render(
-        <Helmet
-          script={[
-            {
-              src: 'http://localhost/test.js',
-              type: 'text/javascript',
-            },
-            {
-              src: 'http://localhost/test2.js',
-              type: 'text/javascript',
-            },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.script).toBeDefined();
-      expect(head.script.toComponent).toBeDefined();
-
-      const scriptComponent = head.script.toComponent();
-
-      expect(scriptComponent).toEqual(isArray);
-      expect(scriptComponent).toHaveLength(2);
-
-      scriptComponent.forEach(script => {
-        expect(script).toEqual(expect.objectContaining({ type: 'script' }));
-      });
-
-      const markup = ReactServer.renderToStaticMarkup(scriptComponent);
-
-      expect(markup).toMatchSnapshot();
-    });
-
-    it('renders script tags as string', () => {
-      const context = {};
-      render(
-        <Helmet
-          script={[
-            {
-              src: 'http://localhost/test.js',
-              type: 'text/javascript',
-            },
-            {
-              src: 'http://localhost/test2.js',
-              type: 'text/javascript',
-            },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.script).toBeDefined();
-      expect(head.script.toString).toBeDefined();
-      expect(head.script.toString()).toMatchSnapshot();
-    });
-  });
-
   describe('Declarative API', () => {
     it('renders script tags as React components', () => {
       const context = {};
@@ -110,7 +46,9 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(scriptComponent);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(
+        `"<script data-rh=\\"true\\" src=\\"http://localhost/test.js\\" type=\\"text/javascript\\"></script><script data-rh=\\"true\\" src=\\"http://localhost/test2.js\\" type=\\"text/javascript\\"></script>"`
+      );
     });
 
     it('renders script tags as string', () => {
@@ -127,7 +65,9 @@ describe('server', () => {
 
       expect(head.script).toBeDefined();
       expect(head.script.toString).toBeDefined();
-      expect(head.script.toString()).toMatchSnapshot();
+      expect(head.script.toString()).toMatchInlineSnapshot(
+        `"<script data-rh=\\"true\\" src=\\"http://localhost/test.js\\" type=\\"text/javascript\\"></script><script data-rh=\\"true\\" src=\\"http://localhost/test2.js\\" type=\\"text/javascript\\"></script>"`
+      );
     });
   });
 });

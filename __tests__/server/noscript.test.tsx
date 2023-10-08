@@ -19,45 +19,6 @@ const isArray = {
 };
 
 describe('server', () => {
-  describe.skip('API', () => {
-    it('renders noscript tags as React components', () => {
-      const context = {};
-      render(
-        <Helmet
-          noscript={[
-            {
-              id: 'foo',
-              innerHTML: '<link rel="stylesheet" type="text/css" href="/style.css" />',
-            },
-            {
-              id: 'bar',
-              innerHTML: '<link rel="stylesheet" type="text/css" href="/style2.css" />',
-            },
-          ]}
-        />,
-        context
-      );
-
-      const head = context.helmet;
-
-      expect(head.noscript).toBeDefined();
-      expect(head.noscript.toComponent).toBeDefined();
-
-      const noscriptComponent = head.noscript.toComponent();
-
-      expect(noscriptComponent).toEqual(isArray);
-      expect(noscriptComponent).toHaveLength(2);
-
-      noscriptComponent.forEach(noscript => {
-        expect(noscript).toEqual(expect.objectContaining({ type: 'noscript' }));
-      });
-
-      const markup = ReactServer.renderToStaticMarkup(noscriptComponent);
-
-      expect(markup).toMatchSnapshot();
-    });
-  });
-
   describe('Declarative API', () => {
     it('renders noscript tags as React components', () => {
       const context = {};
@@ -85,7 +46,9 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(noscriptComponent);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(
+        `"<noscript data-rh=\\"true\\" id=\\"foo\\"><link rel=\\"stylesheet\\" type=\\"text/css\\" href=\\"/style.css\\" /></noscript><noscript data-rh=\\"true\\" id=\\"bar\\"><link rel=\\"stylesheet\\" type=\\"text/css\\" href=\\"/style2.css\\" /></noscript>"`
+      );
     });
   });
 });

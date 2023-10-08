@@ -32,7 +32,7 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(<body lang="en" {...attrs} />);
 
-      expect(markup).toMatchSnapshot();
+      expect(markup).toMatchInlineSnapshot(`"<body lang=\\"ga\\" class=\\"myClassName\\"></body>"`);
     });
 
     it('renders body attributes as string', () => {
@@ -48,7 +48,9 @@ describe('server', () => {
 
       expect(body.bodyAttributes).toBeDefined();
       expect(body.bodyAttributes.toString).toBeDefined();
-      expect(body.bodyAttributes.toString()).toMatchSnapshot();
+      expect(body.bodyAttributes.toString()).toMatchInlineSnapshot(
+        `"lang=\\"ga\\" class=\\"myClassName\\""`
+      );
     });
   });
 });
