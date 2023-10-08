@@ -45,7 +45,7 @@ export interface HelmetPropsAttributes {
 }
 
 export interface HelmetPropsTitle {
-  title?: string;
+  title?: string | string[];
 }
 
 export interface HelmetProps extends HelmetPropsTags, HelmetPropsAttributes, HelmetPropsTitle {
@@ -125,16 +125,22 @@ function mapObjectTypeChildren({
 }: {
   child: ReactElement;
   newProps: HelmetProps;
-  newChildProps: Record<string, unknown>;
+  newChildProps: object;
   nestedChildren: ReactNode;
 }): HelmetProps {
   switch (child.type) {
-    case TAG_NAMES.TITLE:
+    case TAG_NAMES.TITLE: {
       return {
         ...newProps,
-        [child.type]: nestedChildren,
+        // eslint-disable-next-line no-nested-ternary
+        [child.type]: Array.isArray(nestedChildren)
+          ? nestedChildren
+          : nestedChildren
+          ? String(nestedChildren)
+          : undefined,
         titleAttributes: { ...newChildProps },
       };
+    }
 
     case TAG_NAMES.BODY:
       return {

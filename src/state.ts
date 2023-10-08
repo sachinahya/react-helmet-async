@@ -155,7 +155,7 @@ export interface HelmetInternalState {
   onChangeClientState?: NonNullable<HelmetProps['onChangeClientState']>;
   scriptTags: React.JSX.IntrinsicElements['script'][];
   styleTags: { cssText: string }[];
-  title: string | undefined;
+  title: string | string[] | undefined;
   titleAttributes: { itemprop?: string | undefined };
   prioritizeSeoTags?: boolean;
 }
