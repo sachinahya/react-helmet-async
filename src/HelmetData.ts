@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import { HTMLAttributes, ReactElement } from 'react';
 import Dispatcher from './Dispatcher';
 import mapStateOnServer from './server';
 
@@ -7,27 +7,22 @@ export interface HelmetDatum {
   toComponent(): ReactElement[];
 }
 
-export interface HelmetHTMLBodyDatum {
+export interface HelmetAttributeDatum<T extends HTMLAttributes<HTMLElement>> {
   toString(): string;
-  toComponent(): React.HTMLAttributes<HTMLBodyElement>;
-}
-
-export interface HelmetHTMLElementDatum {
-  toString(): string;
-  toComponent(): React.HTMLAttributes<HTMLHtmlElement>;
+  toComponent(): T;
 }
 
 export interface HelmetServerState {
   base: HelmetDatum;
-  bodyAttributes: HelmetHTMLBodyDatum;
-  htmlAttributes: HelmetHTMLElementDatum;
+  bodyAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLBodyElement>>;
+  htmlAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLHtmlElement>>;
   link: HelmetDatum;
   meta: HelmetDatum;
   noscript: HelmetDatum;
   script: HelmetDatum;
   style: HelmetDatum;
   title: HelmetDatum;
-  titleAttributes: HelmetDatum;
+  titleAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLTitleElement>>;
   priority: HelmetDatum;
 }
 

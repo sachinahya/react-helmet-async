@@ -1,15 +1,12 @@
 import { AllHTMLAttributes } from 'react';
-import { HelmetProps } from './Helmet';
+import { HelmetProps, HelmetPropsAttributes } from './Helmet';
 
-const tags = {
-  link: {
-    primaryKeys: ['rel', 'href'],
-  },
-} satisfies {
-  [K in keyof React.JSX.IntrinsicElements]?: {
-    primaryKeys: (keyof React.JSX.IntrinsicElements[K])[];
-  };
-};
+export const HELMET_PROPS = {
+  DEFER: 'defer',
+  ENCODE_SPECIAL_CHARACTERS: 'encodeSpecialCharacters',
+  ON_CHANGE_CLIENT_STATE: 'onChangeClientState',
+  PRIORITIZE_SEO_TAGS: 'prioritizeSeoTags',
+} as const satisfies Record<string, keyof HelmetProps>;
 
 export const TAG_NAMES = {
   BASE: 'base',
@@ -22,23 +19,15 @@ export const TAG_NAMES = {
   SCRIPT: 'script',
   STYLE: 'style',
   TITLE: 'title',
-  // FRAGMENT: 'Symbol(react.fragment)',
-} as const;
-
-export type Tag = (typeof TAG_NAMES)[keyof typeof TAG_NAMES];
-
-export type TagConfig = {
-  [K in Tag]: {
-    props: React.JSX.IntrinsicElements[K];
-    html: HTMLElementTagNameMap[K];
-  };
-};
+} as const satisfies Record<string, keyof React.JSX.IntrinsicElements>;
 
 export const ATTRIBUTE_NAMES = {
   BODY: 'bodyAttributes',
   HTML: 'htmlAttributes',
   TITLE: 'titleAttributes',
-} as const;
+} as const satisfies Record<string, keyof HelmetPropsAttributes>;
+
+export type SeoPriority = Record<string, string | readonly string[]>;
 
 export const SEO_PRIORITY_TAGS = {
   link: { rel: ['amphtml', 'canonical', 'alternate'] },
@@ -62,11 +51,11 @@ export const SEO_PRIORITY_TAGS = {
       'twitter:site',
     ],
   },
-} as const;
+} as const satisfies Record<string, SeoPriority>;
 
 export const VALID_TAG_NAMES = Object.values(TAG_NAMES);
 
-const HTML_TAG_MAP = {
+const HTML_TAG_MAP: Record<string, string> = {
   accessKey: 'accesskey',
   charSet: 'charset',
   className: 'class',
@@ -78,7 +67,7 @@ const HTML_TAG_MAP = {
 };
 
 export const getHtmlAttributeName = (propName: string): string => {
-  return (HTML_TAG_MAP as Record<string, string>)[propName] || propName;
+  return HTML_TAG_MAP[propName] || propName;
 };
 
 export const TAG_PROPERTIES = {
@@ -92,6 +81,6 @@ export const TAG_PROPERTIES = {
   PROPERTY: 'property',
   REL: 'rel',
   SRC: 'src',
-} as const; // satisfies Record<string, 'innerHTML' | 'cssText' | keyof AllHTMLAttributes<HTMLElement>>;
+} as const satisfies Record<string, 'innerHTML' | 'cssText' | keyof AllHTMLAttributes<HTMLElement>>;
 
 export const HELMET_ATTRIBUTE = 'data-rh';

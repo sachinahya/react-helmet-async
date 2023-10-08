@@ -14,6 +14,9 @@ module.exports = {
     'no-restricted-syntax': 0,
     'no-use-before-define': 0,
     'no-continue': 0,
+    'no-cond-assign': 0,
+    'no-loop-func': 0,
+    'react/prop-types': 0,
   },
 
   overrides: [

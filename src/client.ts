@@ -1,6 +1,7 @@
 import { HelmetTags } from './Helmet';
 import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from './constants';
-import { HelmetInternalState, flattenArray } from './utils';
+import { flattenArray } from './utils';
+import { HelmetInternalState } from './state';
 
 const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: any[]) => {
   const headElement = document.head;

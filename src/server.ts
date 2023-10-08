@@ -6,7 +6,9 @@ import {
   SEO_PRIORITY_TAGS,
   getHtmlAttributeName,
 } from './constants';
-import { HelmetInternalState, flattenArray, prioritizer } from './utils';
+import { flattenArray } from './utils';
+import { HelmetInternalState } from './state';
+import { prioritizer } from './seo';
 import { HelmetDatum, HelmetServerState } from './HelmetData';
 
 const SELF_CLOSING_TAGS: (keyof React.JSX.IntrinsicElements)[] = [
@@ -63,7 +65,7 @@ const generateTitleAsString = (
 };
 
 const generateTagsAsString = <
-  T extends 'baseTag' | 'linkTags' | 'metaTags' | 'noscriptTags' | 'scriptTags' | 'styleTags'
+  T extends 'baseTag' | 'linkTags' | 'metaTags' | 'noscriptTags' | 'scriptTags' | 'styleTags',
 >(
   type: keyof React.JSX.IntrinsicElements,
   tags: HelmetInternalState[T],
@@ -261,7 +263,7 @@ const mapStateOnServer = (newState: HelmetInternalState): HelmetServerState => {
     script: getMethodsForTag(TAG_NAMES.SCRIPT, scriptTags, encode),
     style: getMethodsForTag(TAG_NAMES.STYLE, styleTags, encode),
     title: getMethodsForTitleTag({ title, titleAttributes }, encode),
-    titleAttributes: {} as any,
+    titleAttributes: getMethodsForAttributeTag<'title'>(titleAttributes),
   };
 };
 

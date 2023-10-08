@@ -2,7 +2,7 @@ import { Component } from 'react';
 import shallowEqual from 'shallowequal';
 import { handleStateChangeOnClient } from './client';
 import mapStateOnServer from './server';
-import { reducePropsToState } from './utils';
+import { reducePropsToState } from './state';
 import Provider from './Provider';
 import { HelmetDataValue } from './HelmetData';
 import { HelmetProps } from './Helmet';
@@ -45,12 +45,9 @@ export default class Dispatcher extends Component<DispatcherProps> {
     }
   }
 
-  // componentWillMount will be deprecated
-  // for SSR, initialize on first render
-  // constructor is also unsafe in StrictMode
-  init() {
+  override render() {
     if (this.rendered) {
-      return;
+      return null;
     }
 
     this.rendered = true;
@@ -58,10 +55,6 @@ export default class Dispatcher extends Component<DispatcherProps> {
     const { helmetInstances } = this.props.context;
     helmetInstances.add(this);
     this.emitChange();
-  }
-
-  override render() {
-    this.init();
 
     return null;
   }
