@@ -29,22 +29,28 @@ export interface HelmetTags {
   styleTags: Array<HTMLStyleElement>;
 }
 
-export interface HelmetProps {
-  children?: ReactNode;
-  base?: JSX.IntrinsicElements['base'];
-  bodyAttributes?: BodyProps;
-  defer?: boolean;
-  encodeSpecialCharacters?: boolean;
-  helmetData?: HelmetData;
-  htmlAttributes?: HtmlProps;
-  onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
+export interface HelmetPropsTags {
+  base?: JSX.IntrinsicElements['base'][];
   link?: LinkProps[];
   meta?: MetaProps[];
   noscript?: Array<{ innerHTML: string }>;
   script?: Array<JSX.IntrinsicElements['script']>;
   style?: Array<{ cssText: string }>;
-  title?: string;
+}
+
+export interface HelmetPropsAttributes {
+  bodyAttributes?: BodyProps;
+  htmlAttributes?: HtmlProps;
   titleAttributes?: { itemprop?: string };
+}
+
+export interface HelmetProps extends HelmetPropsTags, HelmetPropsAttributes {
+  children?: ReactNode;
+  defer?: boolean;
+  encodeSpecialCharacters?: boolean;
+  helmetData?: HelmetData;
+  onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
+  title?: string;
   prioritizeSeoTags?: boolean;
 }
 
@@ -146,10 +152,10 @@ export class Helmet extends Component<HelmetComponentProps> {
     nestedChildren,
   }: {
     child: ReactElement;
-    newProps: any;
+    newProps: HelmetProps;
     newChildProps: Record<string, unknown>;
     nestedChildren: ReactNode;
-  }) {
+  }): HelmetProps {
     switch (child.type) {
       case TAG_NAMES.TITLE:
         return {
@@ -195,7 +201,7 @@ export class Helmet extends Component<HelmetComponentProps> {
   warnOnInvalidChildren(
     child: ReactElement,
     nestedChildren: any
-  ): child is ReactElement<any, typeof VALID_TAG_NAMES[number]> {
+  ): child is ReactElement<any, (typeof VALID_TAG_NAMES)[number]> {
     invariant(
       VALID_TAG_NAMES.some(name => child.type === name),
       typeof child.type === 'function'
@@ -242,6 +248,7 @@ export class Helmet extends Component<HelmetComponentProps> {
         this.warnOnInvalidChildren(child, nestedChildren);
 
         switch ((child as ReactElement).type) {
+          case TAG_NAMES.BASE:
           case TAG_NAMES.LINK:
           case TAG_NAMES.META:
           case TAG_NAMES.NOSCRIPT:

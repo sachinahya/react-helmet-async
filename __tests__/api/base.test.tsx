@@ -89,7 +89,11 @@ describe('base tag', () => {
     });
 
     it('clears the base tag if one is not specified', () => {
-      render(<Helmet base={{ href: 'http://mysite.com/' }} />);
+      render(
+        <Helmet>
+          <base href="http://mysite.com/" />
+        </Helmet>
+      );
       render(<Helmet />);
 
       const existingTags = document.head.querySelectorAll(`base[${HELMET_ATTRIBUTE}]`);
@@ -118,6 +122,28 @@ describe('base tag', () => {
             <base href="http://mysite.com" />
           </Helmet>
           <Helmet>
+            <base href="http://mysite.com/public" />
+          </Helmet>
+        </div>
+      );
+
+      const existingTags = document.head.querySelectorAll(`base[${HELMET_ATTRIBUTE}]`);
+      const firstTag = [].slice.call(existingTags)[0];
+
+      expect(existingTags).toBeDefined();
+      expect(existingTags).toHaveLength(1);
+
+      expect(firstTag).toBeInstanceOf(Element);
+      expect(firstTag.getAttribute).toBeDefined();
+      expect(firstTag.getAttribute('href')).toBe('http://mysite.com/public');
+      expect(firstTag.outerHTML).toMatchSnapshot();
+    });
+
+    it('sets base tag based on last declared component', () => {
+      render(
+        <div>
+          <Helmet>
+            <base href="http://mysite.com" />
             <base href="http://mysite.com/public" />
           </Helmet>
         </div>

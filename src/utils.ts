@@ -1,6 +1,6 @@
-import { UnionToIntersection } from 'type-fest';
+import { Except, UnionToIntersection } from 'type-fest';
 import { BodyProps, HelmetProps, HtmlProps } from './Helmet';
-import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES } from './constants';
+import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES, SEO_PRIORITY_TAGS } from './constants';
 
 const HELMET_PROPS = {
   DEFER: 'defer',
@@ -22,16 +22,8 @@ const getInnermostProperty = <T extends keyof HelmetProps>(
   return undefined;
 };
 
-const getTitleFromPropsList = (propsList: HelmetProps[]): string | undefined => {
-  return getInnermostProperty(propsList, TAG_NAMES.TITLE);
-};
-
-const getOnChangeClientState = (propsList: HelmetProps[]): HelmetProps['onChangeClientState'] => {
-  return getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE);
-};
-
 const getAttributesFromPropsList = <
-  T extends 'bodyAttributes' | 'htmlAttributes' | 'titleAttributes'
+  T extends 'bodyAttributes' | 'htmlAttributes' | 'titleAttributes',
 >(
   tagType: T,
   propsList: HelmetProps[]
@@ -51,8 +43,12 @@ const getBaseTagFromPropsList = (
   propsList: HelmetProps[]
 ): React.JSX.IntrinsicElements['base'][] => {
   for (const props of [...propsList].reverse()) {
-    if (props.base?.href) {
-      return [props.base];
+    if (props.base) {
+      for (const baseTag of [...props.base].reverse()) {
+        if (baseTag?.href) {
+          return [baseTag];
+        }
+      }
     }
   }
 
@@ -60,7 +56,9 @@ const getBaseTagFromPropsList = (
 };
 
 // eslint-disable-next-line no-console
-const warn = msg => console && typeof console.warn === 'function' && console.warn(msg);
+const warn = (msg: string) => console && typeof console.warn === 'function' && console.warn(msg);
+
+const getTags = <T extends object>(propsList) => {};
 
 const getTagsFromPropsList = <T extends 'link' | 'meta' | 'noscript' | 'script' | 'style'>(
   tagName: T,
@@ -71,47 +69,50 @@ const getTagsFromPropsList = <T extends 'link' | 'meta' | 'noscript' | 'script' 
   const approvedSeenTags = {};
 
   return propsList
-    .filter(props => {
-      if (Array.isArray(props[tagName])) {
+    .map(props => props[tagName])
+    .filter((item): item is NonNullable<HelmetProps[T]> => {
+      if (Array.isArray(item)) {
         return true;
       }
-      if (typeof props[tagName] !== 'undefined') {
+      if (typeof item !== 'undefined') {
         warn(
-          `Helmet: ${tagName} should be of type "Array". Instead found type "${typeof props[
+          `Helmet: ${tagName} should be of type "Array". Instead found type "${typeof item[
             tagName
           ]}"`
         );
       }
       return false;
     })
-    .map(props => props[tagName])
     .reverse()
     .reduce<HelmetProps[T][]>((approvedTags, instanceTags) => {
       const instanceSeenTags: Record<string, Record<string, boolean>> = {};
 
-      instanceTags!
-        .filter(tag => {
-          type TagAttributeKey = keyof UnionToIntersection<typeof tag>;
+      instanceTags
+        .filter((tag: UnionToIntersection<typeof instanceTags>[number]) => {
+          type TagAttributeKey = keyof typeof tag extends string ? keyof typeof tag : never;
 
           let primaryAttributeKey: TagAttributeKey | undefined;
 
           for (const attributeKey of Object.keys(tag) as TagAttributeKey[]) {
-            const lowerCaseAttributeKey = attributeKey; // .toLowerCase() as TagAttributeKey;
+            const linkTag = tag as React.JSX.IntrinsicElements['link'];
+            // const lowerCaseAttributeKey = attributeKey as keyof HelmetProps[T]; // .toLowerCase() as TagAttributeKey;
 
             // Special rule with link tags, since rel and href are both primary tags, rel takes priority
+
             if (
-              primaryAttributes.includes(lowerCaseAttributeKey) &&
+              primaryAttributes.includes(attributeKey) &&
               !(
                 primaryAttributeKey === TAG_PROPERTIES.REL &&
-                tag[primaryAttributeKey].toLowerCase() === 'canonical'
+                tag[primaryAttributeKey]?.toLowerCase() === 'canonical'
               ) &&
               !(
-                lowerCaseAttributeKey === TAG_PROPERTIES.REL &&
-                tag[lowerCaseAttributeKey].toLowerCase() === 'stylesheet'
+                attributeKey === TAG_PROPERTIES.REL &&
+                tag[attributeKey]?.toLowerCase() === 'stylesheet'
               )
             ) {
-              primaryAttributeKey = lowerCaseAttributeKey;
+              primaryAttributeKey = attributeKey;
             }
+
             // Special case for innerHTML which doesn't work lowercased
             if (
               primaryAttributes.includes(attributeKey) &&
@@ -119,7 +120,7 @@ const getTagsFromPropsList = <T extends 'link' | 'meta' | 'noscript' | 'script' 
                 attributeKey === TAG_PROPERTIES.CSS_TEXT ||
                 attributeKey === TAG_PROPERTIES.ITEM_PROP)
             ) {
-              primaryAttributeKey = attributeKey as TagAttributeKey;
+              primaryAttributeKey = attributeKey;
             }
           }
 
@@ -210,14 +211,14 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetInternalStat
       propsList
     ),
     noscriptTags: getTagsFromPropsList(TAG_NAMES.NOSCRIPT, [TAG_PROPERTIES.INNER_HTML], propsList),
-    onChangeClientState: getOnChangeClientState(propsList),
+    onChangeClientState: getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE),
     scriptTags: getTagsFromPropsList(
       TAG_NAMES.SCRIPT,
       [TAG_PROPERTIES.SRC, TAG_PROPERTIES.INNER_HTML],
       propsList
     ),
     styleTags: getTagsFromPropsList(TAG_NAMES.STYLE, [TAG_PROPERTIES.CSS_TEXT], propsList),
-    title: getTitleFromPropsList(propsList),
+    title: getInnermostProperty(propsList, TAG_NAMES.TITLE),
     titleAttributes: getAttributesFromPropsList(ATTRIBUTE_NAMES.TITLE, propsList),
     prioritizeSeoTags: getAnyTruthyFromPropsList(propsList, HELMET_PROPS.PRIORITIZE_SEO_TAGS),
   };
@@ -232,20 +233,23 @@ export function flattenArray(possibleArray: string | string[] | undefined): stri
 
 type SeoPriorityOptions = 'metaTags' | 'linkTags' | 'scriptTags';
 
-const checkIfPropsMatch = (props: HelmetInternalState[SeoPriorityOptions][number], toMatch) => {
-  const keys = Object.keys(props);
-  for (let i = 0; i < keys.length; i += 1) {
+const checkIfPropsMatch = (
+  props: HelmetInternalState[SeoPriorityOptions][number],
+  toMatch: (typeof SEO_PRIORITY_TAGS)[keyof typeof SEO_PRIORITY_TAGS]
+) => {
+  for (const [key, value] of Object.entries(props)) {
     // e.g. if rel exists in the list of allowed props [amphtml, alternate, etc]
-    if (toMatch[keys[i]] && toMatch[keys[i]].includes(props[keys[i]])) {
+    if (toMatch[key]?.includes(value)) {
       return true;
     }
   }
+
   return false;
 };
 
 export const prioritizer = <T extends HelmetInternalState[SeoPriorityOptions][number]>(
   elementsList: T[],
-  propsToMatch
+  propsToMatch: (typeof SEO_PRIORITY_TAGS)[keyof typeof SEO_PRIORITY_TAGS]
 ) => {
   return elementsList.reduce<{ priority: T[]; default: T[] }>(
     (acc, elementAttrs) => {
@@ -260,7 +264,7 @@ export const prioritizer = <T extends HelmetInternalState[SeoPriorityOptions][nu
   );
 };
 
-export const without = (obj, key) => {
+export const without = <T, K extends keyof T>(obj: T, key: K): Except<T, K> => {
   return {
     ...obj,
     [key]: undefined,

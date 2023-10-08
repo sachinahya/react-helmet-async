@@ -1,10 +1,15 @@
 import { AllHTMLAttributes } from 'react';
+import { HelmetProps } from './Helmet';
 
-export const ATTRIBUTE_NAMES = {
-  BODY: 'bodyAttributes',
-  HTML: 'htmlAttributes',
-  TITLE: 'titleAttributes',
-} as const;
+const tags = {
+  link: {
+    primaryKeys: ['rel', 'href'],
+  },
+} satisfies {
+  [K in keyof React.JSX.IntrinsicElements]?: {
+    primaryKeys: (keyof React.JSX.IntrinsicElements[K])[];
+  };
+};
 
 export const TAG_NAMES = {
   BASE: 'base',
@@ -17,7 +22,22 @@ export const TAG_NAMES = {
   SCRIPT: 'script',
   STYLE: 'style',
   TITLE: 'title',
-  FRAGMENT: 'Symbol(react.fragment)',
+  // FRAGMENT: 'Symbol(react.fragment)',
+} as const;
+
+export type Tag = (typeof TAG_NAMES)[keyof typeof TAG_NAMES];
+
+export type TagConfig = {
+  [K in Tag]: {
+    props: React.JSX.IntrinsicElements[K];
+    html: HTMLElementTagNameMap[K];
+  };
+};
+
+export const ATTRIBUTE_NAMES = {
+  BODY: 'bodyAttributes',
+  HTML: 'htmlAttributes',
+  TITLE: 'titleAttributes',
 } as const;
 
 export const SEO_PRIORITY_TAGS = {
