@@ -316,18 +316,16 @@ export class Helmet extends Component<HelmetComponentProps> {
   }
 
   override render() {
-    if (this.rendered) {
-      return null;
+    if (!this.rendered) {
+      this.rendered = true;
+
+      const { children, ...props } = this.props;
+      const mappedProps = mapChildrenToProps(children, { ...props });
+
+      const { helmetInstances } = this.context;
+      helmetInstances.add(this, mappedProps);
+      this.emitChange();
     }
-
-    this.rendered = true;
-
-    const { children, ...props } = this.props;
-    const mappedProps = mapChildrenToProps(children, { ...props });
-
-    const { helmetInstances } = this.context;
-    helmetInstances.add(this, mappedProps);
-    this.emitChange();
 
     return null;
   }
