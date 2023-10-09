@@ -76,9 +76,9 @@ describe('server', () => {
     const head = state.getOutput();
 
     expect(head.title).toBeDefined();
-    expect(head.title.toComponent).toBeDefined();
+    expect(head.title.toElements).toBeDefined();
 
-    const titleComponent = head.title.toComponent();
+    const titleComponent = head.title.toElements();
 
     expect(titleComponent).toEqual(isArray);
     expect(titleComponent).toHaveLength(1);
@@ -211,9 +211,9 @@ describe('server', () => {
     const head = state.getOutput();
 
     expect(head.title).toBeDefined();
-    expect(head.title.toComponent).toBeDefined();
+    expect(head.title.toElements).toBeDefined();
 
-    const titleComponent = head.title.toComponent();
+    const titleComponent = head.title.toElements();
 
     expect(titleComponent).toEqual(isArray);
     expect(titleComponent).toHaveLength(1);

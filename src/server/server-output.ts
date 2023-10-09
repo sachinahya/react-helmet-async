@@ -13,26 +13,28 @@ import { PrioritisedHelmetState, PriorityTags } from '../seo';
 
 export interface HelmetDatum {
   toString(): string;
-  toComponent(): ReactElement[];
 }
 
-export interface HelmetAttributeDatum<T extends HTMLAttributes<HTMLElement>> {
-  toString(): string;
-  toComponent(): T;
+export interface HelmetTagDatum extends HelmetDatum {
+  toElements(): ReactElement[];
+}
+
+export interface HelmetAttributeDatum<T extends HTMLAttributes<HTMLElement>> extends HelmetDatum {
+  toProps(): T;
 }
 
 export interface HelmetServerOutput {
-  base: HelmetDatum;
+  base: HelmetTagDatum;
   bodyAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLBodyElement>>;
   htmlAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLHtmlElement>>;
-  link: HelmetDatum;
-  meta: HelmetDatum;
-  noscript: HelmetDatum;
-  script: HelmetDatum;
-  style: HelmetDatum;
-  title: HelmetDatum;
+  link: HelmetTagDatum;
+  meta: HelmetTagDatum;
+  noscript: HelmetTagDatum;
+  script: HelmetTagDatum;
+  style: HelmetTagDatum;
+  title: HelmetTagDatum;
   titleAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLTitleElement>>;
-  priority: HelmetDatum;
+  priority: HelmetTagDatum;
 }
 
 const encodeSpecialCharactersString = (str: string, encode = true): string => {
@@ -146,13 +148,13 @@ const generateTagsAsReactComponent = (
   return elements;
 };
 
-const getMethodsForTag = (
+const getMethodsForTags = (
   type: keyof React.JSX.IntrinsicElements,
   tags: TagState[keyof TagState],
   encode: boolean | undefined
-): HelmetDatum => {
+): HelmetTagDatum => {
   return {
-    toComponent: () => generateTagsAsReactComponent(type, tags),
+    toElements: () => generateTagsAsReactComponent(type, tags),
     toString: () => generateTagsAsString(type, tags, encode),
   };
 };
@@ -161,16 +163,18 @@ const getMethodsForTitleTag = (
   title: HelmetState['title'],
   titleAttributes: HelmetState['titleAttributes'],
   encode: boolean | undefined
-): HelmetDatum => {
+): HelmetTagDatum => {
   return {
-    toComponent: () => generateTitleAsReactComponent(title, titleAttributes),
+    toElements: () => generateTitleAsReactComponent(title, titleAttributes),
     toString: () => generateTitleAsString(TAG_NAMES.TITLE, title, titleAttributes, encode),
   };
 };
 
-const getMethodsForAttributeTag = <T extends AttributeState[keyof AttributeState]>(tags: T) => {
+const getMethodsForAttributes = <T extends AttributeState[keyof AttributeState]>(
+  tags: T
+): HelmetAttributeDatum<T> => {
   return {
-    toComponent: () => tags,
+    toProps: () => tags,
     toString: () => generateElementAttributesAsString(tags),
   };
 };
@@ -178,10 +182,10 @@ const getMethodsForAttributeTag = <T extends AttributeState[keyof AttributeState
 const getPriorityMethods = (
   priority: PriorityTags | undefined,
   encodeSpecialCharacters: boolean
-): HelmetDatum => {
+): HelmetTagDatum => {
   if (!priority) {
     return {
-      toComponent: () => [],
+      toElements: () => [],
       toString: () => '',
     };
   }
@@ -189,17 +193,17 @@ const getPriorityMethods = (
   const { meta, link, script } = priority;
 
   return {
-    toComponent: () => [
+    toElements: () => [
       ...generateTagsAsReactComponent(TAG_NAMES.META, meta),
       ...generateTagsAsReactComponent(TAG_NAMES.LINK, link),
       ...generateTagsAsReactComponent(TAG_NAMES.SCRIPT, script),
     ],
     toString: () =>
-      `${getMethodsForTag(TAG_NAMES.META, meta, encodeSpecialCharacters)} ${getMethodsForTag(
+      `${getMethodsForTags(TAG_NAMES.META, meta, encodeSpecialCharacters)} ${getMethodsForTags(
         TAG_NAMES.LINK,
         link,
         encodeSpecialCharacters
-      )} ${getMethodsForTag(TAG_NAMES.SCRIPT, script, encodeSpecialCharacters)}`,
+      )} ${getMethodsForTags(TAG_NAMES.SCRIPT, script, encodeSpecialCharacters)}`,
   };
 };
 
@@ -221,15 +225,15 @@ export const getServerOutput = (state: PrioritisedHelmetState): HelmetServerOutp
 
   return {
     priority: getPriorityMethods(priority, encodeSpecialCharacters),
-    base: getMethodsForTag(TAG_NAMES.BASE, base, encodeSpecialCharacters),
-    bodyAttributes: getMethodsForAttributeTag(bodyAttributes),
-    htmlAttributes: getMethodsForAttributeTag(htmlAttributes),
-    link: getMethodsForTag(TAG_NAMES.LINK, link, encodeSpecialCharacters),
-    meta: getMethodsForTag(TAG_NAMES.META, meta, encodeSpecialCharacters),
-    noscript: getMethodsForTag(TAG_NAMES.NOSCRIPT, noscript, encodeSpecialCharacters),
-    script: getMethodsForTag(TAG_NAMES.SCRIPT, script, encodeSpecialCharacters),
-    style: getMethodsForTag(TAG_NAMES.STYLE, style, encodeSpecialCharacters),
+    base: getMethodsForTags(TAG_NAMES.BASE, base, encodeSpecialCharacters),
+    bodyAttributes: getMethodsForAttributes(bodyAttributes),
+    htmlAttributes: getMethodsForAttributes(htmlAttributes),
+    link: getMethodsForTags(TAG_NAMES.LINK, link, encodeSpecialCharacters),
+    meta: getMethodsForTags(TAG_NAMES.META, meta, encodeSpecialCharacters),
+    noscript: getMethodsForTags(TAG_NAMES.NOSCRIPT, noscript, encodeSpecialCharacters),
+    script: getMethodsForTags(TAG_NAMES.SCRIPT, script, encodeSpecialCharacters),
+    style: getMethodsForTags(TAG_NAMES.STYLE, style, encodeSpecialCharacters),
     title: getMethodsForTitleTag(title, titleAttributes, encodeSpecialCharacters),
-    titleAttributes: getMethodsForAttributeTag(titleAttributes),
+    titleAttributes: getMethodsForAttributes(titleAttributes),
   };
 };

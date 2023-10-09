@@ -19,7 +19,7 @@ describe('server', () => {
       );
 
       const { htmlAttributes } = state.getOutput();
-      const attrs = htmlAttributes.toComponent();
+      const attrs = htmlAttributes.toProps();
 
       expect(attrs).toBeDefined();
 

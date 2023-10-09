@@ -19,7 +19,7 @@ describe('server', () => {
       );
 
       const { bodyAttributes } = state.getOutput();
-      const attrs = bodyAttributes.toComponent();
+      const attrs = bodyAttributes.toProps();
 
       expect(attrs).toBeDefined();
 

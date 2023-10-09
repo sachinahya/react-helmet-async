@@ -26,9 +26,9 @@ describe('server', () => {
       const head = state.getOutput();
 
       expect(head.link).toBeDefined();
-      expect(head.link.toComponent).toBeDefined();
+      expect(head.link.toElements).toBeDefined();
 
-      const linkComponent = head.link.toComponent();
+      const linkComponent = head.link.toElements();
 
       expect(linkComponent).toEqual(isArray);
       expect(linkComponent).toHaveLength(2);

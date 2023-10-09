@@ -32,9 +32,9 @@ describe('server', () => {
       const head = state.getOutput();
 
       expect(head.meta).toBeDefined();
-      expect(head.meta.toComponent).toBeDefined();
+      expect(head.meta.toElements).toBeDefined();
 
-      const metaComponent = head.meta.toComponent();
+      const metaComponent = head.meta.toElements();
 
       expect(metaComponent).toEqual(isArray);
       expect(metaComponent).toHaveLength(5);

@@ -33,24 +33,24 @@ describe('server', () => {
     expect(head.htmlAttributes).toBeDefined();
     expect(head.htmlAttributes.toString).toBeDefined();
     expect(head.htmlAttributes.toString()).toBe('');
-    expect(head.htmlAttributes.toComponent).toBeDefined();
-    expect(head.htmlAttributes.toComponent()).toEqual({});
+    expect(head.htmlAttributes.toProps).toBeDefined();
+    expect(head.htmlAttributes.toProps()).toEqual({});
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(`"<title data-rh=\\"true\\"></title>"`);
-    expect(head.title.toComponent).toBeDefined();
+    expect(head.title.toElements).toBeDefined();
 
-    const markup = ReactServer.renderToStaticMarkup(head.title.toComponent());
+    const markup = ReactServer.renderToStaticMarkup(head.title.toElements());
 
     expect(markup).toMatchInlineSnapshot(`"<title data-rh=\\"true\\"></title>"`);
 
     expect(head.base).toBeDefined();
     expect(head.base.toString).toBeDefined();
     expect(head.base.toString()).toBe('');
-    expect(head.base.toComponent).toBeDefined();
+    expect(head.base.toElements).toBeDefined();
 
-    const baseComponent = head.base.toComponent();
+    const baseComponent = head.base.toElements();
 
     expect(baseComponent).toEqual(isArray);
     expect(baseComponent).toHaveLength(0);
@@ -58,9 +58,9 @@ describe('server', () => {
     expect(head.meta).toBeDefined();
     expect(head.meta.toString).toBeDefined();
     expect(head.meta.toString()).toBe('');
-    expect(head.meta.toComponent).toBeDefined();
+    expect(head.meta.toElements).toBeDefined();
 
-    const metaComponent = head.meta.toComponent();
+    const metaComponent = head.meta.toElements();
 
     expect(metaComponent).toEqual(isArray);
     expect(metaComponent).toHaveLength(0);
@@ -68,9 +68,9 @@ describe('server', () => {
     expect(head.link).toBeDefined();
     expect(head.link.toString).toBeDefined();
     expect(head.link.toString()).toBe('');
-    expect(head.link.toComponent).toBeDefined();
+    expect(head.link.toElements).toBeDefined();
 
-    const linkComponent = head.link.toComponent();
+    const linkComponent = head.link.toElements();
 
     expect(linkComponent).toEqual(isArray);
     expect(linkComponent).toHaveLength(0);
@@ -78,9 +78,9 @@ describe('server', () => {
     expect(head.script).toBeDefined();
     expect(head.script.toString).toBeDefined();
     expect(head.script.toString()).toBe('');
-    expect(head.script.toComponent).toBeDefined();
+    expect(head.script.toElements).toBeDefined();
 
-    const scriptComponent = head.script.toComponent();
+    const scriptComponent = head.script.toElements();
 
     expect(scriptComponent).toEqual(isArray);
     expect(scriptComponent).toHaveLength(0);
@@ -88,9 +88,9 @@ describe('server', () => {
     expect(head.noscript).toBeDefined();
     expect(head.noscript.toString).toBeDefined();
     expect(head.noscript.toString()).toBe('');
-    expect(head.noscript.toComponent).toBeDefined();
+    expect(head.noscript.toElements).toBeDefined();
 
-    const noscriptComponent = head.noscript.toComponent();
+    const noscriptComponent = head.noscript.toElements();
 
     expect(noscriptComponent).toEqual(isArray);
     expect(noscriptComponent).toHaveLength(0);
@@ -98,9 +98,9 @@ describe('server', () => {
     expect(head.style).toBeDefined();
     expect(head.style.toString).toBeDefined();
     expect(head.style.toString()).toBe('');
-    expect(head.style.toComponent).toBeDefined();
+    expect(head.style.toElements).toBeDefined();
 
-    const styleComponent = head.style.toComponent();
+    const styleComponent = head.style.toElements();
 
     expect(styleComponent).toEqual(isArray);
     expect(styleComponent).toHaveLength(0);
@@ -108,7 +108,7 @@ describe('server', () => {
     expect(head.priority).toBeDefined();
     expect(head.priority.toString).toBeDefined();
     expect(head.priority.toString()).toBe('');
-    expect(head.priority.toComponent).toBeDefined();
+    expect(head.priority.toElements).toBeDefined();
   });
 
   it('does not render undefined attribute values', () => {
