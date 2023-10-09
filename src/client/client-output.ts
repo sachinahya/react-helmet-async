@@ -1,8 +1,7 @@
-import { HelmetProps, HelmetTags } from './Helmet';
-import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from './constants';
-import { flattenArray } from './utils';
-import { HelmetState, reducePropsToState } from './state';
-import { HelmetStateClient } from './HelmetState';
+import { HelmetTags } from '../Helmet';
+import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from '../constants';
+import { flattenArray } from '../utils';
+import { HelmetState } from '../state';
 
 const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: any[]) => {
   const headElement = document.head;
@@ -159,7 +158,7 @@ const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
 // eslint-disable-next-line
 let _helmetCallback: number | null = null;
 
-const handleStateChangeOnClient = (newState: HelmetState): void => {
+export const handleStateChangeOnClient = (newState: HelmetState): void => {
   if (_helmetCallback) {
     cancelAnimationFrame(_helmetCallback);
   }
@@ -175,24 +174,3 @@ const handleStateChangeOnClient = (newState: HelmetState): void => {
     _helmetCallback = null;
   }
 };
-
-export class HelmetClientState implements HelmetStateClient {
-  #instances = new Map<unknown, HelmetProps>();
-
-  update(instance: unknown, props: HelmetProps): void {
-    this.#instances.set(instance, props);
-    this.#emit();
-  }
-
-  remove(instance: unknown): void {
-    this.#instances.delete(instance);
-    this.#emit();
-  }
-
-  #emit(): void {
-    const propsList = [...this.#instances.values()];
-    const state = reducePropsToState(propsList);
-
-    handleStateChangeOnClient(state);
-  }
-}

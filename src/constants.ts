@@ -1,12 +1,12 @@
 import { AllHTMLAttributes } from 'react';
-import { HelmetProps, HelmetPropsAttributes } from './Helmet';
+import { AttributeState, HelmetState } from './state';
 
 export const HELMET_PROPS = {
   DEFER: 'defer',
   ENCODE_SPECIAL_CHARACTERS: 'encodeSpecialCharacters',
   ON_CHANGE_CLIENT_STATE: 'onChangeClientState',
   PRIORITIZE_SEO_TAGS: 'prioritizeSeoTags',
-} as const satisfies Record<string, keyof HelmetProps>;
+} as const satisfies Record<string, keyof HelmetState>;
 
 export const TAG_NAMES = {
   BASE: 'base',
@@ -31,7 +31,7 @@ export const ATTRIBUTE_NAMES = {
   BODY: 'bodyAttributes',
   HTML: 'htmlAttributes',
   TITLE: 'titleAttributes',
-} as const satisfies Record<string, keyof HelmetPropsAttributes>;
+} as const satisfies Record<string, keyof AttributeState>;
 
 export type SeoPriority = Record<string, string | readonly string[]>;
 

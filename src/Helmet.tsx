@@ -10,6 +10,7 @@ import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
 import { Context } from './Provider';
 import { NON_SELF_CLOSING_TAGS, TAG_NAMES, VALID_TAG_NAMES } from './constants';
+import { HelmetProps, OptionsProps } from './state';
 
 export interface HelmetTags {
   baseTag: Array<any>;
@@ -20,41 +21,9 @@ export interface HelmetTags {
   styleTags: Array<HTMLStyleElement>;
 }
 
-export interface HelmetPropsTags {
-  base?: React.JSX.IntrinsicElements['base'][];
-  link?: React.JSX.IntrinsicElements['link'][];
-  meta?: React.JSX.IntrinsicElements['meta'][];
-  noscript?: React.JSX.IntrinsicElements['noscript'][];
-  script?: React.JSX.IntrinsicElements['script'][];
-  style?: React.JSX.IntrinsicElements['style'][];
-}
-
-export interface HelmetPropsAttributes {
-  bodyAttributes?: React.JSX.IntrinsicElements['body'];
-  htmlAttributes?: React.JSX.IntrinsicElements['html'];
-  titleAttributes?: React.JSX.IntrinsicElements['title'];
-}
-
-export interface HelmetPropsTitle {
-  title?: string | string[];
-}
-
-export interface HelmetOptions {
-  defer?: boolean;
-  encodeSpecialCharacters?: boolean;
-  onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
-  prioritizeSeoTags?: boolean;
-}
-
-export interface HelmetComponentProps extends HelmetOptions {
+export interface HelmetComponentProps extends OptionsProps {
   children?: ReactNode;
 }
-
-export interface HelmetProps
-  extends HelmetPropsTags,
-    HelmetPropsAttributes,
-    HelmetPropsTitle,
-    HelmetComponentProps {}
 
 function flattenArrayTypeChildren(
   arrayTypeChildren: Record<string, unknown[]>,

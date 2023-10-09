@@ -1,10 +1,10 @@
 import React, { FC, ReactNode } from 'react';
-import { HelmetStateClient } from './HelmetState';
+import { HelmetCache } from './cache';
 
-export const Context = React.createContext<HelmetStateClient>({} as HelmetStateClient);
+export const Context = React.createContext<HelmetCache>({} as HelmetCache);
 
 export interface HelmetProviderProps {
-  state: HelmetStateClient;
+  state: HelmetCache;
   children?: ReactNode;
 }
 

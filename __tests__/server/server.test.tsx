@@ -2,7 +2,7 @@ import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
 import { renderServer } from './utils';
-import { HelmetServerState } from '../../src/server';
+import { HelmetServerCache } from '../../src/server/server-cache';
 
 Helmet.defaultProps.defer = false;
 
@@ -12,7 +12,7 @@ const isArray = {
 
 describe('server', () => {
   it('provides initial values if no state is found', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(<div />, state);
     const head = state.getOutput();
@@ -24,7 +24,7 @@ describe('server', () => {
   });
 
   it('rewind() provides a fallback object for empty Helmet state', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(<div />, state);
 
@@ -112,7 +112,7 @@ describe('server', () => {
   });
 
   it('does not render undefined attribute values', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>
@@ -129,7 +129,7 @@ describe('server', () => {
   });
 
   it('prioritizes SEO tags when asked to', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet prioritizeSeoTags>
@@ -156,7 +156,7 @@ describe('server', () => {
   });
 
   it('does not prioritize SEO unless asked to', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>

@@ -2,7 +2,7 @@ import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
 import { renderServer } from './utils';
-import { HelmetServerState } from '../../src/server';
+import { HelmetServerCache } from '../../src/server/server-cache';
 
 Helmet.defaultProps.defer = false;
 
@@ -12,7 +12,7 @@ const isArray = {
 
 describe('server', () => {
   it('provides initial values if no state is found', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     const NullComponent = () => null;
     renderServer(<NullComponent />, state);
@@ -24,7 +24,7 @@ describe('server', () => {
   });
 
   it('encodes special characters in title', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>
@@ -43,7 +43,7 @@ describe('server', () => {
   });
 
   it('opts out of string encoding', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     /* eslint-disable react/no-unescaped-entities */
     renderServer(
@@ -64,7 +64,7 @@ describe('server', () => {
   });
 
   it('renders title with itemprop name as React component', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>
@@ -95,7 +95,7 @@ describe('server', () => {
   });
 
   it('renders title tag as string', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>
@@ -114,7 +114,7 @@ describe('server', () => {
   });
 
   it('renders title and allows children containing expressions', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     const someValue = 'Some Great Title';
 
@@ -135,7 +135,7 @@ describe('server', () => {
   });
 
   it('renders title with itemprop name as string', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>
@@ -157,7 +157,7 @@ describe('server', () => {
   });
 
   it('does not encode all characters with HTML character entity equivalents', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     const chineseTitle = '膣膗 鍆錌雔';
 
@@ -180,7 +180,7 @@ describe('server', () => {
   });
 
   it('does html encode title', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>
@@ -199,7 +199,7 @@ describe('server', () => {
   });
 
   it('renders title as React component', () => {
-    const state = new HelmetServerState();
+    const state = new HelmetServerCache();
 
     renderServer(
       <Helmet>

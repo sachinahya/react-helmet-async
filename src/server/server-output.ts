@@ -4,15 +4,12 @@ import {
   HELMET_ATTRIBUTE,
   TAG_NAMES,
   TAG_PROPERTIES,
-  SEO_PRIORITY_TAGS,
   getHtmlAttributeName,
   NON_SELF_CLOSING_TAGS,
-} from './constants';
-import { flattenArray } from './utils';
-import { HelmetState, reducePropsToState } from './state';
-import { SeoPriorityOptions, prioritizer } from './seo';
-import { HelmetProps, HelmetPropsAttributes, HelmetPropsTags } from './Helmet';
-import { HelmetStateClient } from './HelmetState';
+} from '../constants';
+import { flattenArray } from '../utils';
+import { AttributeState, HelmetState, TagState } from '../state';
+import { PrioritisedHelmetState, PriorityTags } from '../seo';
 
 export interface HelmetDatum {
   toString(): string;
@@ -36,11 +33,6 @@ export interface HelmetServerOutput {
   title: HelmetDatum;
   titleAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLTitleElement>>;
   priority: HelmetDatum;
-}
-
-export interface FilledContext {
-  helmet: HelmetServerOutput;
-  state: HelmetState;
 }
 
 const encodeSpecialCharactersString = (str: string, encode = true): string => {
@@ -90,9 +82,9 @@ const generateTitleAsString = (
   }>${flattenedTitle}</${type}>`;
 };
 
-const generateTagsAsString = <T extends keyof HelmetPropsTags>(
+const generateTagsAsString = <T extends keyof TagState>(
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetState[T],
+  tags: TagState[T],
   encode: boolean | undefined
 ): string => {
   let str = '';
@@ -127,7 +119,7 @@ const generateTitleAsReactComponent = (
 
 const generateTagsAsReactComponent = (
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetState[keyof HelmetPropsTags]
+  tags: TagState[keyof TagState]
 ): ReactElement[] => {
   const elements: ReactElement[] = [];
 
@@ -156,7 +148,7 @@ const generateTagsAsReactComponent = (
 
 const getMethodsForTag = (
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetState[keyof HelmetPropsTags],
+  tags: TagState[keyof TagState],
   encode: boolean | undefined
 ): HelmetDatum => {
   return {
@@ -176,84 +168,59 @@ const getMethodsForTitleTag = (
   };
 };
 
-const getMethodsForAttributeTag = <
-  T extends Required<HelmetPropsAttributes>[keyof HelmetPropsAttributes],
->(
-  tags: T
-) => {
+const getMethodsForAttributeTag = <T extends AttributeState[keyof AttributeState]>(tags: T) => {
   return {
     toComponent: () => tags,
     toString: () => generateElementAttributesAsString(tags),
   };
 };
 
-const getPriorityMethods = ({
-  meta,
-  link,
-  script,
-  encodeSpecialCharacters,
-}: HelmetState): Pick<HelmetState, SeoPriorityOptions> & {
-  priorityMethods: HelmetDatum;
-} => {
-  const metaP = prioritizer(meta, SEO_PRIORITY_TAGS.meta);
-  const linkP = prioritizer(link, SEO_PRIORITY_TAGS.link);
-  const scriptP = prioritizer(script, SEO_PRIORITY_TAGS.script);
+const getPriorityMethods = (
+  priority: PriorityTags | undefined,
+  encodeSpecialCharacters: boolean
+): HelmetDatum => {
+  if (!priority) {
+    return {
+      toComponent: () => [],
+      toString: () => '',
+    };
+  }
 
-  // need to have toComponent() and toString()
-  const priorityMethods = {
-    toComponent: () => [
-      ...generateTagsAsReactComponent(TAG_NAMES.META, metaP.priority),
-      ...generateTagsAsReactComponent(TAG_NAMES.LINK, linkP.priority),
-      ...generateTagsAsReactComponent(TAG_NAMES.SCRIPT, scriptP.priority),
-    ],
-    toString: () =>
-      // generate all the tags as strings and concatenate them
-      `${getMethodsForTag(
-        TAG_NAMES.META,
-        metaP.priority,
-        encodeSpecialCharacters
-      )} ${getMethodsForTag(
-        TAG_NAMES.LINK,
-        linkP.priority,
-        encodeSpecialCharacters
-      )} ${getMethodsForTag(TAG_NAMES.SCRIPT, scriptP.priority, encodeSpecialCharacters)}`,
-  };
+  const { meta, link, script } = priority;
 
   return {
-    priorityMethods,
-    meta: metaP.default,
-    link: linkP.default,
-    script: scriptP.default,
+    toComponent: () => [
+      ...generateTagsAsReactComponent(TAG_NAMES.META, meta),
+      ...generateTagsAsReactComponent(TAG_NAMES.LINK, link),
+      ...generateTagsAsReactComponent(TAG_NAMES.SCRIPT, script),
+    ],
+    toString: () =>
+      `${getMethodsForTag(TAG_NAMES.META, meta, encodeSpecialCharacters)} ${getMethodsForTag(
+        TAG_NAMES.LINK,
+        link,
+        encodeSpecialCharacters
+      )} ${getMethodsForTag(TAG_NAMES.SCRIPT, script, encodeSpecialCharacters)}`,
   };
 };
 
-const mapStateOnServer = (newState: HelmetState): HelmetServerOutput => {
+export const getServerOutput = (state: PrioritisedHelmetState): HelmetServerOutput => {
   const {
     base,
     bodyAttributes,
     encodeSpecialCharacters,
     htmlAttributes,
+    link,
+    meta,
     noscript,
+    script,
     style,
     title,
     titleAttributes,
-    prioritizeSeoTags,
-  } = newState;
-  let { link, meta, script } = newState;
-
-  let priorityMethods: HelmetDatum = {
-    toComponent: () => [],
-    toString: () => {
-      return '';
-    },
-  };
-
-  if (prioritizeSeoTags) {
-    ({ priorityMethods, link, meta, script } = getPriorityMethods(newState));
-  }
+    priority,
+  } = state;
 
   return {
-    priority: priorityMethods,
+    priority: getPriorityMethods(priority, encodeSpecialCharacters),
     base: getMethodsForTag(TAG_NAMES.BASE, base, encodeSpecialCharacters),
     bodyAttributes: getMethodsForAttributeTag(bodyAttributes),
     htmlAttributes: getMethodsForAttributeTag(htmlAttributes),
@@ -266,21 +233,3 @@ const mapStateOnServer = (newState: HelmetState): HelmetServerOutput => {
     titleAttributes: getMethodsForAttributeTag(titleAttributes),
   };
 };
-
-export class HelmetServerState implements HelmetStateClient {
-  #instances = new Map<unknown, HelmetProps>();
-
-  getOutput(): HelmetServerOutput {
-    const propsList = [...this.#instances.values()];
-    const state = reducePropsToState(propsList);
-    return mapStateOnServer(state);
-  }
-
-  update(instance: unknown, props: HelmetProps): void {
-    this.#instances.set(instance, props);
-  }
-
-  remove(instance: unknown): void {
-    this.#instances.delete(instance);
-  }
-}

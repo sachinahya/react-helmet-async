@@ -2,7 +2,7 @@ import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
 import { renderServer } from './utils';
-import { HelmetServerState } from '../../src/server';
+import { HelmetServerCache } from '../../src/server/server-cache';
 
 Helmet.defaultProps.defer = false;
 
@@ -13,7 +13,7 @@ const isArray = {
 describe('server', () => {
   describe('Declarative API', () => {
     it('renders script tags as React components', () => {
-      const state = new HelmetServerState();
+      const state = new HelmetServerCache();
 
       renderServer(
         <Helmet>
@@ -45,7 +45,7 @@ describe('server', () => {
     });
 
     it('renders script tags as string', () => {
-      const state = new HelmetServerState();
+      const state = new HelmetServerCache();
 
       renderServer(
         <Helmet>

@@ -1,2 +1,2 @@
 export { Helmet } from './Helmet';
-export { type HelmetStateClient as HelmetState } from './HelmetState';
+export { type HelmetCache as HelmetState } from './cache';

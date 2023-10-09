@@ -1,12 +1,43 @@
 import { LinkHTMLAttributes } from 'react';
-import {
-  HelmetOptions,
-  HelmetProps,
-  HelmetPropsAttributes,
-  HelmetPropsTags,
-  HelmetPropsTitle,
-} from './Helmet';
 import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES, HELMET_PROPS } from './constants';
+
+export interface TagState {
+  base: React.JSX.IntrinsicElements['base'][];
+  link: React.JSX.IntrinsicElements['link'][];
+  meta: React.JSX.IntrinsicElements['meta'][];
+  noscript: React.JSX.IntrinsicElements['noscript'][];
+  script: React.JSX.IntrinsicElements['script'][];
+  style: React.JSX.IntrinsicElements['style'][];
+}
+
+export interface AttributeState {
+  bodyAttributes: React.JSX.IntrinsicElements['body'];
+  htmlAttributes: React.JSX.IntrinsicElements['html'];
+  titleAttributes: React.JSX.IntrinsicElements['title'];
+}
+
+export interface TitleState {
+  title: string | string[];
+}
+
+export interface OptionsState {
+  defer: boolean;
+  encodeSpecialCharacters: boolean;
+  onChangeClientState: (newState: any, addedTags: any, removedTags: any) => void;
+  prioritizeSeoTags: boolean;
+}
+
+export interface HelmetState extends TagState, AttributeState, TitleState, OptionsState {}
+
+export interface TagProps extends Partial<TagState> {}
+
+export interface AttributeProps extends Partial<AttributeState> {}
+
+export interface TitleProps extends Partial<TitleState> {}
+
+export interface OptionsProps extends Partial<OptionsState> {}
+
+export interface HelmetProps extends Partial<HelmetState> {}
 
 const getInnermostProperty = <T extends keyof HelmetProps>(
   propsList: HelmetProps[],
@@ -21,11 +52,11 @@ const getInnermostProperty = <T extends keyof HelmetProps>(
   return undefined;
 };
 
-const getAttributesFromPropsList = <T extends keyof HelmetPropsAttributes>(
-  propsList: HelmetProps[],
+const getAttributesFromPropsList = <T extends keyof AttributeProps>(
+  propsList: AttributeProps[],
   tagType: T
-): NonNullable<HelmetProps[T]> => {
-  const mergedAttributes: NonNullable<HelmetProps[T]> = {};
+): AttributeState[T] => {
+  const mergedAttributes: AttributeState[T] = {};
 
   for (const props of propsList) {
     if (props[tagType] != null) {
@@ -36,31 +67,15 @@ const getAttributesFromPropsList = <T extends keyof HelmetPropsAttributes>(
   return mergedAttributes;
 };
 
-const getBaseTagFromPropsList = (
-  propsList: HelmetProps[]
-): React.JSX.IntrinsicElements['base'][] => {
-  for (const props of [...propsList].reverse()) {
-    if (props.base) {
-      for (const baseTag of [...props.base].reverse()) {
-        if (baseTag?.href) {
-          return [baseTag];
-        }
-      }
-    }
-  }
-
-  return [];
-};
-
-const getTagsFromPropsList = <T extends keyof HelmetPropsTags>(
-  propsList: HelmetPropsTags[],
+const getTagsFromPropsList = <T extends keyof TagProps>(
+  propsList: TagProps[],
   tagName: T,
   primaryAttributes: string[]
-): NonNullable<HelmetPropsTags[T]> => {
-  // // Calculate list of tags, giving priority innermost component (end of the propslist)
+): TagState[T] => {
+  // Calculate list of tags, giving priority innermost component (end of the propslist)
   const approvedSeenTags: Record<string, Record<string, boolean>> = {};
 
-  const approvedTags: NonNullable<HelmetPropsTags[T]> = [];
+  const approvedTags: TagState[T] = [];
 
   for (const props of [...propsList].reverse()) {
     const instanceTags = props[tagName];
@@ -141,11 +156,19 @@ const getAnyTruthyFromPropsList = (
   return propsList.some(props => props[checkedTag]);
 };
 
-export interface HelmetState
-  extends Required<HelmetPropsTags>,
-    Required<HelmetPropsAttributes>,
-    Required<HelmetPropsTitle>,
-    Required<HelmetOptions> {}
+const getBaseTagFromPropsList = (propsList: TagProps[]): TagState['base'] => {
+  for (const props of [...propsList].reverse()) {
+    if (props.base) {
+      for (const baseTag of [...props.base].reverse()) {
+        if (baseTag?.href) {
+          return [baseTag];
+        }
+      }
+    }
+  }
+
+  return [];
+};
 
 export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
   return {
