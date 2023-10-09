@@ -1,14 +1,16 @@
-import React, { StrictMode } from 'react';
+import React, { ReactNode, StrictMode } from 'react';
 import ReactDOM from 'react-dom';
-import Provider from '../../src/Provider';
+import { HelmetProvider } from '../../src/Provider';
+import { HelmetClientState } from '../../src/client';
 
-// eslint-disable-next-line
-export const render = node => {
+const state = new HelmetClientState();
+
+export const renderClient = (node: ReactNode): void => {
   const mount = document.getElementById('mount');
 
   ReactDOM.render(
     <StrictMode>
-      <Provider>{node}</Provider>
+      <HelmetProvider state={state}>{node}</HelmetProvider>
     </StrictMode>,
     mount
   );

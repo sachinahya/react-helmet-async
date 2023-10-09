@@ -1,14 +1,14 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
 describe('base tag', () => {
   describe('Declarative API', () => {
     it('updates base tag', () => {
-      render(
+      renderClient(
         <Helmet>
           <base href="http://mysite.com/" />
         </Helmet>
@@ -26,12 +26,12 @@ describe('base tag', () => {
     });
 
     it('clears the base tag if one is not specified', () => {
-      render(
+      renderClient(
         <Helmet>
           <base href="http://mysite.com/" />
         </Helmet>
       );
-      render(<Helmet />);
+      renderClient(<Helmet />);
 
       const existingTags = document.head.querySelectorAll(`base[${HELMET_ATTRIBUTE}]`);
 
@@ -40,7 +40,7 @@ describe('base tag', () => {
     });
 
     it("tags without 'href' are not accepted", () => {
-      render(
+      renderClient(
         <Helmet>
           {/* eslint-disable-next-line react/no-unknown-property */}
           <base property="won't work" />
@@ -54,7 +54,7 @@ describe('base tag', () => {
     });
 
     it('sets base tag based on deepest nested component', () => {
-      render(
+      renderClient(
         <div>
           <Helmet>
             <base href="http://mysite.com" />
@@ -80,7 +80,7 @@ describe('base tag', () => {
     });
 
     it('sets base tag based on last declared component', () => {
-      render(
+      renderClient(
         <div>
           <Helmet>
             <base href="http://mysite.com" />
@@ -104,7 +104,7 @@ describe('base tag', () => {
     });
 
     it('does not render tag when primary attribute is null', () => {
-      render(
+      renderClient(
         <Helmet>
           <base href={undefined} />
         </Helmet>

@@ -1,4 +1,5 @@
-import React, { Attributes, HTMLAttributes, ReactElement } from 'react';
+import React, { AllHTMLAttributes, Attributes, HTMLAttributes, ReactElement } from 'react';
+import { Entries } from 'type-fest';
 import {
   HELMET_ATTRIBUTE,
   TAG_NAMES,
@@ -7,9 +8,39 @@ import {
   getHtmlAttributeName,
 } from './constants';
 import { flattenArray } from './utils';
-import { HelmetInternalState } from './state';
-import { prioritizer } from './seo';
-import { HelmetDatum, HelmetServerState } from './HelmetData';
+import { HelmetState, reducePropsToState } from './state';
+import { SeoPriorityOptions, prioritizer } from './seo';
+import { HelmetProps, HelmetPropsAttributes, HelmetPropsTags } from './Helmet';
+import { HelmetStateClient } from './HelmetState';
+
+export interface HelmetDatum {
+  toString(): string;
+  toComponent(): ReactElement[];
+}
+
+export interface HelmetAttributeDatum<T extends HTMLAttributes<HTMLElement>> {
+  toString(): string;
+  toComponent(): T;
+}
+
+export interface HelmetServerOutput {
+  base: HelmetDatum;
+  bodyAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLBodyElement>>;
+  htmlAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLHtmlElement>>;
+  link: HelmetDatum;
+  meta: HelmetDatum;
+  noscript: HelmetDatum;
+  script: HelmetDatum;
+  style: HelmetDatum;
+  title: HelmetDatum;
+  titleAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLTitleElement>>;
+  priority: HelmetDatum;
+}
+
+export interface FilledContext {
+  helmet: HelmetServerOutput;
+  state: HelmetState;
+}
 
 const SELF_CLOSING_TAGS: (keyof React.JSX.IntrinsicElements)[] = [
   TAG_NAMES.NOSCRIPT,
@@ -17,7 +48,7 @@ const SELF_CLOSING_TAGS: (keyof React.JSX.IntrinsicElements)[] = [
   TAG_NAMES.STYLE,
 ];
 
-const encodeSpecialCharacters = (str: string, encode = true): string => {
+const encodeSpecialCharactersString = (str: string, encode = true): string => {
   if (encode === false) {
     return String(str);
   }
@@ -42,7 +73,7 @@ const generateElementAttributesAsString = (attributes: object, encode?: boolean)
 
     const attr =
       value != null
-        ? `${htmlAttributeName}="${encodeSpecialCharacters(value, encode)}"`
+        ? `${htmlAttributeName}="${encodeSpecialCharactersString(value, encode)}"`
         : `${htmlAttributeName}`;
     str += str ? ` ${attr}` : attr;
   }
@@ -52,23 +83,21 @@ const generateElementAttributesAsString = (attributes: object, encode?: boolean)
 
 const generateTitleAsString = (
   type: typeof TAG_NAMES.TITLE,
-  title: HelmetInternalState['title'],
-  attributes: HelmetInternalState['titleAttributes'],
+  title: HelmetState['title'],
+  attributes: HelmetState['titleAttributes'],
   encode: boolean | undefined
 ) => {
   const attributeString = generateElementAttributesAsString(attributes);
-  const flattenedTitle = encodeSpecialCharacters(flattenArray(title) || '', encode);
+  const flattenedTitle = encodeSpecialCharactersString(flattenArray(title) || '', encode);
 
   return `<${type} ${HELMET_ATTRIBUTE}="true"${
     attributeString ? ` ${attributeString}` : ''
   }>${flattenedTitle}</${type}>`;
 };
 
-const generateTagsAsString = <
-  T extends 'baseTag' | 'linkTags' | 'metaTags' | 'noscriptTags' | 'scriptTags' | 'styleTags',
->(
+const generateTagsAsString = <T extends keyof HelmetPropsTags>(
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetInternalState[T],
+  tags: HelmetState[T],
   encode: boolean | undefined
 ): string => {
   let str = '';
@@ -87,54 +116,33 @@ const generateTagsAsString = <
   return str;
 };
 
-const convertElementAttributesToReactProps = <T extends keyof React.JSX.IntrinsicElements>(
-  attributes: HelmetInternalState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes'],
-  initProps?: React.JSX.IntrinsicElements[T]
-): React.JSX.IntrinsicElements[T] => {
-  const props: React.JSX.IntrinsicElements[T] = {};
-
-  for (const [key, value] of Object.entries(attributes)) {
-    props[key] = value;
-  }
-
-  return { ...initProps, ...props };
-};
-
 const generateTitleAsReactComponent = (
-  title: string | undefined,
-  attributes: HelmetInternalState['titleAttributes']
+  title: string | string[] | undefined,
+  attributes: HelmetState['titleAttributes']
 ): ReactElement[] => {
   // assigning into an array to define toString function on it
-  const initProps = {
-    key: title,
+  const props = {
+    key: String(title),
     [HELMET_ATTRIBUTE]: true,
+    ...attributes,
   };
-  const props = convertElementAttributesToReactProps<'title'>(attributes, initProps);
 
   return [React.createElement(TAG_NAMES.TITLE, props, title)];
 };
 
 const generateTagsAsReactComponent = (
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetInternalState[
-    | 'baseTag'
-    | 'linkTags'
-    | 'metaTags'
-    | 'noscriptTags'
-    | 'scriptTags'
-    | 'styleTags']
+  tags: HelmetState[keyof HelmetPropsTags]
 ): ReactElement[] => {
   const elements: ReactElement[] = [];
 
   for (const [i, tag] of tags.entries()) {
-    const mappedTag: Attributes & {
-      [HELMET_ATTRIBUTE]: boolean;
-    } & HTMLAttributes<HTMLElement> = {
+    const mappedTag: { dangerouslySetInnerHTML?: unknown } & Record<string, unknown> = {
       key: i,
       [HELMET_ATTRIBUTE]: true,
     };
 
-    for (const [attribute, value] of Object.entries(tag)) {
+    for (const [attribute, value] of Object.entries(tag) as Entries<typeof tag>) {
       const mappedAttribute = attribute;
 
       if (
@@ -156,13 +164,7 @@ const generateTagsAsReactComponent = (
 
 const getMethodsForTag = (
   type: keyof React.JSX.IntrinsicElements,
-  tags: HelmetInternalState[
-    | 'baseTag'
-    | 'linkTags'
-    | 'metaTags'
-    | 'noscriptTags'
-    | 'scriptTags'
-    | 'styleTags'],
+  tags: HelmetState[keyof HelmetPropsTags],
   encode: boolean | undefined
 ): HelmetDatum => {
   return {
@@ -172,74 +174,80 @@ const getMethodsForTag = (
 };
 
 const getMethodsForTitleTag = (
-  tags: Pick<HelmetInternalState, 'title' | 'titleAttributes'>,
+  title: HelmetState['title'],
+  titleAttributes: HelmetState['titleAttributes'],
   encode: boolean | undefined
 ): HelmetDatum => {
   return {
-    toComponent: () => generateTitleAsReactComponent(tags.title, tags.titleAttributes, encode),
-    toString: () =>
-      generateTitleAsString(TAG_NAMES.TITLE, tags.title, tags.titleAttributes, encode),
+    toComponent: () => generateTitleAsReactComponent(title, titleAttributes),
+    toString: () => generateTitleAsString(TAG_NAMES.TITLE, title, titleAttributes, encode),
   };
 };
 
-const getMethodsForAttributeTag = <T extends keyof React.JSX.IntrinsicElements>(
-  tags: HelmetInternalState['bodyAttributes' | 'htmlAttributes']
+const getMethodsForAttributeTag = <
+  T extends Required<HelmetPropsAttributes>[keyof HelmetPropsAttributes],
+>(
+  tags: T
 ) => {
   return {
-    toComponent: () => convertElementAttributesToReactProps<T>(tags),
+    toComponent: () => tags,
     toString: () => generateElementAttributesAsString(tags),
   };
 };
 
 const getPriorityMethods = ({
-  metaTags,
-  linkTags,
-  scriptTags,
-  encode,
-}: HelmetInternalState): Pick<HelmetInternalState, 'metaTags' | 'linkTags' | 'scriptTags'> & {
+  meta,
+  link,
+  script,
+  encodeSpecialCharacters,
+}: HelmetState): Pick<HelmetState, SeoPriorityOptions> & {
   priorityMethods: HelmetDatum;
 } => {
-  const meta = prioritizer(metaTags, SEO_PRIORITY_TAGS.meta);
-  const link = prioritizer(linkTags, SEO_PRIORITY_TAGS.link);
-  const script = prioritizer(scriptTags, SEO_PRIORITY_TAGS.script);
+  const metaP = prioritizer(meta, SEO_PRIORITY_TAGS.meta);
+  const linkP = prioritizer(link, SEO_PRIORITY_TAGS.link);
+  const scriptP = prioritizer(script, SEO_PRIORITY_TAGS.script);
 
   // need to have toComponent() and toString()
   const priorityMethods = {
     toComponent: () => [
-      ...generateTagsAsReactComponent(TAG_NAMES.META, meta.priority),
-      ...generateTagsAsReactComponent(TAG_NAMES.LINK, link.priority),
-      ...generateTagsAsReactComponent(TAG_NAMES.SCRIPT, script.priority),
+      ...generateTagsAsReactComponent(TAG_NAMES.META, metaP.priority),
+      ...generateTagsAsReactComponent(TAG_NAMES.LINK, linkP.priority),
+      ...generateTagsAsReactComponent(TAG_NAMES.SCRIPT, scriptP.priority),
     ],
     toString: () =>
       // generate all the tags as strings and concatenate them
-      `${getMethodsForTag(TAG_NAMES.META, meta.priority, encode)} ${getMethodsForTag(
+      `${getMethodsForTag(
+        TAG_NAMES.META,
+        metaP.priority,
+        encodeSpecialCharacters
+      )} ${getMethodsForTag(
         TAG_NAMES.LINK,
-        link.priority,
-        encode
-      )} ${getMethodsForTag(TAG_NAMES.SCRIPT, script.priority, encode)}`,
+        linkP.priority,
+        encodeSpecialCharacters
+      )} ${getMethodsForTag(TAG_NAMES.SCRIPT, scriptP.priority, encodeSpecialCharacters)}`,
   };
 
   return {
     priorityMethods,
-    metaTags: meta.default,
-    linkTags: link.default,
-    scriptTags: script.default,
+    meta: metaP.default,
+    link: linkP.default,
+    script: scriptP.default,
   };
 };
 
-const mapStateOnServer = (newState: HelmetInternalState): HelmetServerState => {
+const mapStateOnServer = (newState: HelmetState): HelmetServerOutput => {
   const {
-    baseTag,
+    base,
     bodyAttributes,
-    encode,
+    encodeSpecialCharacters,
     htmlAttributes,
-    noscriptTags,
-    styleTags,
+    noscript,
+    style,
     title,
     titleAttributes,
     prioritizeSeoTags,
   } = newState;
-  let { linkTags, metaTags, scriptTags } = newState;
+  let { link, meta, script } = newState;
 
   let priorityMethods: HelmetDatum = {
     toComponent: () => [],
@@ -249,22 +257,38 @@ const mapStateOnServer = (newState: HelmetInternalState): HelmetServerState => {
   };
 
   if (prioritizeSeoTags) {
-    ({ priorityMethods, linkTags, metaTags, scriptTags } = getPriorityMethods(newState));
+    ({ priorityMethods, link, meta, script } = getPriorityMethods(newState));
   }
 
   return {
     priority: priorityMethods,
-    base: getMethodsForTag(TAG_NAMES.BASE, baseTag, encode),
-    bodyAttributes: getMethodsForAttributeTag<'body'>(bodyAttributes),
-    htmlAttributes: getMethodsForAttributeTag<'html'>(htmlAttributes),
-    link: getMethodsForTag(TAG_NAMES.LINK, linkTags, encode),
-    meta: getMethodsForTag(TAG_NAMES.META, metaTags, encode),
-    noscript: getMethodsForTag(TAG_NAMES.NOSCRIPT, noscriptTags, encode),
-    script: getMethodsForTag(TAG_NAMES.SCRIPT, scriptTags, encode),
-    style: getMethodsForTag(TAG_NAMES.STYLE, styleTags, encode),
-    title: getMethodsForTitleTag({ title, titleAttributes }, encode),
-    titleAttributes: getMethodsForAttributeTag<'title'>(titleAttributes),
+    base: getMethodsForTag(TAG_NAMES.BASE, base, encodeSpecialCharacters),
+    bodyAttributes: getMethodsForAttributeTag(bodyAttributes),
+    htmlAttributes: getMethodsForAttributeTag(htmlAttributes),
+    link: getMethodsForTag(TAG_NAMES.LINK, link, encodeSpecialCharacters),
+    meta: getMethodsForTag(TAG_NAMES.META, meta, encodeSpecialCharacters),
+    noscript: getMethodsForTag(TAG_NAMES.NOSCRIPT, noscript, encodeSpecialCharacters),
+    script: getMethodsForTag(TAG_NAMES.SCRIPT, script, encodeSpecialCharacters),
+    style: getMethodsForTag(TAG_NAMES.STYLE, style, encodeSpecialCharacters),
+    title: getMethodsForTitleTag(title, titleAttributes, encodeSpecialCharacters),
+    titleAttributes: getMethodsForAttributeTag(titleAttributes),
   };
 };
 
-export default mapStateOnServer;
+export class HelmetServerState implements HelmetStateClient {
+  #instances = new Map<unknown, HelmetProps>();
+
+  getOutput(): HelmetServerOutput {
+    const propsList = [...this.#instances.values()];
+    const state = reducePropsToState(propsList);
+    return mapStateOnServer(state);
+  }
+
+  update(instance: unknown, props: HelmetProps): void {
+    this.#instances.set(instance, props);
+  }
+
+  remove(instance: unknown): void {
+    this.#instances.delete(instance);
+  }
+}

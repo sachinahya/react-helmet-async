@@ -1,26 +1,9 @@
-import React, { Component, ContextType, ReactElement, ReactNode, isValidElement } from 'react';
+import React, { Component, ReactElement, ReactNode, isValidElement } from 'react';
 import { isFragment } from 'react-is';
 import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
-import Provider, { Context } from './Provider';
-import HelmetData from './HelmetData';
-import { without } from './utils';
+import { Context } from './Provider';
 import { TAG_NAMES, VALID_TAG_NAMES } from './constants';
-import { reducePropsToState } from './state';
-import { handleStateChangeOnClient } from './client';
-import mapStateOnServer from './server';
-
-export interface OtherElementAttributes {
-  [key: string]: string | number | boolean | null | undefined;
-}
-
-export type BodyProps = JSX.IntrinsicElements['body'] & OtherElementAttributes;
-
-export type HtmlProps = JSX.IntrinsicElements['html'] & OtherElementAttributes;
-
-export type LinkProps = JSX.IntrinsicElements['link'];
-
-export type MetaProps = JSX.IntrinsicElements['meta'];
 
 export interface HelmetTags {
   baseTag: Array<any>;
@@ -32,36 +15,40 @@ export interface HelmetTags {
 }
 
 export interface HelmetPropsTags {
-  base?: JSX.IntrinsicElements['base'][];
-  link?: LinkProps[];
-  meta?: MetaProps[];
-  noscript?: Array<{ innerHTML: string }>;
-  script?: Array<JSX.IntrinsicElements['script']>;
-  style?: Array<{ cssText: string }>;
+  base?: React.JSX.IntrinsicElements['base'][];
+  link?: React.JSX.IntrinsicElements['link'][];
+  meta?: React.JSX.IntrinsicElements['meta'][];
+  noscript?: { innerHTML: string }[];
+  script?: React.JSX.IntrinsicElements['script'][];
+  style?: { cssText: string }[];
 }
 
 export interface HelmetPropsAttributes {
-  bodyAttributes?: BodyProps;
-  htmlAttributes?: HtmlProps;
-  titleAttributes?: { itemprop?: string };
+  bodyAttributes?: React.JSX.IntrinsicElements['body'];
+  htmlAttributes?: React.JSX.IntrinsicElements['html'];
+  titleAttributes?: React.JSX.IntrinsicElements['title'];
 }
 
 export interface HelmetPropsTitle {
   title?: string | string[];
 }
 
-export interface HelmetProps extends HelmetPropsTags, HelmetPropsAttributes, HelmetPropsTitle {
-  children?: ReactNode;
+export interface HelmetOptions {
   defer?: boolean;
   encodeSpecialCharacters?: boolean;
   onChangeClientState?: (newState: any, addedTags: HelmetTags, removedTags: HelmetTags) => void;
   prioritizeSeoTags?: boolean;
 }
 
-export type HelmetComponentProps = Pick<
-  HelmetProps,
-  'children' | 'defer' | 'encodeSpecialCharacters' | 'onChangeClientState' | 'prioritizeSeoTags'
->;
+export interface HelmetComponentProps extends HelmetOptions {
+  children?: ReactNode;
+}
+
+export interface HelmetProps
+  extends HelmetPropsTags,
+    HelmetPropsAttributes,
+    HelmetPropsTitle,
+    HelmetComponentProps {}
 
 function mapNestedChildrenToProps(child: ReactElement, nestedChildren: ReactNode) {
   if (!nestedChildren) {
@@ -201,8 +188,11 @@ function warnOnInvalidChildren(
   return true;
 }
 
-function mapChildrenToProps(children: ReactNode, newProps: HelmetProps): HelmetProps {
+function mapChildrenToProps(componentProps: HelmetComponentProps): HelmetProps {
   let arrayTypeChildren = {};
+
+  // eslint-disable-next-line prefer-const
+  let { children, ...newProps } = componentProps;
 
   React.Children.forEach(children, child => {
     if (!child || !isValidElement(child) || !child.props) {
@@ -214,7 +204,7 @@ function mapChildrenToProps(children: ReactNode, newProps: HelmetProps): HelmetP
     const newChildProps = childProps;
 
     if (isFragment(child)) {
-      newProps = mapChildrenToProps(nestedChildren, newProps);
+      newProps = mapChildrenToProps({ children: nestedChildren, ...newProps });
     } else {
       warnOnInvalidChildren(child, nestedChildren);
 
@@ -249,24 +239,7 @@ function mapChildrenToProps(children: ReactNode, newProps: HelmetProps): HelmetP
 }
 
 export class Helmet extends Component<HelmetComponentProps> {
-  /**
-   * @param {Object} base: {"target": "_blank", "href": "http://mysite.com/"}
-   * @param {Object} bodyAttributes: {"className": "root"}
-   * @param {Boolean} defer: true
-   * @param {Boolean} encodeSpecialCharacters: true
-   * @param {Object} htmlAttributes: {"lang": "en", "amp": undefined}
-   * @param {Array} link: [{"rel": "canonical", "href": "http://mysite.com/example"}]
-   * @param {Array} meta: [{"name": "description", "content": "Test description"}]
-   * @param {Array} noscript: [{"innerHTML": "<img src='http://mysite.com/js/test.js'"}]
-   * @param {Function} onChangeClientState: "(newState) => console.log(newState)"
-   * @param {Array} script: [{"type": "text/javascript", "src": "http://mysite.com/js/test.js"}, "innerHTML": "console.log()"]
-   * @param {Array} style: [{"type": "text/css", "cssText": "div { display: block; color: blue; }"}]
-   * @param {String} title: "Title"
-   * @param {Object} titleAttributes: {"itemprop": "name"}
-   * @param {Boolean} prioritizeSeoTags: false
-   */
-
-  static defaultProps = {
+  static defaultProps: Partial<HelmetComponentProps> = {
     defer: true,
     encodeSpecialCharacters: true,
     prioritizeSeoTags: false,
@@ -274,57 +247,30 @@ export class Helmet extends Component<HelmetComponentProps> {
 
   static override contextType = Context;
 
-  static displayName = 'Helmet';
-
   // @ts-expect-error
   override context!: React.ContextType<typeof Context>;
 
   rendered = false;
 
-  override shouldComponentUpdate(nextProps: HelmetProps) {
+  override shouldComponentUpdate(nextProps: HelmetComponentProps) {
     return !fastCompare(this.props, nextProps);
   }
 
   override componentDidUpdate() {
-    const { children, ...props } = this.props;
-    const mappedProps = mapChildrenToProps(children, { ...props });
-
-    this.context.helmetInstances.update(this, mappedProps);
-
-    this.emitChange();
+    const mappedProps = mapChildrenToProps(this.props);
+    this.context.update(this, mappedProps);
   }
 
   override componentWillUnmount() {
-    const { helmetInstances } = this.context;
-    helmetInstances.remove(this);
-    this.emitChange();
-  }
-
-  emitChange() {
-    const { helmetInstances, setHelmet } = this.context;
-    const propsList = helmetInstances.get().map(instance => {
-      // const { ...props } = instance[1];
-      return instance[1];
-    });
-    const state = reducePropsToState(propsList);
-    if (Provider.canUseDOM) {
-      handleStateChangeOnClient(state);
-    } else if (mapStateOnServer) {
-      const serverState = mapStateOnServer(state);
-      setHelmet(serverState);
-    }
+    this.context.remove(this);
   }
 
   override render() {
     if (!this.rendered) {
       this.rendered = true;
 
-      const { children, ...props } = this.props;
-      const mappedProps = mapChildrenToProps(children, { ...props });
-
-      const { helmetInstances } = this.context;
-      helmetInstances.add(this, mappedProps);
-      this.emitChange();
+      const mappedProps = mapChildrenToProps(this.props);
+      this.context.update(this, mappedProps);
     }
 
     return null;

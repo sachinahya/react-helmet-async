@@ -1,18 +1,10 @@
 import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
-import Provider from '../../src/Provider';
-import { render } from './utils';
+import { renderServer } from './utils';
+import { HelmetServerState } from '../../src/server';
 
 Helmet.defaultProps.defer = false;
-
-beforeAll(() => {
-  Provider.canUseDOM = false;
-});
-
-afterAll(() => {
-  Provider.canUseDOM = true;
-});
 
 const isArray = {
   asymmetricMatch: actual => Array.isArray(actual),
@@ -21,16 +13,17 @@ const isArray = {
 describe('server', () => {
   describe('Declarative API', () => {
     it('renders style tags as React components', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <style type="text/css">{`body {background-color: green;}`}</style>
           <style type="text/css">{`p {font-size: 12px;}`}</style>
         </Helmet>,
-        context
+        state
       );
 
-      const head = context.helmet;
+      const head = state.getOutput();
 
       expect(head.style).toBeDefined();
       expect(head.style.toComponent).toBeDefined();
@@ -48,16 +41,17 @@ describe('server', () => {
     });
 
     it('renders style tags as string', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <style type="text/css">{`body {background-color: green;}`}</style>
           <style type="text/css">{`p {font-size: 12px;}`}</style>
         </Helmet>,
-        context
+        state
       );
 
-      const head = context.helmet;
+      const head = state.getOutput();
 
       expect(head.style).toBeDefined();
       expect(head.style.toString).toBeDefined();

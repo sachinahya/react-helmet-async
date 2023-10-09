@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from '../src';
 import { HELMET_ATTRIBUTE } from '../src/constants';
-import { render } from './api/utils';
+import { renderClient } from './api/utils';
 
 Helmet.defaultProps.defer = false;
 
@@ -11,7 +11,7 @@ describe('misc', () => {
     global.console.error = jest.fn();
 
     const renderInvalid = () => {
-      render(
+      renderClient(
         <Helmet>
           <title>Test Title</title>
           <Helmet>
@@ -27,7 +27,7 @@ describe('misc', () => {
   });
 
   it('encodes special characters', () => {
-    render(
+    renderClient(
       <Helmet>
         <meta name="description" content={'This is "quoted" text and & and \'.'} />
       </Helmet>
@@ -50,7 +50,7 @@ describe('misc', () => {
 
   it('does not change the DOM if it recevies identical props', () => {
     const onChange = jest.fn();
-    render(
+    renderClient(
       <Helmet onChangeClientState={onChange}>
         <meta name="description" content="Test description" />
         <title>Test Title</title>
@@ -58,7 +58,7 @@ describe('misc', () => {
     );
 
     // Re-rendering will pass new props to an already mounted Helmet
-    render(
+    renderClient(
       <Helmet onChangeClientState={onChange}>
         <meta name="description" content="Test description" />
         <title>Test Title</title>
@@ -72,7 +72,7 @@ describe('misc', () => {
     document.head.innerHTML = `<script ${HELMET_ATTRIBUTE}="true" src="http://localhost/test.js" type="text/javascript" />`;
 
     const onChange = jest.fn();
-    render(
+    renderClient(
       <Helmet onChangeClientState={onChange}>
         <script src="http://localhost/test.js" type="text/javascript" />
       </Helmet>
@@ -90,7 +90,7 @@ describe('misc', () => {
     const onChange = jest.fn();
     let addedTags;
     let removedTags;
-    render(
+    renderClient(
       <Helmet onChangeClientState={onChange}>
         <link href="http://localhost/style.css" rel="stylesheet" type="text/css" />
         <meta name="description" content="Test description" />
@@ -117,7 +117,7 @@ describe('misc', () => {
     expect(removedTags).toEqual({});
 
     // Re-rendering will pass new props to an already mounted Helmet
-    render(
+    renderClient(
       <Helmet onChangeClientState={onChange}>
         <link href="http://localhost/style.css" rel="stylesheet" type="text/css" />
         <link href="http://localhost/style2.css" rel="stylesheet" type="text/css" />
@@ -155,7 +155,7 @@ describe('misc', () => {
     global.console.error = jest.fn();
 
     const renderInvalid = () => {
-      render(
+      renderClient(
         <Helmet>
           <title>Test Title</title>
           <div>
@@ -175,7 +175,7 @@ describe('misc', () => {
     global.console.error = jest.fn();
 
     const renderInvalid = () => {
-      render(
+      renderClient(
         <Helmet>
           <title>Test Title</title>
           <div data-custom-attribute />
@@ -194,7 +194,7 @@ describe('misc', () => {
 
     const renderInvalid = () => {
       /* eslint-disable react/void-dom-elements-no-children */
-      render(
+      renderClient(
         <Helmet>
           <title>Test Title</title>
           <link href="http://localhost/helmet" rel="canonical">
@@ -215,7 +215,7 @@ describe('misc', () => {
     global.console.error = jest.fn();
 
     const renderInvalid = () => {
-      render(
+      renderClient(
         <Helmet>
           <title>Test Title</title>
           <script>
@@ -233,7 +233,7 @@ describe('misc', () => {
   it('handles undefined children', () => {
     const charSet = undefined;
 
-    render(
+    renderClient(
       <Helmet>
         {charSet && <meta charSet={charSet} />}
         <title>Test Title</title>
@@ -244,7 +244,7 @@ describe('misc', () => {
   });
 
   it('recognizes valid tags regardless of attribute ordering', () => {
-    render(
+    renderClient(
       <Helmet>
         <meta content="Test Description" name="description" />
       </Helmet>

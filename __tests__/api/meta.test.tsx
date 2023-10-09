@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 /* eslint-disable no-console */
 
@@ -9,7 +9,7 @@ Helmet.defaultProps.defer = false;
 
 describe('meta tags', () => {
   it('updates meta tags', () => {
-    render(
+    renderClient(
       <Helmet>
         <meta charSet="utf-8" />
         <meta name="description" content="Test description" />
@@ -38,7 +38,7 @@ describe('meta tags', () => {
   });
 
   it('clears all meta tags if none are specified', () => {
-    render(
+    renderClient(
       <Helmet>
         <meta name="description" content="Test description" />
       </Helmet>
@@ -46,7 +46,7 @@ describe('meta tags', () => {
 
     expect(document.head.querySelectorAll(`meta[${HELMET_ATTRIBUTE}]`)).toHaveLength(1);
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     const existingTags = document.head.querySelectorAll(`meta[${HELMET_ATTRIBUTE}]`);
 
@@ -55,7 +55,7 @@ describe('meta tags', () => {
   });
 
   it("tags without 'name', 'http-equiv', 'property', 'charset', or 'itemprop' are not accepted", () => {
-    render(
+    renderClient(
       <Helmet>
         <meta id="won't work" />
       </Helmet>
@@ -68,7 +68,7 @@ describe('meta tags', () => {
   });
 
   it('sets meta tags based on deepest nested component', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <meta charSet="utf-8" />
@@ -115,7 +115,7 @@ describe('meta tags', () => {
   });
 
   it('allows duplicate meta tags if specified in the same component', () => {
-    render(
+    renderClient(
       <Helmet>
         <meta name="description" content="Test description" />
         <meta name="description" content="Duplicate description" />
@@ -147,7 +147,7 @@ describe('meta tags', () => {
   });
 
   it('overrides duplicate meta tags with single meta tag in a nested component', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <meta name="description" content="Test description" />
@@ -175,7 +175,7 @@ describe('meta tags', () => {
   });
 
   it('overrides single meta tag with duplicate meta tags in a nested component', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <meta name="description" content="Test description" />
@@ -212,7 +212,7 @@ describe('meta tags', () => {
   });
 
   it('does not render tag when primary attribute is null', () => {
-    render(
+    renderClient(
       <Helmet>
         <meta name={undefined} content="Inner duplicate description" />
       </Helmet>

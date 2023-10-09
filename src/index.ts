@@ -1,3 +1,2 @@
 export { Helmet } from './Helmet';
-export { default as HelmetData } from './HelmetData';
-export { default as HelmetProvider } from './Provider';
+export { type HelmetStateClient as HelmetState } from './HelmetState';

@@ -1,19 +1,10 @@
-// @ts-nocheck
 import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
-import Provider from '../../src/Provider';
-import { render } from './utils';
+import { renderServer } from './utils';
+import { HelmetServerState } from '../../src/server';
 
 Helmet.defaultProps.defer = false;
-
-beforeAll(() => {
-  Provider.canUseDOM = false;
-});
-
-afterAll(() => {
-  Provider.canUseDOM = true;
-});
 
 const isArray = {
   asymmetricMatch: actual => Array.isArray(actual),
@@ -21,10 +12,11 @@ const isArray = {
 
 describe('server', () => {
   it('provides initial values if no state is found', () => {
-    const context = {};
+    const state = new HelmetServerState();
+
     const NullComponent = () => null;
-    render(<NullComponent />, context);
-    const head = context.helmet;
+    renderServer(<NullComponent />, state);
+    const head = state.getOutput();
 
     expect(head.meta).toBeDefined();
     expect(head.meta.toString).toBeDefined();
@@ -32,15 +24,16 @@ describe('server', () => {
   });
 
   it('encodes special characters in title', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <title>{`Dangerous <script> include`}</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -50,17 +43,18 @@ describe('server', () => {
   });
 
   it('opts out of string encoding', () => {
-    const context = {};
+    const state = new HelmetServerState();
+
     /* eslint-disable react/no-unescaped-entities */
-    render(
+    renderServer(
       <Helmet encodeSpecialCharacters={false}>
         <title>This is text and & and '.</title>
       </Helmet>,
-      context
+      state
     );
     /* eslint-enable react/no-unescaped-entities */
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -70,15 +64,16 @@ describe('server', () => {
   });
 
   it('renders title with itemprop name as React component', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <title itemProp="name">Title with Itemprop</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toComponent).toBeDefined();
@@ -100,15 +95,16 @@ describe('server', () => {
   });
 
   it('renders title tag as string', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <title>{'Dangerous <script> include'}</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -118,17 +114,18 @@ describe('server', () => {
   });
 
   it('renders title and allows children containing expressions', () => {
-    const context = {};
+    const state = new HelmetServerState();
+
     const someValue = 'Some Great Title';
 
-    render(
+    renderServer(
       <Helmet>
         <title>Title: {someValue}</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -138,15 +135,16 @@ describe('server', () => {
   });
 
   it('renders title with itemprop name as string', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <title itemProp="name">Title with Itemprop</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -159,19 +157,20 @@ describe('server', () => {
   });
 
   it('does not encode all characters with HTML character entity equivalents', () => {
-    const context = {};
+    const state = new HelmetServerState();
+
     const chineseTitle = '膣膗 鍆錌雔';
 
-    render(
+    renderServer(
       <div>
         <Helmet>
           <title>{chineseTitle}</title>
         </Helmet>
       </div>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -181,15 +180,16 @@ describe('server', () => {
   });
 
   it('does html encode title', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <title>{`Dangerous <script> include`}</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
@@ -199,15 +199,16 @@ describe('server', () => {
   });
 
   it('renders title as React component', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <title>{`Dangerous <script> include`}</title>
       </Helmet>,
-      context
+      state
     );
 
-    const head = context.helmet;
+    const head = state.getOutput();
 
     expect(head.title).toBeDefined();
     expect(head.title.toComponent).toBeDefined();

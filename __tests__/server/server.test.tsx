@@ -1,18 +1,10 @@
 import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
-import Provider from '../../src/Provider';
-import { render } from './utils';
+import { renderServer } from './utils';
+import { HelmetServerState } from '../../src/server';
 
 Helmet.defaultProps.defer = false;
-
-beforeAll(() => {
-  Provider.canUseDOM = false;
-});
-
-afterAll(() => {
-  Provider.canUseDOM = true;
-});
 
 const isArray = {
   asymmetricMatch: actual => Array.isArray(actual),
@@ -20,9 +12,10 @@ const isArray = {
 
 describe('server', () => {
   it('provides initial values if no state is found', () => {
-    const context = {};
-    render(<div />, context);
-    const head = context.helmet;
+    const state = new HelmetServerState();
+
+    renderServer(<div />, state);
+    const head = state.getOutput();
 
     expect(head.meta).toBeDefined();
     expect(head.meta.toString).toBeDefined();
@@ -31,10 +24,11 @@ describe('server', () => {
   });
 
   it('rewind() provides a fallback object for empty Helmet state', () => {
-    const context = {};
-    render(<div />, context);
+    const state = new HelmetServerState();
 
-    const head = context.helmet;
+    renderServer(<div />, state);
+
+    const head = state.getOutput();
 
     expect(head.htmlAttributes).toBeDefined();
     expect(head.htmlAttributes.toString).toBeDefined();
@@ -118,15 +112,16 @@ describe('server', () => {
   });
 
   it('does not render undefined attribute values', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <script src="foo.js" async={undefined} />
       </Helmet>,
-      context
+      state
     );
 
-    const { script } = context.helmet;
+    const { script } = state.getOutput();
 
     expect(script.toString()).toMatchInlineSnapshot(
       `"<script data-rh=\\"true\\" src=\\"foo.js\\" async></script>"`
@@ -134,54 +129,54 @@ describe('server', () => {
   });
 
   it('prioritizes SEO tags when asked to', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet prioritizeSeoTags>
         <link rel="notImportant" href="https://www.chipotle.com" />
         <link rel="canonical" href="https://www.tacobell.com" />
         <meta property="og:title" content="A very important title" />
       </Helmet>,
-      context
+      state
     );
 
-    expect(context.helmet.priority.toString()).toContain(
+    expect(state.getOutput().priority.toString()).toContain(
       'rel="canonical" href="https://www.tacobell.com"'
     );
-    expect(context.helmet.link.toString()).not.toContain(
+    expect(state.getOutput().link.toString()).not.toContain(
       'rel="canonical" href="https://www.tacobell.com"'
     );
 
-    expect(context.helmet.priority.toString()).toContain(
+    expect(state.getOutput().priority.toString()).toContain(
       'property="og:title" content="A very important title"'
     );
-    expect(context.helmet.meta.toString()).not.toContain(
+    expect(state.getOutput().meta.toString()).not.toContain(
       'property="og:title" content="A very important title"'
     );
   });
 
   it('does not prioritize SEO unless asked to', () => {
-    const context = {};
-    render(
+    const state = new HelmetServerState();
+
+    renderServer(
       <Helmet>
         <link rel="notImportant" href="https://www.chipotle.com" />
         <link rel="canonical" href="https://www.tacobell.com" />
         <meta property="og:title" content="A very important title" />
       </Helmet>,
-      context
+      state
     );
 
-    expect(context.helmet.priority.toString()).not.toContain(
-      'rel="canonical" href="https://www.tacobell.com"'
-    );
-    expect(context.helmet.link.toString()).toContain(
-      'rel="canonical" href="https://www.tacobell.com"'
-    );
+    const head = state.getOutput();
 
-    expect(context.helmet.priority.toString()).not.toContain(
+    expect(head.priority.toString()).not.toContain(
+      'rel="canonical" href="https://www.tacobell.com"'
+    );
+    expect(head.link.toString()).toContain('rel="canonical" href="https://www.tacobell.com"');
+
+    expect(head.priority.toString()).not.toContain(
       'property="og:title" content="A very important title"'
     );
-    expect(context.helmet.meta.toString()).toContain(
-      'property="og:title" content="A very important title"'
-    );
+    expect(head.meta.toString()).toContain('property="og:title" content="A very important title"');
   });
 });

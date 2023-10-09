@@ -1,10 +1,10 @@
 import { SeoPriority } from './constants';
-import { HelmetInternalState } from './state';
+import { HelmetState } from './state';
 
-type SeoPriorityOptions = 'metaTags' | 'linkTags' | 'scriptTags';
+export type SeoPriorityOptions = 'meta' | 'link' | 'script';
 
 const checkIfPropsMatch = (
-  props: HelmetInternalState[SeoPriorityOptions][number],
+  props: HelmetState[SeoPriorityOptions][number],
   toMatch: SeoPriority
 ) => {
   for (const [key, value] of Object.entries(props)) {
@@ -17,7 +17,7 @@ const checkIfPropsMatch = (
   return false;
 };
 
-export const prioritizer = <T extends HelmetInternalState[SeoPriorityOptions][number]>(
+export const prioritizer = <T extends HelmetState[SeoPriorityOptions][number]>(
   elementsList: T[],
   propsToMatch: SeoPriority
 ): { priority: T[]; default: T[] } => {

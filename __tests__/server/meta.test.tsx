@@ -1,28 +1,21 @@
 import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
-import Provider from '../../src/Provider';
-import { render } from './utils';
+import { renderServer } from './utils';
+import { HelmetServerState } from '../../src/server';
 
 Helmet.defaultProps.defer = false;
 
-beforeAll(() => {
-  Provider.canUseDOM = false;
-});
-
-afterAll(() => {
-  Provider.canUseDOM = true;
-});
-
 const isArray = {
-  asymmetricMatch: actual => Array.isArray(actual),
+  asymmetricMatch: (actual: any) => Array.isArray(actual),
 };
 
 describe('server', () => {
   describe('Declarative API', () => {
     it('renders meta tags as React components', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <meta charSet="utf-8" />
           <meta
@@ -33,10 +26,10 @@ describe('server', () => {
           <meta property="og:type" content="article" />
           <meta itemProp="name" content="Test name itemprop" />
         </Helmet>,
-        context
+        state
       );
 
-      const head = context.helmet;
+      const head = state.getOutput();
 
       expect(head.meta).toBeDefined();
       expect(head.meta.toComponent).toBeDefined();
@@ -58,8 +51,9 @@ describe('server', () => {
     });
 
     it('renders meta tags as string', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <meta charSet="utf-8" />
           <meta
@@ -70,10 +64,10 @@ describe('server', () => {
           <meta property="og:type" content="article" />
           <meta itemProp="name" content="Test name itemprop" />
         </Helmet>,
-        context
+        state
       );
 
-      const head = context.helmet;
+      const head = state.getOutput();
 
       expect(head.meta).toBeDefined();
       expect(head.meta.toString).toBeDefined();

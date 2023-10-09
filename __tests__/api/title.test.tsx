@@ -1,12 +1,12 @@
 import React from 'react';
 import { Helmet } from '../../src';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
 describe('title', () => {
   it('updates page title', () => {
-    render(
+    renderClient(
       <Helmet>
         <title>Test Title</title>
       </Helmet>
@@ -18,7 +18,7 @@ describe('title', () => {
   it('updates page title and allows children containing expressions', () => {
     const someValue = 'Some Great Title';
 
-    render(
+    renderClient(
       <Helmet>
         <title>Title: {someValue}</title>
       </Helmet>
@@ -28,7 +28,7 @@ describe('title', () => {
   });
 
   it('updates page title with multiple children', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <title>Test Title</title>
@@ -46,7 +46,7 @@ describe('title', () => {
   });
 
   it('sets title based on deepest nested component', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <title>Main Title</title>
@@ -61,7 +61,7 @@ describe('title', () => {
   });
 
   it('sets title using deepest nested component with a defined title', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <title>Main Title</title>
@@ -76,7 +76,7 @@ describe('title', () => {
   it('does not encode all characters with HTML character entity equivalents', () => {
     const chineseTitle = '膣膗 鍆錌雔';
 
-    render(
+    renderClient(
       <Helmet>
         <title>{chineseTitle}</title>
       </Helmet>
@@ -86,7 +86,7 @@ describe('title', () => {
   });
 
   it('page title with prop itemProp', () => {
-    render(
+    renderClient(
       <Helmet>
         <title itemProp="name">Test Title with itemProp</title>
       </Helmet>
@@ -101,7 +101,7 @@ describe('title', () => {
   it('retains existing title tag when no title tag is defined', () => {
     document.head.innerHTML = `<title>Existing Title</title>`;
 
-    render(
+    renderClient(
       <Helmet>
         <meta name="keywords" content="stuff" />
       </Helmet>
@@ -111,7 +111,7 @@ describe('title', () => {
   });
 
   it.skip('clears title tag if empty title is defined', () => {
-    render(
+    renderClient(
       <Helmet>
         <title>Existing Title</title>
         <meta name="keywords" content="stuff" />
@@ -120,7 +120,7 @@ describe('title', () => {
 
     expect(document.title).toBe('Existing Title');
 
-    render(
+    renderClient(
       <Helmet>
         <title />
         <meta name="keywords" content="stuff" />

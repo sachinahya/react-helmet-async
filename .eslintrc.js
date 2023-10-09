@@ -17,6 +17,9 @@ module.exports = {
     'no-cond-assign': 0,
     'no-loop-func': 0,
     'react/prop-types': 0,
+    'max-classes-per-file': 0,
+    'react/no-unused-prop-types': 0,
+    'react/default-props-match-prop-types': 0,
   },
 
   overrides: [

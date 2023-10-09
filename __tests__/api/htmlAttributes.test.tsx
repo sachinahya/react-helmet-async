@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 /* eslint-disable jsx-a11y/html-has-lang, react/no-unknown-property */
 
@@ -9,7 +9,7 @@ Helmet.defaultProps.defer = false;
 
 describe('html attributes', () => {
   it('clears html attributes that are handled within helmet', () => {
-    render(
+    renderClient(
       <Helmet>
         <html lang="en" about={undefined} draggable />
       </Helmet>
@@ -22,7 +22,7 @@ describe('html attributes', () => {
     expect(htmlTag.getAttribute('draggable')).not.toBeNull();
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).not.toBeNull();
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     expect(htmlTag.getAttribute('lang')).toBeNull();
     expect(htmlTag.getAttribute('about')).toBeNull();
@@ -31,7 +31,7 @@ describe('html attributes', () => {
   });
 
   it('updates with multiple additions and removals - all new', () => {
-    render(
+    renderClient(
       <Helmet>
         <html lang="en" about={undefined} />
       </Helmet>
@@ -43,7 +43,7 @@ describe('html attributes', () => {
     expect(htmlTag.getAttribute('lang')).toBe('en');
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBe('lang,about');
 
-    render(
+    renderClient(
       <Helmet>
         <html id="html-tag" title="html tag" />
       </Helmet>
@@ -58,7 +58,7 @@ describe('html attributes', () => {
 });
 
 it('updates html attributes', () => {
-  render(
+  renderClient(
     <Helmet>
       <html className="myClassName" lang="en" />
     </Helmet>
@@ -72,7 +72,7 @@ it('updates html attributes', () => {
 });
 
 it('sets attributes based on the deepest nested component', () => {
-  render(
+  renderClient(
     <div>
       <Helmet>
         <html lang="en" />
@@ -90,7 +90,7 @@ it('sets attributes based on the deepest nested component', () => {
 });
 
 it('handles valueless attributes', () => {
-  render(
+  renderClient(
     <Helmet>
       <html about={undefined} draggable />
     </Helmet>
@@ -104,7 +104,7 @@ it('handles valueless attributes', () => {
 });
 
 it('updates with multiple additions and removals - overwrite and new', () => {
-  render(
+  renderClient(
     <Helmet>
       <html lang="en" draggable />
     </Helmet>
@@ -114,7 +114,7 @@ it('updates with multiple additions and removals - overwrite and new', () => {
 
   expect(htmlTag.getAttribute('draggable')).toBe('true');
 
-  render(
+  renderClient(
     <Helmet>
       <html lang="ja" id="html-tag" title="html tag" />
     </Helmet>
@@ -128,7 +128,7 @@ it('updates with multiple additions and removals - overwrite and new', () => {
 });
 
 it('updates with multiple additions and removals - all new', () => {
-  render(
+  renderClient(
     <Helmet>
       <html lang="en" draggable />
     </Helmet>
@@ -138,7 +138,7 @@ it('updates with multiple additions and removals - all new', () => {
 
   expect(htmlTag.getAttribute('draggable')).toBe('true');
 
-  render(
+  renderClient(
     <Helmet>
       <html id="html-tag" title="html tag" />
     </Helmet>
@@ -163,7 +163,7 @@ describe('initialized outside of helmet', () => {
     expect(htmlTag.getAttribute('about')).toBe('about');
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBeNull();
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     expect(htmlTag.getAttribute('about')).toBe('about');
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBeNull();
@@ -175,7 +175,7 @@ describe('initialized outside of helmet', () => {
     expect(htmlTag.getAttribute('about')).toBe('about');
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBeNull();
 
-    render(
+    renderClient(
       <Helmet>
         <html about="helmet-attr" />
       </Helmet>
@@ -191,7 +191,7 @@ describe('initialized outside of helmet', () => {
     expect(htmlTag.getAttribute('about')).toBe('about');
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBeNull();
 
-    render(
+    renderClient(
       <Helmet>
         <html about="helmet-attr" />
       </Helmet>
@@ -200,7 +200,7 @@ describe('initialized outside of helmet', () => {
     expect(htmlTag.getAttribute('about')).toBe('helmet-attr');
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBe('about');
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     expect(htmlTag.getAttribute('about')).toBeNull();
     expect(htmlTag.getAttribute(HELMET_ATTRIBUTE)).toBeNull();

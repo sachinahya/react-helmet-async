@@ -1,15 +1,13 @@
-import React, { StrictMode } from 'react';
+import React, { ReactNode, StrictMode } from 'react';
 import ReactDOM from 'react-dom';
-import Provider from '../../src/Provider';
+import ReactServer from 'react-dom/server';
+import { HelmetProvider } from '../../src/Provider';
+import { HelmetState } from '../../src';
 
-// eslint-disable-next-line
-export const render = (node, context = {}) => {
-  const mount = document.getElementById('mount');
-
-  ReactDOM.render(
+export const renderServer = (node: ReactNode, state: HelmetState): void => {
+  ReactServer.renderToStaticMarkup(
     <StrictMode>
-      <Provider context={context}>{node}</Provider>
-    </StrictMode>,
-    mount
+      <HelmetProvider state={state}>{node}</HelmetProvider>
+    </StrictMode>
   );
 };

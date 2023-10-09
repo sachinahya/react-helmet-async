@@ -1,7 +1,8 @@
-import { HelmetTags } from './Helmet';
+import { HelmetProps, HelmetTags } from './Helmet';
 import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from './constants';
 import { flattenArray } from './utils';
-import { HelmetInternalState } from './state';
+import { HelmetState, reducePropsToState } from './state';
+import { HelmetStateClient } from './HelmetState';
 
 const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: any[]) => {
   const headElement = document.head;
@@ -55,9 +56,7 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
 
 const updateAttributes = (
   tagName: string,
-  attributes: NonNullable<
-    HelmetInternalState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']
-  >
+  attributes: NonNullable<HelmetState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']>
 ) => {
   const elementTag = document.getElementsByTagName(tagName)[0];
 
@@ -99,7 +98,7 @@ const updateAttributes = (
   }
 };
 
-const updateTitle = (title: HelmetInternalState['title'], attributes: any) => {
+const updateTitle = (title: HelmetState['title'], attributes: any) => {
   if (typeof title !== 'undefined' && document.title !== title) {
     document.title = flattenArray(title);
   }
@@ -107,17 +106,17 @@ const updateTitle = (title: HelmetInternalState['title'], attributes: any) => {
   updateAttributes(TAG_NAMES.TITLE, attributes);
 };
 
-const commitTagChanges = (newState: HelmetInternalState, cb?: () => void) => {
+const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
   const {
-    baseTag,
+    base,
     bodyAttributes,
     htmlAttributes,
-    linkTags,
-    metaTags,
-    noscriptTags,
+    link,
+    meta,
+    noscript,
     onChangeClientState,
-    scriptTags,
-    styleTags,
+    script,
+    style,
     title,
     titleAttributes,
   } = newState;
@@ -127,16 +126,16 @@ const commitTagChanges = (newState: HelmetInternalState, cb?: () => void) => {
   updateTitle(title, titleAttributes);
 
   const tagUpdates = {
-    baseTag: updateTagsByType(TAG_NAMES.BASE, baseTag),
-    linkTags: updateTagsByType(TAG_NAMES.LINK, linkTags),
-    metaTags: updateTagsByType(TAG_NAMES.META, metaTags),
-    noscriptTags: updateTagsByType(TAG_NAMES.NOSCRIPT, noscriptTags),
-    scriptTags: updateTagsByType(TAG_NAMES.SCRIPT, scriptTags),
-    styleTags: updateTagsByType(TAG_NAMES.STYLE, styleTags),
+    baseTag: updateTagsByType(TAG_NAMES.BASE, base),
+    linkTags: updateTagsByType(TAG_NAMES.LINK, link),
+    metaTags: updateTagsByType(TAG_NAMES.META, meta),
+    noscriptTags: updateTagsByType(TAG_NAMES.NOSCRIPT, noscript),
+    scriptTags: updateTagsByType(TAG_NAMES.SCRIPT, script),
+    styleTags: updateTagsByType(TAG_NAMES.STYLE, style),
   };
 
-  const addedTags = {} as HelmetTags;
-  const removedTags = {} as HelmetTags;
+  const addedTags = {} as Record<keyof HelmetTags, HTMLElement[]>;
+  const removedTags = {} as Record<keyof HelmetTags, HTMLElement[]>;
 
   (Object.keys(tagUpdates) as (keyof typeof tagUpdates)[]).forEach(tagType => {
     const { newTags, oldTags } = tagUpdates[tagType];
@@ -153,13 +152,13 @@ const commitTagChanges = (newState: HelmetInternalState, cb?: () => void) => {
     cb();
   }
 
-  onChangeClientState?.(newState, addedTags, removedTags);
+  onChangeClientState?.(newState, addedTags as HelmetTags, removedTags as HelmetTags);
 };
 
 // eslint-disable-next-line
 let _helmetCallback: number | null = null;
 
-export const handleStateChangeOnClient = (newState: HelmetInternalState): void => {
+const handleStateChangeOnClient = (newState: HelmetState): void => {
   if (_helmetCallback) {
     cancelAnimationFrame(_helmetCallback);
   }
@@ -175,3 +174,24 @@ export const handleStateChangeOnClient = (newState: HelmetInternalState): void =
     _helmetCallback = null;
   }
 };
+
+export class HelmetClientState implements HelmetStateClient {
+  #instances = new Map<unknown, HelmetProps>();
+
+  update(instance: unknown, props: HelmetProps): void {
+    this.#instances.set(instance, props);
+    this.#emit();
+  }
+
+  remove(instance: unknown): void {
+    this.#instances.delete(instance);
+    this.#emit();
+  }
+
+  #emit(): void {
+    const propsList = [...this.#instances.values()];
+    const state = reducePropsToState(propsList);
+
+    handleStateChangeOnClient(state);
+  }
+}

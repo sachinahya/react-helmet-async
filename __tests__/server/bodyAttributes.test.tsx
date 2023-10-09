@@ -1,31 +1,24 @@
 import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
-import Provider from '../../src/Provider';
-import { render } from './utils';
+import { renderServer } from './utils';
+import { HelmetServerState } from '../../src/server';
 
 Helmet.defaultProps.defer = false;
-
-beforeAll(() => {
-  Provider.canUseDOM = false;
-});
-
-afterAll(() => {
-  Provider.canUseDOM = true;
-});
 
 describe('server', () => {
   describe('Declarative API', () => {
     it('renders body attributes as component', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <body lang="ga" className="myClassName" />
         </Helmet>,
-        context
+        state
       );
 
-      const { bodyAttributes } = context.helmet;
+      const { bodyAttributes } = state.getOutput();
       const attrs = bodyAttributes.toComponent();
 
       expect(attrs).toBeDefined();
@@ -36,15 +29,16 @@ describe('server', () => {
     });
 
     it('renders body attributes as string', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <body lang="ga" className="myClassName" />
         </Helmet>,
-        context
+        state
       );
 
-      const body = context.helmet;
+      const body = state.getOutput();
 
       expect(body.bodyAttributes).toBeDefined();
       expect(body.bodyAttributes.toString).toBeDefined();

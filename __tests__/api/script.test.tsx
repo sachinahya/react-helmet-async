@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
@@ -14,7 +14,7 @@ describe('script tags', () => {
             "url": "http://localhost/helmet"
           }
         `;
-    render(
+    renderClient(
       <Helmet>
         <script src="http://localhost/test.js" type="text/javascript" />
         <script src="http://localhost/test2.js" type="text/javascript" />
@@ -39,7 +39,7 @@ describe('script tags', () => {
   });
 
   it('clears all scripts tags if none are specified', () => {
-    render(
+    renderClient(
       <Helmet>
         <script src="http://localhost/test.js" type="text/javascript" />
       </Helmet>
@@ -47,7 +47,7 @@ describe('script tags', () => {
 
     expect(document.head.querySelectorAll(`script[${HELMET_ATTRIBUTE}]`)).toHaveLength(1);
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     const existingTags = document.head.querySelectorAll(`script[${HELMET_ATTRIBUTE}]`);
 
@@ -56,7 +56,7 @@ describe('script tags', () => {
   });
 
   it("tags without 'src' are not accepted", () => {
-    render(
+    renderClient(
       <Helmet>
         <script id="won't work" />
       </Helmet>
@@ -69,7 +69,7 @@ describe('script tags', () => {
   });
 
   it('sets script tags based on deepest nested component', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <script src="http://localhost/test.js" type="text/javascript" />
@@ -103,7 +103,7 @@ describe('script tags', () => {
   });
 
   it('sets undefined attribute values to empty strings', () => {
-    render(
+    renderClient(
       <Helmet>
         <script src="foo.js" async={undefined} />
       </Helmet>
@@ -118,7 +118,7 @@ describe('script tags', () => {
   });
 
   it('does not render tag when primary attribute (src) is null', () => {
-    render(
+    renderClient(
       <Helmet>
         <script src={undefined} type="text/javascript" />
       </Helmet>
@@ -130,7 +130,7 @@ describe('script tags', () => {
   });
 
   it('does not render tag when primary attribute (innerHTML) is null', () => {
-    render(
+    renderClient(
       <Helmet>
         <script />
       </Helmet>

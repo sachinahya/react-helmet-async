@@ -1,18 +1,10 @@
 import React from 'react';
 import ReactServer from 'react-dom/server';
 import { Helmet } from '../../src';
-import Provider from '../../src/Provider';
-import { render } from './utils';
+import { renderServer } from './utils';
+import { HelmetServerState } from '../../src/server';
 
 Helmet.defaultProps.defer = false;
-
-beforeAll(() => {
-  Provider.canUseDOM = false;
-});
-
-afterAll(() => {
-  Provider.canUseDOM = true;
-});
 
 const isArray = {
   asymmetricMatch: actual => Array.isArray(actual),
@@ -21,16 +13,17 @@ const isArray = {
 describe('server', () => {
   describe('Declarative API', () => {
     it('renders noscript tags as React components', () => {
-      const context = {};
-      render(
+      const state = new HelmetServerState();
+
+      renderServer(
         <Helmet>
           <noscript id="foo">{`<link rel="stylesheet" type="text/css" href="/style.css" />`}</noscript>
           <noscript id="bar">{`<link rel="stylesheet" type="text/css" href="/style2.css" />`}</noscript>
         </Helmet>,
-        context
+        state
       );
 
-      const head = context.helmet;
+      const head = state.getOutput();
 
       expect(head.noscript).toBeDefined();
       expect(head.noscript.toComponent).toBeDefined();

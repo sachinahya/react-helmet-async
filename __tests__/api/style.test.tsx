@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
@@ -18,7 +18,7 @@ describe('Declarative API', () => {
             }
         `;
 
-    render(
+    renderClient(
       <Helmet>
         <style type="text/css">{cssText1}</style>
         <style>{cssText2}</style>
@@ -61,7 +61,7 @@ describe('Declarative API', () => {
                 background-color: green;
             }
         `;
-    render(
+    renderClient(
       <Helmet>
         <style type="text/css">{cssText}</style>
       </Helmet>
@@ -69,7 +69,7 @@ describe('Declarative API', () => {
 
     expect(document.head.querySelectorAll(`style[${HELMET_ATTRIBUTE}]`)).toHaveLength(1);
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     const existingTags = document.head.querySelectorAll(`style[${HELMET_ATTRIBUTE}]`);
 
@@ -78,7 +78,7 @@ describe('Declarative API', () => {
   });
 
   it("tags without 'cssText' are not accepted", () => {
-    render(
+    renderClient(
       <Helmet>
         <style id="won't work" />
       </Helmet>
@@ -91,7 +91,7 @@ describe('Declarative API', () => {
   });
 
   it('does not render tag when primary attribute is null', () => {
-    render(
+    renderClient(
       <Helmet>
         <style>{undefined}</style>
       </Helmet>

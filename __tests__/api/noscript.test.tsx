@@ -1,13 +1,13 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
 describe('noscript tags', () => {
   it('updates noscript tags', () => {
-    render(
+    renderClient(
       <Helmet>
         <noscript id="bar">{`<link rel="stylesheet" type="text/css" href="foo.css" />`}</noscript>
       </Helmet>
@@ -24,13 +24,13 @@ describe('noscript tags', () => {
   });
 
   it('clears all noscripts tags if none are specified', () => {
-    render(
+    renderClient(
       <Helmet>
         <noscript id="bar" />
       </Helmet>
     );
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     const existingTags = document.head.querySelectorAll(`script[${HELMET_ATTRIBUTE}]`);
 
@@ -39,7 +39,7 @@ describe('noscript tags', () => {
   });
 
   it("tags without 'innerHTML' are not accepted", () => {
-    render(
+    renderClient(
       <Helmet>
         <noscript id="won't work" />
       </Helmet>
@@ -52,7 +52,7 @@ describe('noscript tags', () => {
   });
 
   it('does not render tag when primary attribute is null', () => {
-    render(
+    renderClient(
       <Helmet>
         <noscript>{undefined}</noscript>
       </Helmet>

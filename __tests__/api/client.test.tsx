@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from '../../src';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
@@ -8,7 +8,7 @@ describe('onChangeClientState', () => {
   describe('API', () => {
     it('when handling client state change, calls the function with new state, addedTags and removedTags', () => {
       const onChange = jest.fn();
-      render(
+      renderClient(
         <div>
           <Helmet onChangeClientState={onChange}>
             <base href="http://mysite.com/" />
@@ -27,19 +27,19 @@ describe('onChangeClientState', () => {
       const removedTags = onChange.mock.calls[0][2];
 
       expect(newState).toEqual(expect.objectContaining({ title: 'Main Title' }));
-      expect(newState.baseTag[0]).toEqual(
+      expect(newState.base[0]).toEqual(
         expect.objectContaining({
           href: 'http://mysite.com/',
         })
       );
-      expect(newState.metaTags[0]).toEqual(expect.objectContaining({ charSet: 'utf-8' }));
-      expect(newState.linkTags[0]).toEqual(
+      expect(newState.meta[0]).toEqual(expect.objectContaining({ charSet: 'utf-8' }));
+      expect(newState.link[0]).toEqual(
         expect.objectContaining({
           href: 'http://localhost/helmet',
           rel: 'canonical',
         })
       );
-      expect(newState.scriptTags[0]).toEqual(
+      expect(newState.script[0]).toEqual(
         expect.objectContaining({
           src: 'http://localhost/test.js',
           type: 'text/javascript',

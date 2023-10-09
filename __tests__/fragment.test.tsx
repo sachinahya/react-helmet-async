@@ -1,12 +1,12 @@
 import React from 'react';
 import { Helmet } from '../src';
-import { render } from './api/utils';
+import { renderClient } from './api/utils';
 
 Helmet.defaultProps.defer = false;
 
 describe('fragments', () => {
   it('parses Fragments', () => {
-    render(
+    renderClient(
       <Helmet>
         <>
           <title>Hello</title>
@@ -19,7 +19,7 @@ describe('fragments', () => {
   });
 
   it('parses nested Fragments', () => {
-    render(
+    renderClient(
       <Helmet>
         <>
           <title>Foo</title>

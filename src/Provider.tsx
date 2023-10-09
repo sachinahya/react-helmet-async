@@ -1,29 +1,13 @@
-import React, { Component, ReactNode } from 'react';
-import HelmetData, { HelmetDataValue } from './HelmetData';
+import React, { FC, ReactNode } from 'react';
+import { HelmetStateClient } from './HelmetState';
 
-export const Context = React.createContext<HelmetDataValue>({} as HelmetDataValue);
+export const Context = React.createContext<HelmetStateClient>({} as HelmetStateClient);
 
-const canUseDOM = typeof document !== 'undefined';
-
-export interface ProviderProps {
-  context: any;
+export interface HelmetProviderProps {
+  state: HelmetStateClient;
   children?: ReactNode;
 }
 
-export default class Provider extends Component<ProviderProps> {
-  static canUseDOM = canUseDOM;
-
-  static displayName = 'HelmetProvider';
-
-  helmetData: HelmetData;
-
-  constructor(props: ProviderProps) {
-    super(props);
-
-    this.helmetData = new HelmetData(this.props.context, Provider.canUseDOM);
-  }
-
-  override render() {
-    return <Context.Provider value={this.helmetData.value}>{this.props.children}</Context.Provider>;
-  }
-}
+export const HelmetProvider: FC<HelmetProviderProps> = ({ state, children }) => {
+  return <Context.Provider value={state}>{children}</Context.Provider>;
+};

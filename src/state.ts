@@ -1,10 +1,10 @@
 import { LinkHTMLAttributes } from 'react';
 import {
-  BodyProps,
+  HelmetOptions,
   HelmetProps,
   HelmetPropsAttributes,
   HelmetPropsTags,
-  HtmlProps,
+  HelmetPropsTitle,
 } from './Helmet';
 import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES, HELMET_PROPS } from './constants';
 
@@ -143,49 +143,41 @@ const getAnyTruthyFromPropsList = (
   return propsList.some(props => props[checkedTag]);
 };
 
-export interface HelmetInternalState {
-  baseTag: React.JSX.IntrinsicElements['base'][];
-  bodyAttributes: NonNullable<BodyProps>;
-  defer?: boolean;
-  encode?: boolean;
-  htmlAttributes: NonNullable<HtmlProps>;
-  linkTags: React.JSX.IntrinsicElements['link'][];
-  metaTags: React.JSX.IntrinsicElements['meta'][];
-  noscriptTags: { innerHTML: string }[];
-  onChangeClientState?: NonNullable<HelmetProps['onChangeClientState']>;
-  scriptTags: React.JSX.IntrinsicElements['script'][];
-  styleTags: { cssText: string }[];
-  title: string | string[] | undefined;
-  titleAttributes: { itemprop?: string | undefined };
-  prioritizeSeoTags?: boolean;
-}
+export interface HelmetState
+  extends Required<HelmetPropsTags>,
+    Required<HelmetPropsAttributes>,
+    Required<HelmetPropsTitle>,
+    Required<HelmetOptions> {}
 
-export const reducePropsToState = (propsList: HelmetProps[]): HelmetInternalState => {
+export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
   return {
-    baseTag: getBaseTagFromPropsList(propsList),
+    base: getBaseTagFromPropsList(propsList),
     bodyAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.BODY),
-    defer: getInnermostProperty(propsList, HELMET_PROPS.DEFER),
-    encode: getInnermostProperty(propsList, HELMET_PROPS.ENCODE_SPECIAL_CHARACTERS),
+    defer: getInnermostProperty(propsList, HELMET_PROPS.DEFER)!,
+    encodeSpecialCharacters: getInnermostProperty(
+      propsList,
+      HELMET_PROPS.ENCODE_SPECIAL_CHARACTERS
+    )!,
     htmlAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.HTML),
-    linkTags: getTagsFromPropsList(propsList, TAG_NAMES.LINK, [
+    link: getTagsFromPropsList(propsList, TAG_NAMES.LINK, [
       TAG_PROPERTIES.REL,
       TAG_PROPERTIES.HREF,
     ]),
-    metaTags: getTagsFromPropsList(propsList, TAG_NAMES.META, [
+    meta: getTagsFromPropsList(propsList, TAG_NAMES.META, [
       TAG_PROPERTIES.NAME,
       TAG_PROPERTIES.CHARSET,
       TAG_PROPERTIES.HTTPEQUIV,
       TAG_PROPERTIES.PROPERTY,
       TAG_PROPERTIES.ITEM_PROP,
     ]),
-    noscriptTags: getTagsFromPropsList(propsList, TAG_NAMES.NOSCRIPT, [TAG_PROPERTIES.INNER_HTML]),
-    onChangeClientState: getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE),
-    scriptTags: getTagsFromPropsList(propsList, TAG_NAMES.SCRIPT, [
+    noscript: getTagsFromPropsList(propsList, TAG_NAMES.NOSCRIPT, [TAG_PROPERTIES.INNER_HTML]),
+    onChangeClientState: getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE)!,
+    script: getTagsFromPropsList(propsList, TAG_NAMES.SCRIPT, [
       TAG_PROPERTIES.SRC,
       TAG_PROPERTIES.INNER_HTML,
     ]),
-    styleTags: getTagsFromPropsList(propsList, TAG_NAMES.STYLE, [TAG_PROPERTIES.CSS_TEXT]),
-    title: getInnermostProperty(propsList, TAG_NAMES.TITLE),
+    style: getTagsFromPropsList(propsList, TAG_NAMES.STYLE, [TAG_PROPERTIES.CSS_TEXT]),
+    title: getInnermostProperty(propsList, TAG_NAMES.TITLE)!,
     titleAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.TITLE),
     prioritizeSeoTags: getAnyTruthyFromPropsList(propsList, HELMET_PROPS.PRIORITIZE_SEO_TAGS),
   };

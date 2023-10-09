@@ -1,7 +1,7 @@
 import React from 'react';
 import { Helmet } from '../../src';
 import { HELMET_ATTRIBUTE } from '../../src/constants';
-import { render } from './utils';
+import { renderClient } from './utils';
 
 Helmet.defaultProps.defer = false;
 
@@ -11,7 +11,7 @@ describe('title attributes', () => {
   });
 
   it('updates title attributes', () => {
-    render(
+    renderClient(
       <Helmet>
         <title itemProp="name" />
       </Helmet>
@@ -24,7 +24,7 @@ describe('title attributes', () => {
   });
 
   it('sets attributes based on the deepest nested component', () => {
-    render(
+    renderClient(
       <div>
         <Helmet>
           <title lang="en" hidden />
@@ -43,7 +43,7 @@ describe('title attributes', () => {
   });
 
   it('handles valueless attributes', () => {
-    render(
+    renderClient(
       <Helmet>
         <title hidden />
       </Helmet>
@@ -56,7 +56,7 @@ describe('title attributes', () => {
   });
 
   it('clears title attributes that are handled within helmet', () => {
-    render(
+    renderClient(
       <Helmet>
         <title lang="en" hidden />
       </Helmet>
@@ -68,7 +68,7 @@ describe('title attributes', () => {
     expect(titleTag?.getAttribute('hidden')).not.toBeNull();
     expect(titleTag?.getAttribute(HELMET_ATTRIBUTE)).not.toBeNull();
 
-    render(<Helmet />);
+    renderClient(<Helmet />);
 
     expect(titleTag?.getAttribute('lang')).toBeNull();
     expect(titleTag?.getAttribute('hidden')).toBeNull();
