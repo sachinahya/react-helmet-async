@@ -18,11 +18,12 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
       const newElement = document.createElement(type);
 
       for (const attribute of Object.keys(tag)) {
-        if (attribute === TAG_PROPERTIES.INNER_HTML) {
-          newElement.innerHTML = tag.innerHTML;
-        } else if (attribute === TAG_PROPERTIES.CSS_TEXT) {
-          // Assuming newElement is instance of HTMLStyleElement
-          (newElement as HTMLStyleElement).appendChild(document.createTextNode(tag.cssText));
+        if (attribute === TAG_PROPERTIES.CHILDREN) {
+          if (type === TAG_NAMES.SCRIPT || type === TAG_NAMES.NOSCRIPT) {
+            newElement.innerHTML = tag.children;
+          } else if (type === TAG_NAMES.STYLE) {
+            (newElement as HTMLStyleElement).appendChild(document.createTextNode(tag.children));
+          }
         } else {
           const value = typeof tag[attribute] === 'undefined' ? '' : tag[attribute];
           newElement.setAttribute(getHtmlAttributeName(attribute), value);

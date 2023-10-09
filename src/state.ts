@@ -98,9 +98,7 @@ const getTagsFromPropsList = <T extends keyof HelmetPropsTags>(
         // Special case for innerHTML which doesn't work lowercased
         if (
           primaryAttributes.includes(attributeKey) &&
-          (attributeKey === TAG_PROPERTIES.INNER_HTML ||
-            attributeKey === TAG_PROPERTIES.CSS_TEXT ||
-            attributeKey === TAG_PROPERTIES.ITEM_PROP)
+          (attributeKey === TAG_PROPERTIES.CHILDREN || attributeKey === TAG_PROPERTIES.ITEM_PROP)
         ) {
           primaryAttributeKey = attributeKey;
         }
@@ -170,13 +168,13 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
       TAG_PROPERTIES.PROPERTY,
       TAG_PROPERTIES.ITEM_PROP,
     ]),
-    noscript: getTagsFromPropsList(propsList, TAG_NAMES.NOSCRIPT, [TAG_PROPERTIES.INNER_HTML]),
+    noscript: getTagsFromPropsList(propsList, TAG_NAMES.NOSCRIPT, [TAG_PROPERTIES.CHILDREN]),
     onChangeClientState: getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE)!,
     script: getTagsFromPropsList(propsList, TAG_NAMES.SCRIPT, [
       TAG_PROPERTIES.SRC,
-      TAG_PROPERTIES.INNER_HTML,
+      TAG_PROPERTIES.CHILDREN,
     ]),
-    style: getTagsFromPropsList(propsList, TAG_NAMES.STYLE, [TAG_PROPERTIES.CSS_TEXT]),
+    style: getTagsFromPropsList(propsList, TAG_NAMES.STYLE, [TAG_PROPERTIES.CHILDREN]),
     title: getInnermostProperty(propsList, TAG_NAMES.TITLE)!,
     titleAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.TITLE),
     prioritizeSeoTags: getAnyTruthyFromPropsList(propsList, HELMET_PROPS.PRIORITIZE_SEO_TAGS),

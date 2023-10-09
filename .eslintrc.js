@@ -20,6 +20,7 @@ module.exports = {
     'max-classes-per-file': 0,
     'react/no-unused-prop-types': 0,
     'react/default-props-match-prop-types': 0,
+    'prefer-object-spread': 0,
   },
 
   overrides: [

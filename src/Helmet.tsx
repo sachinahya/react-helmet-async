@@ -1,9 +1,15 @@
-import React, { Component, ReactElement, ReactNode, isValidElement } from 'react';
+import React, {
+  Component,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+  isValidElement,
+} from 'react';
 import { isFragment } from 'react-is';
 import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
 import { Context } from './Provider';
-import { TAG_NAMES, VALID_TAG_NAMES } from './constants';
+import { NON_SELF_CLOSING_TAGS, TAG_NAMES, VALID_TAG_NAMES } from './constants';
 
 export interface HelmetTags {
   baseTag: Array<any>;
@@ -18,9 +24,9 @@ export interface HelmetPropsTags {
   base?: React.JSX.IntrinsicElements['base'][];
   link?: React.JSX.IntrinsicElements['link'][];
   meta?: React.JSX.IntrinsicElements['meta'][];
-  noscript?: { innerHTML: string }[];
+  noscript?: React.JSX.IntrinsicElements['noscript'][];
   script?: React.JSX.IntrinsicElements['script'][];
-  style?: { cssText: string }[];
+  style?: React.JSX.IntrinsicElements['style'][];
 }
 
 export interface HelmetPropsAttributes {
@@ -50,192 +56,132 @@ export interface HelmetProps
     HelmetPropsTitle,
     HelmetComponentProps {}
 
-function mapNestedChildrenToProps(child: ReactElement, nestedChildren: ReactNode) {
-  if (!nestedChildren) {
-    return null;
+function flattenArrayTypeChildren(
+  arrayTypeChildren: Record<string, unknown[]>,
+  child: ReactElement<PropsWithChildren>
+): void {
+  if (typeof child.type !== 'string') {
+    return;
   }
 
-  switch (child.type) {
-    case TAG_NAMES.SCRIPT:
-    case TAG_NAMES.NOSCRIPT:
-      return {
-        innerHTML: nestedChildren,
-      };
+  const newChildProps = { ...child.props };
 
-    case TAG_NAMES.STYLE:
-      return {
-        cssText: nestedChildren,
-      };
-    default:
+  if (newChildProps.children) {
+    const isSelfClosing = !NON_SELF_CLOSING_TAGS.includes(child.type);
+
+    if (isSelfClosing) {
       throw new Error(
         `<${child.type} /> elements are self-closing and can not contain children. Refer to our API for more information.`
       );
-  }
-}
-
-function flattenArrayTypeChildren({
-  child,
-  arrayTypeChildren,
-  newChildProps,
-  nestedChildren,
-}: {
-  child: ReactElement;
-  arrayTypeChildren: Record<string, any[]>;
-  newChildProps: Record<string, unknown>;
-  nestedChildren: ReactNode;
-}): Record<string, any[]> {
-  if (typeof child.type !== 'string') {
-    return arrayTypeChildren;
+    }
   }
 
-  return {
-    ...arrayTypeChildren,
-    [child.type]: [
-      ...(arrayTypeChildren[child.type] || []),
-      {
-        ...newChildProps,
-        ...mapNestedChildrenToProps(child, nestedChildren),
-      },
-    ],
-  };
+  (arrayTypeChildren[child.type] ??= []).push(newChildProps);
 }
 
-function mapObjectTypeChildren({
-  child,
-  newProps,
-  newChildProps,
-  nestedChildren,
-}: {
-  child: ReactElement;
-  newProps: HelmetProps;
-  newChildProps: object;
-  nestedChildren: ReactNode;
-}): HelmetProps {
+function mapObjectTypeChildren(
+  mappedProps: HelmetProps,
+  child: ReactElement<PropsWithChildren>
+): HelmetProps {
+  const { children: nestedChildren, ...newChildProps } = child.props;
+
   switch (child.type) {
     case TAG_NAMES.TITLE: {
-      return {
-        ...newProps,
-        // eslint-disable-next-line no-nested-ternary
-        [child.type]: Array.isArray(nestedChildren)
-          ? nestedChildren
-          : nestedChildren
-          ? String(nestedChildren)
-          : undefined,
-        titleAttributes: { ...newChildProps },
-      };
+      // eslint-disable-next-line no-nested-ternary
+      mappedProps.title = Array.isArray(nestedChildren)
+        ? nestedChildren
+        : nestedChildren
+        ? String(nestedChildren)
+        : undefined;
+
+      mappedProps.titleAttributes = newChildProps;
+
+      break;
     }
 
     case TAG_NAMES.BODY:
-      return {
-        ...newProps,
-        bodyAttributes: { ...newChildProps },
-      };
+      mappedProps.bodyAttributes = newChildProps;
+      break;
 
     case TAG_NAMES.HTML:
-      return {
-        ...newProps,
-        htmlAttributes: { ...newChildProps },
-      };
-    default:
-      return typeof child.type === 'string'
-        ? {
-            ...newProps,
-            [child.type]: { ...newChildProps },
-          }
-        : newProps;
+      mappedProps.htmlAttributes = newChildProps;
+      break;
+
+    default: {
+      // eslint-disable-next-line no-lone-blocks
+      if (typeof child.type === 'string') {
+        (mappedProps as Record<string, unknown>)[child.type] = newChildProps;
+      }
+
+      break;
+    }
   }
+
+  return mappedProps;
 }
 
-function mapArrayTypeChildrenToProps(
-  arrayTypeChildren: Record<string, any[]>,
-  newProps: HelmetProps
-) {
-  let newFlattenedProps = { ...newProps };
+function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): HelmetProps {
+  const arrayTypeChildren: Record<string, unknown[]> = {};
 
-  Object.entries(arrayTypeChildren).forEach(([arrayChildName, arrayChild]) => {
-    newFlattenedProps = {
-      ...newFlattenedProps,
-      [arrayChildName]: arrayChild,
-    };
-  });
+  const { children, ...mappedProps } = componentProps;
 
-  return newFlattenedProps;
-}
-
-function warnOnInvalidChildren(
-  child: ReactElement,
-  nestedChildren: any
-): child is ReactElement<any, (typeof VALID_TAG_NAMES)[number]> {
-  invariant(
-    VALID_TAG_NAMES.some(name => child.type === name),
-    typeof child.type === 'function'
-      ? `You may be attempting to nest <Helmet> components within each other, which is not allowed. Refer to our API for more information.`
-      : `Only elements types ${VALID_TAG_NAMES.join(
-          ', '
-        )} are allowed. Helmet does not support rendering <${
-          child.type
-        }> elements. Refer to our API for more information.`
-  );
-
-  invariant(
-    !nestedChildren ||
-      typeof nestedChildren === 'string' ||
-      (Array.isArray(nestedChildren) &&
-        !nestedChildren.some(nestedChild => typeof nestedChild !== 'string')),
-    `Helmet expects a string as a child of <${child.type}>. Did you forget to wrap your children in braces? ( <${child.type}>{\`\`}</${child.type}> ) Refer to our API for more information.`
-  );
-
-  return true;
-}
-
-function mapChildrenToProps(componentProps: HelmetComponentProps): HelmetProps {
-  let arrayTypeChildren = {};
-
-  // eslint-disable-next-line prefer-const
-  let { children, ...newProps } = componentProps;
-
-  React.Children.forEach(children, child => {
-    if (!child || !isValidElement(child) || !child.props) {
+  React.Children.forEach(children as ReactElement<PropsWithChildren>[], child => {
+    if (!isValidElement(child)) {
       return;
     }
 
-    const { children: nestedChildren, ...childProps } = child.props;
-    // convert React props to HTML attributes
-    const newChildProps = childProps;
-
-    if (isFragment(child)) {
-      newProps = mapChildrenToProps({ children: nestedChildren, ...newProps });
+    // isFragment incorrectly narrows to ReactElement.
+    // A child can still be a ReactElement if it's not a fragment.
+    if (isFragment(child) as boolean) {
+      Object.assign(
+        mappedProps,
+        mapChildrenToProps({
+          ...mappedProps,
+          children: child.props.children,
+        })
+      );
     } else {
-      warnOnInvalidChildren(child, nestedChildren);
+      invariant(
+        VALID_TAG_NAMES.some(name => child.type === name),
+        typeof child.type === 'function'
+          ? `You may be attempting to nest <Helmet> components within each other, which is not allowed. Refer to our API for more information.`
+          : `Only elements types ${VALID_TAG_NAMES.join(
+              ', '
+            )} are allowed. Helmet does not support rendering <${
+              child.type
+            }> elements. Refer to our API for more information.`
+      );
 
-      switch ((child as ReactElement).type) {
+      invariant(
+        !child.props.children ||
+          typeof child.props.children === 'string' ||
+          (Array.isArray(child.props.children) &&
+            !child.props.children.some(nestedChild => typeof nestedChild !== 'string')),
+        `Helmet expects a string as a child of <${child.type}>. Did you forget to wrap your children in braces? ( <${child.type}>{\`\`}</${child.type}> ) Refer to our API for more information.`
+      );
+
+      switch (child.type) {
         case TAG_NAMES.BASE:
         case TAG_NAMES.LINK:
         case TAG_NAMES.META:
         case TAG_NAMES.NOSCRIPT:
         case TAG_NAMES.SCRIPT:
         case TAG_NAMES.STYLE:
-          arrayTypeChildren = flattenArrayTypeChildren({
-            child,
-            arrayTypeChildren,
-            newChildProps,
-            nestedChildren,
-          });
+          flattenArrayTypeChildren(arrayTypeChildren, child);
           break;
 
         default:
-          newProps = mapObjectTypeChildren({
-            child,
-            newProps,
-            newChildProps,
-            nestedChildren,
-          });
+          mapObjectTypeChildren(mappedProps, child);
           break;
       }
     }
   });
 
-  return mapArrayTypeChildrenToProps(arrayTypeChildren, newProps);
+  for (const [arrayChildName, arrayChild] of Object.entries(arrayTypeChildren)) {
+    (mappedProps as Record<string, unknown[]>)[arrayChildName] = arrayChild;
+  }
+
+  return mappedProps;
 }
 
 export class Helmet extends Component<HelmetComponentProps> {

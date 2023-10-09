@@ -21,6 +21,12 @@ export const TAG_NAMES = {
   TITLE: 'title',
 } as const satisfies Record<string, keyof React.JSX.IntrinsicElements>;
 
+export const NON_SELF_CLOSING_TAGS: string[] = [
+  TAG_NAMES.NOSCRIPT,
+  TAG_NAMES.SCRIPT,
+  TAG_NAMES.STYLE,
+] satisfies readonly (keyof React.JSX.IntrinsicElements)[];
+
 export const ATTRIBUTE_NAMES = {
   BODY: 'bodyAttributes',
   HTML: 'htmlAttributes',
@@ -72,15 +78,14 @@ export const getHtmlAttributeName = (propName: string): string => {
 
 export const TAG_PROPERTIES = {
   CHARSET: 'charSet',
-  CSS_TEXT: 'cssText',
+  CHILDREN: 'children',
   HREF: 'href',
   HTTPEQUIV: 'httpEquiv',
-  INNER_HTML: 'innerHTML',
   ITEM_PROP: 'itemProp',
   NAME: 'name',
   PROPERTY: 'property',
   REL: 'rel',
   SRC: 'src',
-} as const satisfies Record<string, 'innerHTML' | 'cssText' | keyof AllHTMLAttributes<HTMLElement>>;
+} as const satisfies Record<string, keyof AllHTMLAttributes<HTMLElement>>;
 
 export const HELMET_ATTRIBUTE = 'data-rh';

@@ -1,4 +1,4 @@
-import React, { AllHTMLAttributes, Attributes, HTMLAttributes, ReactElement } from 'react';
+import React, { HTMLAttributes, ReactElement } from 'react';
 import { Entries } from 'type-fest';
 import {
   HELMET_ATTRIBUTE,
@@ -6,6 +6,7 @@ import {
   TAG_PROPERTIES,
   SEO_PRIORITY_TAGS,
   getHtmlAttributeName,
+  NON_SELF_CLOSING_TAGS,
 } from './constants';
 import { flattenArray } from './utils';
 import { HelmetState, reducePropsToState } from './state';
@@ -42,12 +43,6 @@ export interface FilledContext {
   state: HelmetState;
 }
 
-const SELF_CLOSING_TAGS: (keyof React.JSX.IntrinsicElements)[] = [
-  TAG_NAMES.NOSCRIPT,
-  TAG_NAMES.SCRIPT,
-  TAG_NAMES.STYLE,
-];
-
 const encodeSpecialCharactersString = (str: string, encode = true): string => {
   if (encode === false) {
     return String(str);
@@ -65,7 +60,7 @@ const generateElementAttributesAsString = (attributes: object, encode?: boolean)
   let str = '';
 
   for (const [key, value] of Object.entries(attributes)) {
-    if (key === TAG_PROPERTIES.INNER_HTML || key === TAG_PROPERTIES.CSS_TEXT) {
+    if (key === TAG_PROPERTIES.CHILDREN) {
       continue;
     }
 
@@ -104,12 +99,12 @@ const generateTagsAsString = <T extends keyof HelmetPropsTags>(
 
   for (const tag of tags) {
     const attributeString = generateElementAttributesAsString(tag, encode);
-    const tagContent = tag.innerHTML || tag.cssText || '';
+    const tagContent = tag.children || '';
 
-    const isNotSelfClosing = !SELF_CLOSING_TAGS.includes(type);
+    const isSelfClosing = !NON_SELF_CLOSING_TAGS.includes(type);
 
     str += `<${type} ${HELMET_ATTRIBUTE}="true" ${attributeString}${
-      isNotSelfClosing ? `/>` : `>${tagContent}</${type}>`
+      isSelfClosing ? `/>` : `>${tagContent}</${type}>`
     }`;
   }
 
@@ -145,11 +140,8 @@ const generateTagsAsReactComponent = (
     for (const [attribute, value] of Object.entries(tag) as Entries<typeof tag>) {
       const mappedAttribute = attribute;
 
-      if (
-        mappedAttribute === TAG_PROPERTIES.INNER_HTML ||
-        mappedAttribute === TAG_PROPERTIES.CSS_TEXT
-      ) {
-        const content = tag.innerHTML || tag.cssText;
+      if (mappedAttribute === TAG_PROPERTIES.CHILDREN) {
+        const content = tag.children || '';
         mappedTag.dangerouslySetInnerHTML = { __html: content };
       } else {
         mappedTag[mappedAttribute] = value;
