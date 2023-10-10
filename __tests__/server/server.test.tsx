@@ -38,12 +38,12 @@ describe('server', () => {
 
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
-    expect(head.title.toString()).toMatchInlineSnapshot(`"<title data-rh=\\"true\\"></title>"`);
+    expect(head.title.toString()).toMatchInlineSnapshot(`"<title data-rh="true"></title>"`);
     expect(head.title.toElements).toBeDefined();
 
     const markup = ReactServer.renderToStaticMarkup(head.title.toElements());
 
-    expect(markup).toMatchInlineSnapshot(`"<title data-rh=\\"true\\"></title>"`);
+    expect(markup).toMatchInlineSnapshot(`"<title data-rh="true"></title>"`);
 
     expect(head.base).toBeDefined();
     expect(head.base.toString).toBeDefined();
@@ -124,7 +124,7 @@ describe('server', () => {
     const { script } = state.getOutput();
 
     expect(script.toString()).toMatchInlineSnapshot(
-      `"<script data-rh=\\"true\\" src=\\"foo.js\\" async></script>"`
+      `"<script data-rh="true" src="foo.js" async></script>"`
     );
   });
 

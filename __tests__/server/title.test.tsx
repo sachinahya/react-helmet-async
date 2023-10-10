@@ -38,7 +38,7 @@ describe('server', () => {
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">Dangerous &lt;script&gt; include</title>"`
+      `"<title data-rh="true">Dangerous &lt;script&gt; include</title>"`
     );
   });
 
@@ -59,7 +59,7 @@ describe('server', () => {
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">This is text and & and '.</title>"`
+      `"<title data-rh="true">This is text and & and '.</title>"`
     );
   });
 
@@ -90,7 +90,7 @@ describe('server', () => {
     const markup = ReactServer.renderToStaticMarkup(titleComponent);
 
     expect(markup).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\" itemProp=\\"name\\">Title with Itemprop</title>"`
+      `"<title data-rh="true" itemProp="name">Title with Itemprop</title>"`
     );
   });
 
@@ -109,7 +109,7 @@ describe('server', () => {
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">Dangerous &lt;script&gt; include</title>"`
+      `"<title data-rh="true">Dangerous &lt;script&gt; include</title>"`
     );
   });
 
@@ -130,7 +130,7 @@ describe('server', () => {
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">Title: Some Great Title</title>"`
+      `"<title data-rh="true">Title: Some Great Title</title>"`
     );
   });
 
@@ -152,7 +152,7 @@ describe('server', () => {
     const titleString = head.title.toString();
 
     expect(titleString).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\" itemprop=\\"name\\">Title with Itemprop</title>"`
+      `"<title data-rh="true" itemprop="name">Title with Itemprop</title>"`
     );
   });
 
@@ -175,7 +175,7 @@ describe('server', () => {
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">膣膗 鍆錌雔</title>"`
+      `"<title data-rh="true">膣膗 鍆錌雔</title>"`
     );
   });
 
@@ -194,7 +194,7 @@ describe('server', () => {
     expect(head.title).toBeDefined();
     expect(head.title.toString).toBeDefined();
     expect(head.title.toString()).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">Dangerous &lt;script&gt; include</title>"`
+      `"<title data-rh="true">Dangerous &lt;script&gt; include</title>"`
     );
   });
 
@@ -225,7 +225,7 @@ describe('server', () => {
     const markup = ReactServer.renderToStaticMarkup(titleComponent);
 
     expect(markup).toMatchInlineSnapshot(
-      `"<title data-rh=\\"true\\">Dangerous &lt;script&gt; include</title>"`
+      `"<title data-rh="true">Dangerous &lt;script&gt; include</title>"`
     );
   });
 });

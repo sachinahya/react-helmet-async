@@ -40,7 +40,7 @@ describe('server', () => {
       const markup = ReactServer.renderToStaticMarkup(scriptComponent);
 
       expect(markup).toMatchInlineSnapshot(
-        `"<script data-rh=\\"true\\" src=\\"http://localhost/test.js\\" type=\\"text/javascript\\"></script><script data-rh=\\"true\\" src=\\"http://localhost/test2.js\\" type=\\"text/javascript\\"></script>"`
+        `"<script data-rh="true" src="http://localhost/test.js" type="text/javascript"></script><script data-rh="true" src="http://localhost/test2.js" type="text/javascript"></script>"`
       );
     });
 
@@ -60,7 +60,7 @@ describe('server', () => {
       expect(head.script).toBeDefined();
       expect(head.script.toString).toBeDefined();
       expect(head.script.toString()).toMatchInlineSnapshot(
-        `"<script data-rh=\\"true\\" src=\\"http://localhost/test.js\\" type=\\"text/javascript\\"></script><script data-rh=\\"true\\" src=\\"http://localhost/test2.js\\" type=\\"text/javascript\\"></script>"`
+        `"<script data-rh="true" src="http://localhost/test.js" type="text/javascript"></script><script data-rh="true" src="http://localhost/test2.js" type="text/javascript"></script>"`
       );
     });
   });

@@ -19,7 +19,7 @@ describe('noscript tags', () => {
     expect(existingTags).toHaveLength(1);
     expect(existingTags[0]?.id).toBe('bar');
     expect(existingTags[0]?.outerHTML).toMatchInlineSnapshot(
-      `"<noscript id=\\"bar\\" data-rh=\\"true\\"><link rel=\\"stylesheet\\" type=\\"text/css\\" href=\\"foo.css\\" /></noscript>"`
+      `"<noscript id="bar" data-rh="true"><link rel="stylesheet" type="text/css" href="foo.css" /></noscript>"`
     );
   });
 

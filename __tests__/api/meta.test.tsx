@@ -93,16 +93,14 @@ describe('meta tags', () => {
     expect(firstTag).toBeInstanceOf(Element);
     expect(firstTag?.getAttribute).toBeDefined();
     expect(firstTag?.getAttribute('charset')).toBe('utf-8');
-    expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta charset=\\"utf-8\\" data-rh=\\"true\\">"`
-    );
+    expect(firstTag?.outerHTML).toMatchInlineSnapshot(`"<meta charset="utf-8" data-rh="true">"`);
 
     expect(secondTag).toBeInstanceOf(Element);
     expect(secondTag?.getAttribute).toBeDefined();
     expect(secondTag?.getAttribute('name')).toBe('description');
     expect(secondTag?.getAttribute('content')).toBe('Inner description');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Inner description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Inner description" data-rh="true">"`
     );
 
     expect(thirdTag).toBeInstanceOf(Element);
@@ -110,7 +108,7 @@ describe('meta tags', () => {
     expect(thirdTag?.getAttribute('name')).toBe('keywords');
     expect(thirdTag?.getAttribute('content')).toBe('test,meta,tags');
     expect(thirdTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"keywords\\" content=\\"test,meta,tags\\" data-rh=\\"true\\">"`
+      `"<meta name="keywords" content="test,meta,tags" data-rh="true">"`
     );
   });
 
@@ -134,7 +132,7 @@ describe('meta tags', () => {
     expect(firstTag?.getAttribute('name')).toBe('description');
     expect(firstTag?.getAttribute('content')).toBe('Test description');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Test description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Test description" data-rh="true">"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -142,7 +140,7 @@ describe('meta tags', () => {
     expect(secondTag?.getAttribute('name')).toBe('description');
     expect(secondTag?.getAttribute('content')).toBe('Duplicate description');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Duplicate description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Duplicate description" data-rh="true">"`
     );
   });
 
@@ -170,7 +168,7 @@ describe('meta tags', () => {
     expect(firstTag?.getAttribute('name')).toBe('description');
     expect(firstTag?.getAttribute('content')).toBe('Inner description');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Inner description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Inner description" data-rh="true">"`
     );
   });
 
@@ -199,7 +197,7 @@ describe('meta tags', () => {
     expect(firstTag?.getAttribute('name')).toBe('description');
     expect(firstTag?.getAttribute('content')).toBe('Inner description');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Inner description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Inner description" data-rh="true">"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -207,7 +205,7 @@ describe('meta tags', () => {
     expect(secondTag?.getAttribute('name')).toBe('description');
     expect(secondTag?.getAttribute('content')).toBe('Inner duplicate description');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Inner duplicate description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Inner duplicate description" data-rh="true">"`
     );
   });
 

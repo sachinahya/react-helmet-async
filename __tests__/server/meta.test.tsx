@@ -46,7 +46,7 @@ describe('server', () => {
       const markup = ReactServer.renderToStaticMarkup(metaComponent);
 
       expect(markup).toMatchInlineSnapshot(
-        `"<meta data-rh=\\"true\\" charSet=\\"utf-8\\"/><meta data-rh=\\"true\\" name=\\"description\\" content=\\"Test description &amp; encoding of special characters like &#x27; &quot; &gt; &lt; \`\\"/><meta data-rh=\\"true\\" http-equiv=\\"content-type\\" content=\\"text/html\\"/><meta data-rh=\\"true\\" property=\\"og:type\\" content=\\"article\\"/><meta data-rh=\\"true\\" itemProp=\\"name\\" content=\\"Test name itemprop\\"/>"`
+        `"<meta data-rh="true" charSet="utf-8"/><meta data-rh="true" name="description" content="Test description &amp; encoding of special characters like &#x27; &quot; &gt; &lt; \`"/><meta data-rh="true" http-equiv="content-type" content="text/html"/><meta data-rh="true" property="og:type" content="article"/><meta data-rh="true" itemProp="name" content="Test name itemprop"/>"`
       );
     });
 
@@ -72,7 +72,7 @@ describe('server', () => {
       expect(head.meta).toBeDefined();
       expect(head.meta.toString).toBeDefined();
       expect(head.meta.toString()).toMatchInlineSnapshot(
-        `"<meta data-rh=\\"true\\" charset=\\"utf-8\\"/><meta data-rh=\\"true\\" name=\\"description\\" content=\\"Test description &amp; encoding of special characters like &#x27; &quot; &gt; &lt; \`\\"/><meta data-rh=\\"true\\" http-equiv=\\"content-type\\" content=\\"text/html\\"/><meta data-rh=\\"true\\" property=\\"og:type\\" content=\\"article\\"/><meta data-rh=\\"true\\" itemprop=\\"name\\" content=\\"Test name itemprop\\"/>"`
+        `"<meta data-rh="true" charset="utf-8"/><meta data-rh="true" name="description" content="Test description &amp; encoding of special characters like &#x27; &quot; &gt; &lt; \`"/><meta data-rh="true" http-equiv="content-type" content="text/html"/><meta data-rh="true" property="og:type" content="article"/><meta data-rh="true" itemprop="name" content="Test name itemprop"/>"`
       );
     });
   });

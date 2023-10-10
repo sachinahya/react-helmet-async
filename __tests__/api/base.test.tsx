@@ -75,7 +75,7 @@ describe('base tag', () => {
       expect(firstTag?.getAttribute).toBeDefined();
       expect(firstTag?.getAttribute('href')).toBe('http://mysite.com/public');
       expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-        `"<base href=\\"http://mysite.com/public\\" data-rh=\\"true\\">"`
+        `"<base href="http://mysite.com/public" data-rh="true">"`
       );
     });
 
@@ -99,7 +99,7 @@ describe('base tag', () => {
       expect(firstTag?.getAttribute).toBeDefined();
       expect(firstTag?.getAttribute('href')).toBe('http://mysite.com/public');
       expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-        `"<base href=\\"http://mysite.com/public\\" data-rh=\\"true\\">"`
+        `"<base href="http://mysite.com/public" data-rh="true">"`
       );
     });
 

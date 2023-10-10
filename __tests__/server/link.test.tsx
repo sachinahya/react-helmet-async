@@ -40,7 +40,7 @@ describe('server', () => {
       const markup = ReactServer.renderToStaticMarkup(linkComponent);
 
       expect(markup).toMatchInlineSnapshot(
-        `"<link data-rh=\\"true\\" href=\\"http://localhost/helmet\\" rel=\\"canonical\\"/><link data-rh=\\"true\\" href=\\"http://localhost/style.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>"`
+        `"<link data-rh="true" href="http://localhost/helmet" rel="canonical"/><link data-rh="true" href="http://localhost/style.css" rel="stylesheet" type="text/css"/>"`
       );
     });
 
@@ -60,7 +60,7 @@ describe('server', () => {
       expect(head.link).toBeDefined();
       expect(head.link.toString).toBeDefined();
       expect(head.link.toString()).toMatchInlineSnapshot(
-        `"<link data-rh=\\"true\\" href=\\"http://localhost/helmet\\" rel=\\"canonical\\"/><link data-rh=\\"true\\" href=\\"http://localhost/style.css\\" rel=\\"stylesheet\\" type=\\"text/css\\"/>"`
+        `"<link data-rh="true" href="http://localhost/helmet" rel="canonical"/><link data-rh="true" href="http://localhost/style.css" rel="stylesheet" type="text/css"/>"`
       );
     });
   });

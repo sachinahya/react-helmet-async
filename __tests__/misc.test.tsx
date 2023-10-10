@@ -44,7 +44,7 @@ describe('misc', () => {
     expect(existingTag?.getAttribute('name')).toBe('description');
     expect(existingTag?.getAttribute('content')).toBe('This is "quoted" text and & and \'.');
     expect(existingTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"This is &quot;quoted&quot; text and &amp; and '.\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="This is &quot;quoted&quot; text and &amp; and '." data-rh="true">"`
     );
   });
 
@@ -107,12 +107,12 @@ describe('misc', () => {
     expect(addedTags).toHaveProperty('metaTags');
     expect(addedTags.metaTags[0]).toBeDefined();
     expect(addedTags.metaTags[0].outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Test description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Test description" data-rh="true">"`
     );
     expect(addedTags).toHaveProperty('linkTags');
     expect(addedTags.linkTags[0]).toBeDefined();
     expect(addedTags.linkTags[0].outerHTML).toMatchInlineSnapshot(
-      `"<link href=\\"http://localhost/style.css\\" rel=\\"stylesheet\\" type=\\"text/css\\" data-rh=\\"true\\">"`
+      `"<link href="http://localhost/style.css" rel="stylesheet" type="text/css" data-rh="true">"`
     );
     expect(removedTags).toEqual({});
 
@@ -135,17 +135,17 @@ describe('misc', () => {
     expect(addedTags).toHaveProperty('metaTags');
     expect(addedTags.metaTags[0]).toBeDefined();
     expect(addedTags.metaTags[0].outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"New description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="New description" data-rh="true">"`
     );
     expect(addedTags).toHaveProperty('linkTags');
     expect(addedTags.linkTags[0]).toBeDefined();
     expect(addedTags.linkTags[0].outerHTML).toMatchInlineSnapshot(
-      `"<link href=\\"http://localhost/style2.css\\" rel=\\"stylesheet\\" type=\\"text/css\\" data-rh=\\"true\\">"`
+      `"<link href="http://localhost/style2.css" rel="stylesheet" type="text/css" data-rh="true">"`
     );
     expect(removedTags).toHaveProperty('metaTags');
     expect(removedTags.metaTags[0]).toBeDefined();
     expect(removedTags.metaTags[0].outerHTML).toMatchInlineSnapshot(
-      `"<meta name=\\"description\\" content=\\"Test description\\" data-rh=\\"true\\">"`
+      `"<meta name="description" content="Test description" data-rh="true">"`
     );
     expect(removedTags).not.toHaveProperty('linkTags');
   });
@@ -261,7 +261,7 @@ describe('misc', () => {
     expect(existingTag?.getAttribute('name')).toBe('description');
     expect(existingTag?.getAttribute('content')).toBe('Test Description');
     expect(existingTag?.outerHTML).toMatchInlineSnapshot(
-      `"<meta content=\\"Test Description\\" name=\\"description\\" data-rh=\\"true\\">"`
+      `"<meta content="Test Description" name="description" data-rh="true">"`
     );
   });
 });

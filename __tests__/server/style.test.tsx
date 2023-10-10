@@ -36,7 +36,7 @@ describe('server', () => {
       const markup = ReactServer.renderToStaticMarkup(styleComponent);
 
       expect(markup).toMatchInlineSnapshot(
-        `"<style data-rh=\\"true\\" type=\\"text/css\\">body {background-color: green;}</style><style data-rh=\\"true\\" type=\\"text/css\\">p {font-size: 12px;}</style>"`
+        `"<style data-rh="true" type="text/css">body {background-color: green;}</style><style data-rh="true" type="text/css">p {font-size: 12px;}</style>"`
       );
     });
 
@@ -56,7 +56,7 @@ describe('server', () => {
       expect(head.style).toBeDefined();
       expect(head.style.toString).toBeDefined();
       expect(head.style.toString()).toMatchInlineSnapshot(
-        `"<style data-rh=\\"true\\" type=\\"text/css\\">body {background-color: green;}</style><style data-rh=\\"true\\" type=\\"text/css\\">p {font-size: 12px;}</style>"`
+        `"<style data-rh="true" type="text/css">body {background-color: green;}</style><style data-rh="true" type="text/css">p {font-size: 12px;}</style>"`
       );
     });
   });

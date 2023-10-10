@@ -62,7 +62,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('rel')).toBe('canonical');
     expect(firstTag?.getAttribute('href')).toBe('http://localhost/helmet/newest');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link href=\\"http://localhost/helmet/newest\\" rel=\\"canonical\\" data-rh=\\"true\\">"`
+      `"<link href="http://localhost/helmet/newest" rel="canonical" data-rh="true">"`
     );
   });
 
@@ -92,7 +92,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('type')).toBe('text/css');
     expect(firstTag?.getAttribute('media')).toBe('all');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link href=\\"http://localhost/style.css\\" rel=\\"stylesheet\\" type=\\"text/css\\" media=\\"all\\" data-rh=\\"true\\">"`
+      `"<link href="http://localhost/style.css" rel="stylesheet" type="text/css" media="all" data-rh="true">"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -102,7 +102,7 @@ describe('link tags', () => {
     expect(secondTag?.getAttribute('type')).toBe('text/css');
     expect(secondTag?.getAttribute('media')).toBe('all');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"stylesheet\\" href=\\"http://localhost/inner.css\\" type=\\"text/css\\" media=\\"all\\" data-rh=\\"true\\">"`
+      `"<link rel="stylesheet" href="http://localhost/inner.css" type="text/css" media="all" data-rh="true">"`
     );
   });
 
@@ -135,7 +135,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('type')).toBe('text/css');
     expect(firstTag?.getAttribute('media')).toBe('all');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link href=\\"http://localhost/style.css\\" rel=\\"stylesheet\\" type=\\"text/css\\" media=\\"all\\" data-rh=\\"true\\">"`
+      `"<link href="http://localhost/style.css" rel="stylesheet" type="text/css" media="all" data-rh="true">"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -143,7 +143,7 @@ describe('link tags', () => {
     expect(secondTag?.getAttribute('href')).toBe('http://localhost/helmet/innercomponent');
     expect(secondTag?.getAttribute('rel')).toBe('canonical');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet/innercomponent\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet/innercomponent" data-rh="true">"`
     );
 
     expect(thirdTag).toBeInstanceOf(Element);
@@ -153,7 +153,7 @@ describe('link tags', () => {
     expect(thirdTag?.getAttribute('type')).toBe('text/css');
     expect(thirdTag?.getAttribute('media')).toBe('all');
     expect(thirdTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link href=\\"http://localhost/inner.css\\" rel=\\"stylesheet\\" type=\\"text/css\\" media=\\"all\\" data-rh=\\"true\\">"`
+      `"<link href="http://localhost/inner.css" rel="stylesheet" type="text/css" media="all" data-rh="true">"`
     );
   });
 
@@ -177,7 +177,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('rel')).toBe('canonical');
     expect(firstTag?.getAttribute('href')).toBe('http://localhost/helmet');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet" data-rh="true">"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -185,7 +185,7 @@ describe('link tags', () => {
     expect(secondTag?.getAttribute('rel')).toBe('canonical');
     expect(secondTag?.getAttribute('href')).toBe('http://localhost/helmet/component');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet/component\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet/component" data-rh="true">"`
     );
   });
 
@@ -213,7 +213,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('rel')).toBe('canonical');
     expect(firstTag?.getAttribute('href')).toBe('http://localhost/helmet/innercomponent');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet/innercomponent\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet/innercomponent" data-rh="true">"`
     );
   });
 
@@ -242,7 +242,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('rel')).toBe('canonical');
     expect(firstTag?.getAttribute('href')).toBe('http://localhost/helmet/component');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet/component\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet/component" data-rh="true">"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -250,7 +250,7 @@ describe('link tags', () => {
     expect(secondTag?.getAttribute('rel')).toBe('canonical');
     expect(secondTag?.getAttribute('href')).toBe('http://localhost/helmet/innercomponent');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet/innercomponent\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet/innercomponent" data-rh="true">"`
     );
   });
 
@@ -273,7 +273,7 @@ describe('link tags', () => {
     expect(firstTag?.getAttribute('rel')).toBe('canonical');
     expect(firstTag?.getAttribute('href')).toBe('http://localhost/helmet/component');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<link rel=\\"canonical\\" href=\\"http://localhost/helmet/component\\" data-rh=\\"true\\">"`
+      `"<link rel="canonical" href="http://localhost/helmet/component" data-rh="true">"`
     );
   });
 

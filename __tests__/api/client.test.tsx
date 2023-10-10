@@ -49,25 +49,25 @@ describe('onChangeClientState', () => {
       expect(addedTags.baseTag).toBeDefined();
       expect(addedTags.baseTag[0]).toBeDefined();
       expect(addedTags.baseTag[0].outerHTML).toMatchInlineSnapshot(
-        `"<base href=\\"http://mysite.com/\\" data-rh=\\"true\\">"`
+        `"<base href="http://mysite.com/" data-rh="true">"`
       );
 
       expect(addedTags.metaTags).toBeDefined();
       expect(addedTags.metaTags[0]).toBeDefined();
       expect(addedTags.metaTags[0].outerHTML).toMatchInlineSnapshot(
-        `"<meta charset=\\"utf-8\\" data-rh=\\"true\\">"`
+        `"<meta charset="utf-8" data-rh="true">"`
       );
 
       expect(addedTags.linkTags).toBeDefined();
       expect(addedTags.linkTags[0]).toBeDefined();
       expect(addedTags.linkTags[0].outerHTML).toMatchInlineSnapshot(
-        `"<link href=\\"http://localhost/helmet\\" rel=\\"canonical\\" data-rh=\\"true\\">"`
+        `"<link href="http://localhost/helmet" rel="canonical" data-rh="true">"`
       );
 
       expect(addedTags.scriptTags).toBeDefined();
       expect(addedTags.scriptTags[0]).toBeDefined();
       expect(addedTags.scriptTags[0].outerHTML).toMatchInlineSnapshot(
-        `"<script src=\\"http://localhost/test.js\\" type=\\"text/javascript\\" data-rh=\\"true\\"></script>"`
+        `"<script src="http://localhost/test.js" type="text/javascript" data-rh="true"></script>"`
       );
 
       expect(removedTags).toEqual({});

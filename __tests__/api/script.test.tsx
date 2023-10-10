@@ -90,7 +90,7 @@ describe('script tags', () => {
     expect(firstTag?.getAttribute('src')).toBe('http://localhost/test.js');
     expect(firstTag?.getAttribute('type')).toBe('text/javascript');
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(
-      `"<script src=\\"http://localhost/test.js\\" type=\\"text/javascript\\" data-rh=\\"true\\"></script>"`
+      `"<script src="http://localhost/test.js" type="text/javascript" data-rh="true"></script>"`
     );
 
     expect(secondTag).toBeInstanceOf(Element);
@@ -98,7 +98,7 @@ describe('script tags', () => {
     expect(secondTag?.getAttribute('src')).toBe('http://localhost/test2.js');
     expect(secondTag?.getAttribute('type')).toBe('text/javascript');
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(
-      `"<script src=\\"http://localhost/test2.js\\" type=\\"text/javascript\\" data-rh=\\"true\\"></script>"`
+      `"<script src="http://localhost/test2.js" type="text/javascript" data-rh="true"></script>"`
     );
   });
 
@@ -113,7 +113,7 @@ describe('script tags', () => {
 
     expect(existingTag).toBeDefined();
     expect(existingTag?.outerHTML).toMatchInlineSnapshot(
-      `"<script src=\\"foo.js\\" async=\\"\\" data-rh=\\"true\\"></script>"`
+      `"<script src="foo.js" async="" data-rh="true"></script>"`
     );
   });
 

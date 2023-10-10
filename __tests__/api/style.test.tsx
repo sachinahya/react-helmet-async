@@ -37,7 +37,7 @@ describe('Declarative API', () => {
     expect(firstTag?.getAttribute('type')).toBe('text/css');
     expect(firstTag?.innerHTML).toEqual(cssText1);
     expect(firstTag?.outerHTML).toMatchInlineSnapshot(`
-      "<style type=\\"text/css\\" data-rh=\\"true\\">
+      "<style type="text/css" data-rh="true">
                   body {
                       background-color: green;
                   }
@@ -47,7 +47,7 @@ describe('Declarative API', () => {
     expect(secondTag).toBeInstanceOf(Element);
     expect(secondTag?.innerHTML).toEqual(cssText2);
     expect(secondTag?.outerHTML).toMatchInlineSnapshot(`
-      "<style data-rh=\\"true\\">
+      "<style data-rh="true">
                   p {
                       font-size: 12px;
                   }

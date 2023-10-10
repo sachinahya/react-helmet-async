@@ -1,5 +1,5 @@
 module.exports = {
-  extends: ['kyt'],
+  extends: ['kyt', 'plugin:react/jsx-runtime'],
 
   rules: {
     'react/static-property-placement': 0,
@@ -25,10 +25,11 @@ module.exports = {
 
   overrides: [
     {
-      files: ['*.test.js'],
+      files: ['*.test.?(c|m)?(j|t)?s?(x)'],
       rules: {
         'react/jsx-props-no-spreading': 0,
         'react/no-unknown-property': 0,
+        'react/jsx-no-useless-fragment': 0,
       },
     },
   ],

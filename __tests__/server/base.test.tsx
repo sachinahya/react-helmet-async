@@ -39,7 +39,7 @@ describe('server', () => {
       const markup = ReactServer.renderToStaticMarkup(baseComponent);
 
       expect(markup).toMatchInlineSnapshot(
-        `"<base data-rh=\\"true\\" target=\\"_blank\\" href=\\"http://localhost/\\"/>"`
+        `"<base data-rh="true" target="_blank" href="http://localhost/"/>"`
       );
     });
 
@@ -58,7 +58,7 @@ describe('server', () => {
       expect(head.base).toBeDefined();
       expect(head.base.toString).toBeDefined();
       expect(head.base.toString()).toMatchInlineSnapshot(
-        `"<base data-rh=\\"true\\" target=\\"_blank\\" href=\\"http://localhost/\\"/>"`
+        `"<base data-rh="true" target="_blank" href="http://localhost/"/>"`
       );
     });
   });

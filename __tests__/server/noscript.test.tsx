@@ -40,7 +40,7 @@ describe('server', () => {
       const markup = ReactServer.renderToStaticMarkup(noscriptComponent);
 
       expect(markup).toMatchInlineSnapshot(
-        `"<noscript data-rh=\\"true\\" id=\\"foo\\"><link rel=\\"stylesheet\\" type=\\"text/css\\" href=\\"/style.css\\" /></noscript><noscript data-rh=\\"true\\" id=\\"bar\\"><link rel=\\"stylesheet\\" type=\\"text/css\\" href=\\"/style2.css\\" /></noscript>"`
+        `"<noscript data-rh="true" id="foo"><link rel="stylesheet" type="text/css" href="/style.css" /></noscript><noscript data-rh="true" id="bar"><link rel="stylesheet" type="text/css" href="/style2.css" /></noscript>"`
       );
     });
   });

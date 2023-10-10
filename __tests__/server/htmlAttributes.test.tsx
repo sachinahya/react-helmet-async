@@ -25,7 +25,7 @@ describe('server', () => {
 
       const markup = ReactServer.renderToStaticMarkup(<html lang="en" {...attrs} />);
 
-      expect(markup).toMatchInlineSnapshot(`"<html lang=\\"ga\\" class=\\"myClassName\\"></html>"`);
+      expect(markup).toMatchInlineSnapshot(`"<html lang="ga" class="myClassName"></html>"`);
     });
 
     it('renders html attributes as string', () => {
@@ -43,7 +43,7 @@ describe('server', () => {
       expect(head.htmlAttributes).toBeDefined();
       expect(head.htmlAttributes.toString).toBeDefined();
       expect(head.htmlAttributes.toString()).toMatchInlineSnapshot(
-        `"lang=\\"ga\\" class=\\"myClassName\\""`
+        `"lang="ga" class="myClassName""`
       );
     });
   });
