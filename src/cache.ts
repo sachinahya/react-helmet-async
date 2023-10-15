@@ -1,6 +1,6 @@
-import { HelmetProps } from './state';
+import { HeadProps } from './state';
 
-export interface HelmetCache {
-  update(instance: unknown, props: HelmetProps): void;
+export interface HeadCache {
+  update(instance: unknown, props: HeadProps): void;
   remove(instance: unknown): void;
 }

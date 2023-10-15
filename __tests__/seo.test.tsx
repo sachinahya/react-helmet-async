@@ -1,17 +1,17 @@
-import { Helmet } from '../src/Helmet';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { Head } from '../src/Head';
+import { HeadServerCache } from '../src/server/server-cache';
 import { renderServer } from './utils';
 
 describe('SEO prioritisation', () => {
   it('prioritizes SEO tags when asked to', () => {
-    const cache = new HelmetServerCache({ prioritiseSeoTags: true });
+    const cache = new HeadServerCache({ prioritiseSeoTags: true });
 
     renderServer(
-      <Helmet>
+      <Head>
         <link rel="notImportant" href="https://www.chipotle.com" />
         <link rel="canonical" href="https://www.tacobell.com" />
         <meta property="og:title" content="A very important title" />
-      </Helmet>,
+      </Head>,
       cache
     );
 
@@ -23,20 +23,20 @@ describe('SEO prioritisation', () => {
     );
 
     expect(head.link.toString()).toBe(
-      '<link data-rh="true" rel="notImportant" href="https://www.chipotle.com"/>'
+      '<link data-ht="true" rel="notImportant" href="https://www.chipotle.com"/>'
     );
     expect(head.meta.toString()).toBe('');
   });
 
   it('does not prioritize SEO unless asked to', () => {
-    const cache = new HelmetServerCache();
+    const cache = new HeadServerCache();
 
     renderServer(
-      <Helmet>
+      <Head>
         <link rel="notImportant" href="https://www.chipotle.com" />
         <link rel="canonical" href="https://www.tacobell.com" />
         <meta property="og:title" content="A very important title" />
-      </Helmet>,
+      </Head>,
       cache
     );
 

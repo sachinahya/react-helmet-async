@@ -1,40 +1,42 @@
-import React, { HTMLAttributes, ReactElement } from 'react';
+import { createElement, JSX, HTMLAttributes, ReactElement } from 'react';
 import { Entries } from 'type-fest';
 import {
-  HELMET_ATTRIBUTE,
+  TRACKING_ATTRIBUTE,
   TAG_NAMES,
   TAG_PROPERTIES,
   getHtmlAttributeName,
   NON_SELF_CLOSING_TAGS,
 } from '../constants';
-import { flattenArray } from '../utils';
-import { AttributeState, HelmetState, TagState } from '../state';
-import { PrioritisedHelmetState, PriorityTags } from '../seo';
+import { AttributeState, HeadState, TagState, TitleState } from '../state';
+import { PrioritisedHeadState, PriorityTags } from '../seo';
 
-export interface HelmetDatum {
+export interface HeadDatum {
   toString(): string;
 }
 
-export interface HelmetTagDatum extends HelmetDatum {
+export interface HeadTagDatum extends HeadDatum {
   toElements(): ReactElement[];
 }
 
-export interface HelmetAttributeDatum<T extends HTMLAttributes<HTMLElement>> extends HelmetDatum {
+export interface HeadAttributeDatum<T extends HTMLAttributes<HTMLElement>> extends HeadDatum {
   toProps(): T;
 }
 
-export interface HelmetServerOutput {
-  base: HelmetTagDatum;
-  bodyAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLBodyElement>>;
-  htmlAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLHtmlElement>>;
-  link: HelmetTagDatum;
-  meta: HelmetTagDatum;
-  noscript: HelmetTagDatum;
-  script: HelmetTagDatum;
-  style: HelmetTagDatum;
-  title: HelmetTagDatum;
-  titleAttributes: HelmetAttributeDatum<HTMLAttributes<HTMLTitleElement>>;
-  priority: HelmetTagDatum;
+export type TagServerOutput = { [K in keyof TagState]: HeadTagDatum };
+
+export type AttributeServerOutput = {
+  [K in keyof AttributeState]: HeadAttributeDatum<AttributeState[K]>;
+};
+
+export type TitleServerOutput = {
+  [K in keyof TitleState]: HeadTagDatum;
+};
+
+export interface HeadServerOutput
+  extends TagServerOutput,
+    AttributeServerOutput,
+    TitleServerOutput {
+  priority: HeadTagDatum;
 }
 
 const encodeSpecialCharactersString = (str: string): string => {
@@ -68,19 +70,21 @@ const generateElementAttributesAsString = (attributes: object): string => {
 
 const generateTitleAsString = (
   type: typeof TAG_NAMES.TITLE,
-  title: HelmetState['title'],
-  attributes: HelmetState['titleAttributes']
+  title: HeadState['title'],
+  attributes: HeadState['titleAttributes']
 ) => {
-  const attributeString = generateElementAttributesAsString(attributes);
-  const flattenedTitle = encodeSpecialCharactersString(flattenArray(title) || '');
+  title = Array.isArray(title) ? title.join('') : title;
 
-  return `<${type} ${HELMET_ATTRIBUTE}="true"${
+  const attributeString = generateElementAttributesAsString(attributes);
+  const flattenedTitle = encodeSpecialCharactersString(title || '');
+
+  return `<${type} ${TRACKING_ATTRIBUTE}="true"${
     attributeString ? ` ${attributeString}` : ''
   }>${flattenedTitle}</${type}>`;
 };
 
 const generateTagsAsString = <T extends keyof TagState>(
-  type: keyof React.JSX.IntrinsicElements,
+  type: keyof JSX.IntrinsicElements,
   tags: TagState[T]
 ): string => {
   let str = '';
@@ -91,7 +95,7 @@ const generateTagsAsString = <T extends keyof TagState>(
 
     const isSelfClosing = !NON_SELF_CLOSING_TAGS.includes(type);
 
-    str += `<${type} ${HELMET_ATTRIBUTE}="true" ${attributeString}${
+    str += `<${type} ${TRACKING_ATTRIBUTE}="true" ${attributeString}${
       isSelfClosing ? `/>` : `>${tagContent}</${type}>`
     }`;
   }
@@ -101,20 +105,20 @@ const generateTagsAsString = <T extends keyof TagState>(
 
 const generateTitleAsReactComponent = (
   title: string | string[] | undefined,
-  attributes: HelmetState['titleAttributes']
+  attributes: HeadState['titleAttributes']
 ): ReactElement[] => {
   // assigning into an array to define toString function on it
   const props = {
     key: String(title),
-    [HELMET_ATTRIBUTE]: true,
+    [TRACKING_ATTRIBUTE]: true,
     ...attributes,
   };
 
-  return [React.createElement(TAG_NAMES.TITLE, props, title)];
+  return [createElement(TAG_NAMES.TITLE, props, title)];
 };
 
 const generateTagsAsReactComponent = (
-  type: keyof React.JSX.IntrinsicElements,
+  type: keyof JSX.IntrinsicElements,
   tags: TagState[keyof TagState]
 ): ReactElement[] => {
   const elements: ReactElement[] = [];
@@ -122,7 +126,7 @@ const generateTagsAsReactComponent = (
   for (const [i, tag] of tags.entries()) {
     const mappedTag: { dangerouslySetInnerHTML?: unknown } & Record<string, unknown> = {
       key: i,
-      [HELMET_ATTRIBUTE]: true,
+      [TRACKING_ATTRIBUTE]: true,
     };
 
     for (const [attribute, value] of Object.entries(tag) as Entries<typeof tag>) {
@@ -136,16 +140,16 @@ const generateTagsAsReactComponent = (
       }
     }
 
-    elements.push(React.createElement(type, mappedTag));
+    elements.push(createElement(type, mappedTag));
   }
 
   return elements;
 };
 
 const getMethodsForTags = (
-  type: keyof React.JSX.IntrinsicElements,
+  type: keyof JSX.IntrinsicElements,
   tags: TagState[keyof TagState]
-): HelmetTagDatum => {
+): HeadServerOutput[keyof TagState] => {
   return {
     toElements: () => generateTagsAsReactComponent(type, tags),
     toString: () => generateTagsAsString(type, tags),
@@ -153,9 +157,9 @@ const getMethodsForTags = (
 };
 
 const getMethodsForTitleTag = (
-  title: HelmetState['title'],
-  titleAttributes: HelmetState['titleAttributes']
-): HelmetTagDatum => {
+  title: HeadState['title'],
+  titleAttributes: HeadState['titleAttributes']
+): HeadServerOutput[keyof TagState] => {
   return {
     toElements: () => generateTitleAsReactComponent(title, titleAttributes),
     toString: () => generateTitleAsString(TAG_NAMES.TITLE, title, titleAttributes),
@@ -164,14 +168,16 @@ const getMethodsForTitleTag = (
 
 const getMethodsForAttributes = <T extends AttributeState[keyof AttributeState]>(
   tags: T
-): HelmetAttributeDatum<T> => {
+): HeadAttributeDatum<T> => {
   return {
     toProps: () => tags,
     toString: () => generateElementAttributesAsString(tags),
   };
 };
 
-const getPriorityMethods = (priority: PriorityTags | undefined): HelmetTagDatum => {
+const getPriorityMethods = (
+  priority: PriorityTags | undefined
+): HeadServerOutput[keyof TagState] => {
   if (!priority) {
     return {
       toElements: () => [],
@@ -195,7 +201,7 @@ const getPriorityMethods = (priority: PriorityTags | undefined): HelmetTagDatum 
   };
 };
 
-export const getServerOutput = (state: PrioritisedHelmetState): HelmetServerOutput => {
+export const getServerOutput = (state: PrioritisedHeadState): HeadServerOutput => {
   const {
     base,
     bodyAttributes,

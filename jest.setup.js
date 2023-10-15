@@ -2,7 +2,7 @@ import 'raf/polyfill';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import ReactDOM from 'react-dom';
-import { Helmet } from './src/Helmet';
+import { Head } from './src/Head';
 
 configure({ adapter: new Adapter() });
 

@@ -1,11 +1,10 @@
-import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from '../constants';
-import { flattenArray } from '../utils';
-import { HelmetState } from '../state';
+import { TRACKING_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from '../constants';
+import { HeadState } from '../state';
 
 const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: object[]) => {
   const headElement = document.head;
   const tagNodes = headElement.querySelectorAll<HTMLElementTagNameMap[T]>(
-    `${type}[${HELMET_ATTRIBUTE}]`
+    `${type}[${TRACKING_ATTRIBUTE}]`
   );
   const oldTags = [...tagNodes];
   const newTags: HTMLElement[] = [];
@@ -33,7 +32,7 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
         }
       }
 
-      newElement.setAttribute(HELMET_ATTRIBUTE, 'true');
+      newElement.setAttribute(TRACKING_ATTRIBUTE, 'true');
 
       // Remove a duplicate tag from domTagstoRemove, so it isn't cleared.
       if (
@@ -60,7 +59,7 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
 
 const updateAttributes = (
   tagName: string,
-  attributes: HelmetState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']
+  attributes: HeadState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']
 ) => {
   const elementTag = document.getElementsByTagName(tagName)[0];
 
@@ -68,10 +67,10 @@ const updateAttributes = (
     return;
   }
 
-  const helmetAttributeString = elementTag.getAttribute(HELMET_ATTRIBUTE);
-  const helmetAttributes = helmetAttributeString ? helmetAttributeString.split(',') : [];
+  const headAttributeString = elementTag.getAttribute(TRACKING_ATTRIBUTE);
+  const headAttributes = headAttributeString ? headAttributeString.split(',') : [];
 
-  const attributesToRemove = [...helmetAttributes].map(getHtmlAttributeName);
+  const attributesToRemove = [...headAttributes].map(getHtmlAttributeName);
 
   for (const [key, value] of Object.entries(attributes)) {
     if (value === undefined) {
@@ -84,8 +83,8 @@ const updateAttributes = (
       elementTag.setAttribute(htmlAttribute, String(value));
     }
 
-    if (helmetAttributes.indexOf(htmlAttribute) === -1) {
-      helmetAttributes.push(htmlAttribute);
+    if (headAttributes.indexOf(htmlAttribute) === -1) {
+      headAttributes.push(htmlAttribute);
     }
 
     const indexToSave = attributesToRemove.indexOf(htmlAttribute);
@@ -103,24 +102,25 @@ const updateAttributes = (
     .map(([attribute]) => getHtmlAttributeName(attribute))
     .join(',');
 
-  if (helmetAttributes.length === attributesToRemove.length) {
-    elementTag.removeAttribute(HELMET_ATTRIBUTE);
-  } else if (elementTag.getAttribute(HELMET_ATTRIBUTE) !== attributeKeyHash) {
-    elementTag.setAttribute(HELMET_ATTRIBUTE, attributeKeyHash);
+  if (headAttributes.length === attributesToRemove.length) {
+    elementTag.removeAttribute(TRACKING_ATTRIBUTE);
+  } else if (elementTag.getAttribute(TRACKING_ATTRIBUTE) !== attributeKeyHash) {
+    elementTag.setAttribute(TRACKING_ATTRIBUTE, attributeKeyHash);
   }
 };
 
-const updateTitle = (title: HelmetState['title'], attributes: HelmetState['titleAttributes']) => {
+const updateTitle = (title: HeadState['title'], attributes: HeadState['titleAttributes']) => {
   title ??= '';
+  title = Array.isArray(title) ? title.join('') : title;
 
   if (document.title !== title) {
-    document.title = flattenArray(title);
+    document.title = title;
   }
 
   updateAttributes(TAG_NAMES.TITLE, attributes);
 };
 
-const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
+const commitTagChanges = (newState: HeadState, cb?: () => void) => {
   const {
     base,
     bodyAttributes,
@@ -150,7 +150,7 @@ const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
 
 let handle: NodeJS.Timeout;
 
-export const handleStateChange = (state: HelmetState, sync: boolean): void => {
+export const handleStateChange = (state: HeadState, sync: boolean): void => {
   if (handle) {
     clearTimeout(handle);
   }

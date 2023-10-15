@@ -1,16 +1,16 @@
-import { Helmet } from '../src/Helmet';
-import { HELMET_ATTRIBUTE } from '../src/constants';
+import { Head } from '../src/Head';
+import { TRACKING_ATTRIBUTE } from '../src/constants';
 import { getInjectedElementsByTagName, renderClient, renderResult, renderServer } from './utils';
-import { HelmetClientCache } from '../src/client/client-cache';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { HeadClientCache } from '../src/client/client-cache';
+import { HeadServerCache } from '../src/server/server-cache';
 
 describe('misc', () => {
-  let serverCache: HelmetServerCache;
-  let clientCache: HelmetClientCache;
+  let serverCache: HeadServerCache;
+  let clientCache: HeadClientCache;
 
   beforeEach(() => {
-    serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache({ sync: true });
+    serverCache = new HeadServerCache();
+    clientCache = new HeadClientCache({ sync: true });
   });
 
   describe('errors', () => {
@@ -18,48 +18,48 @@ describe('misc', () => {
       jest.spyOn(console, 'error').mockImplementation();
     });
 
-    describe('does not accept nested Helmets', () => {
-      const NestedHelmets = () => (
-        <Helmet>
+    describe('does not accept nested Head tags', () => {
+      const NestedHeads = () => (
+        <Head>
           <title>Test Title</title>
-          <Helmet>
+          <Head>
             <title>Title you will never see</title>
-          </Helmet>
-        </Helmet>
+          </Head>
+        </Head>
       );
 
       it('client', () => {
         expect(() => {
-          renderClient(<NestedHelmets />, clientCache);
+          renderClient(<NestedHeads />, clientCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: You may be attempting to nest <Helmet> components within each other, which is not allowed. Refer to our API for more information."`
+          `"Invariant failed: You may be attempting to nest <Head> components within each other, which is not allowed. Refer to our API for more information."`
         );
       });
 
       it('server', () => {
         expect(() => {
-          renderServer(<NestedHelmets />, serverCache);
+          renderServer(<NestedHeads />, serverCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: You may be attempting to nest <Helmet> components within each other, which is not allowed. Refer to our API for more information."`
+          `"Invariant failed: You may be attempting to nest <Head> components within each other, which is not allowed. Refer to our API for more information."`
         );
       });
     });
 
     describe('throws on invalid elements', () => {
       const InvalidElements = () => (
-        <Helmet>
+        <Head>
           <title>Test Title</title>
           <div>
             <title>Title you will never see</title>
           </div>
-        </Helmet>
+        </Head>
       );
 
       it('client', () => {
         expect(() => {
           renderClient(<InvalidElements />, clientCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Helmet does not support rendering <div> elements. Refer to our API for more information."`
+          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Head does not support rendering <div> elements. Refer to our API for more information."`
         );
       });
 
@@ -67,24 +67,24 @@ describe('misc', () => {
         expect(() => {
           renderServer(<InvalidElements />, serverCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Helmet does not support rendering <div> elements. Refer to our API for more information."`
+          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Head does not support rendering <div> elements. Refer to our API for more information."`
         );
       });
     });
 
     describe('throws on invalid self-closing elements', () => {
       const InvalidSelfClosing = () => (
-        <Helmet>
+        <Head>
           <title>Test Title</title>
           <div data-custom-attribute />
-        </Helmet>
+        </Head>
       );
 
       it('client', () => {
         expect(() => {
           renderClient(<InvalidSelfClosing />, clientCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Helmet does not support rendering <div> elements. Refer to our API for more information."`
+          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Head does not support rendering <div> elements. Refer to our API for more information."`
         );
       });
 
@@ -92,20 +92,20 @@ describe('misc', () => {
         expect(() => {
           renderServer(<InvalidSelfClosing />, serverCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Helmet does not support rendering <div> elements. Refer to our API for more information."`
+          `"Invariant failed: Only elements types base, body, head, html, link, meta, noscript, script, style, title are allowed. Head does not support rendering <div> elements. Refer to our API for more information."`
         );
       });
     });
 
     describe('throws on invalid strings as children', () => {
       const InvalidStringChildren = () => (
-        <Helmet>
+        <Head>
           <title>Test Title</title>
           {/* eslint-disable-next-line react/void-dom-elements-no-children */}
-          <link href="http://localhost/helmet" rel="canonical">
+          <link href="http://localhost/head" rel="canonical">
             test
           </link>
-        </Helmet>
+        </Head>
       );
 
       it('client', () => {
@@ -127,19 +127,19 @@ describe('misc', () => {
 
     describe('throws on invalid children', () => {
       const InvalidChildren = () => (
-        <Helmet>
+        <Head>
           <title>Test Title</title>
           <script>
             <title>Title you will never see</title>
           </script>
-        </Helmet>
+        </Head>
       );
 
       it('client', () => {
         expect(() => {
           renderClient(<InvalidChildren />, clientCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: Helmet expects a string as a child of <script>. Did you forget to wrap your children in braces? ( <script>{\`\`}</script> ) Refer to our API for more information."`
+          `"Invariant failed: Head expects a string as a child of <script>. Did you forget to wrap your children in braces? ( <script>{\`\`}</script> ) Refer to our API for more information."`
         );
       });
 
@@ -147,7 +147,7 @@ describe('misc', () => {
         expect(() => {
           renderServer(<InvalidChildren />, serverCache);
         }).toThrowErrorMatchingInlineSnapshot(
-          `"Invariant failed: Helmet expects a string as a child of <script>. Did you forget to wrap your children in braces? ( <script>{\`\`}</script> ) Refer to our API for more information."`
+          `"Invariant failed: Head expects a string as a child of <script>. Did you forget to wrap your children in braces? ( <script>{\`\`}</script> ) Refer to our API for more information."`
         );
       });
     });
@@ -157,10 +157,10 @@ describe('misc', () => {
     const charSet = undefined;
 
     const UndefinedChildren = () => (
-      <Helmet>
+      <Head>
         {charSet && <meta charSet={charSet} />}
         <title>Test Title</title>
-      </Helmet>
+      </Head>
     );
 
     it('client', () => {
@@ -186,10 +186,10 @@ describe('misc', () => {
     const charSet = 0;
 
     const UndefinedChildren = () => (
-      <Helmet>
+      <Head>
         {charSet && <meta charSet={charSet} />}
         <title>Test Title</title>
-      </Helmet>
+      </Head>
     );
 
     it('client', () => {
@@ -213,9 +213,9 @@ describe('misc', () => {
 
   describe('recognizes valid tags regardless of attribute ordering', () => {
     const AttributeOrdering = () => (
-      <Helmet>
+      <Head>
         <meta content="Test Description" name="description" />
-      </Helmet>
+      </Head>
     );
 
     it('client', () => {
@@ -229,7 +229,7 @@ describe('misc', () => {
       expect(existingTag?.getAttribute('name')).toBe('description');
       expect(existingTag?.getAttribute('content')).toBe('Test Description');
       expect(existingTag?.outerHTML).toBe(
-        '<meta content="Test Description" name="description" data-rh="true">'
+        '<meta content="Test Description" name="description" data-ht="true">'
       );
     });
 
@@ -239,10 +239,10 @@ describe('misc', () => {
       const head = serverCache.getOutput();
 
       expect(head.meta.toString()).toBe(
-        '<meta data-rh="true" content="Test Description" name="description"/>'
+        '<meta data-ht="true" content="Test Description" name="description"/>'
       );
       expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-rh="true" content="Test Description" name="description"/>'
+        '<meta data-ht="true" content="Test Description" name="description"/>'
       );
     });
   });

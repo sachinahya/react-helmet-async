@@ -1,18 +1,15 @@
 import { SEO_PRIORITY_TAGS, SeoPriority } from './constants';
-import { HelmetState, TagState } from './state';
+import { HeadState, TagState } from './state';
 
 export type SeoPriorityOptions = 'meta' | 'link' | 'script';
 
 export type PriorityTags = Pick<TagState, 'meta' | 'link' | 'script'>;
 
-export interface PrioritisedHelmetState extends HelmetState {
+export interface PrioritisedHeadState extends HeadState {
   priority?: PriorityTags;
 }
 
-const checkIfPropsMatch = (
-  props: HelmetState[SeoPriorityOptions][number],
-  toMatch: SeoPriority
-) => {
+const checkIfPropsMatch = (props: HeadState[SeoPriorityOptions][number], toMatch: SeoPriority) => {
   for (const [key, value] of Object.entries(props)) {
     // e.g. if rel exists in the list of allowed props [amphtml, alternate, etc]
     if (toMatch[key]?.includes(value)) {
@@ -23,7 +20,7 @@ const checkIfPropsMatch = (
   return false;
 };
 
-const prioritise = <T extends HelmetState[SeoPriorityOptions][number]>(
+const prioritise = <T extends HeadState[SeoPriorityOptions][number]>(
   elementsList: T[],
   propsToMatch: SeoPriority
 ): { priority: T[]; default: T[] } => {
@@ -44,7 +41,7 @@ const prioritise = <T extends HelmetState[SeoPriorityOptions][number]>(
   };
 };
 
-export const prioritiseState = (state: HelmetState): PrioritisedHelmetState => {
+export const prioritiseState = (state: HeadState): PrioritisedHeadState => {
   const metaP = prioritise(state.meta, SEO_PRIORITY_TAGS.meta);
   const linkP = prioritise(state.link, SEO_PRIORITY_TAGS.link);
   const scriptP = prioritise(state.script, SEO_PRIORITY_TAGS.script);

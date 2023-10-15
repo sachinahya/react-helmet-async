@@ -1,26 +1,26 @@
-import { LinkHTMLAttributes } from 'react';
+import { JSX, LinkHTMLAttributes } from 'react';
 import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES } from './constants';
 
 export interface TagState {
-  base: React.JSX.IntrinsicElements['base'][];
-  link: React.JSX.IntrinsicElements['link'][];
-  meta: React.JSX.IntrinsicElements['meta'][];
-  noscript: React.JSX.IntrinsicElements['noscript'][];
-  script: React.JSX.IntrinsicElements['script'][];
-  style: React.JSX.IntrinsicElements['style'][];
+  base: JSX.IntrinsicElements['base'][];
+  link: JSX.IntrinsicElements['link'][];
+  meta: JSX.IntrinsicElements['meta'][];
+  noscript: JSX.IntrinsicElements['noscript'][];
+  script: JSX.IntrinsicElements['script'][];
+  style: JSX.IntrinsicElements['style'][];
 }
 
 export interface AttributeState {
-  bodyAttributes: React.JSX.IntrinsicElements['body'];
-  htmlAttributes: React.JSX.IntrinsicElements['html'];
-  titleAttributes: React.JSX.IntrinsicElements['title'];
+  bodyAttributes: JSX.IntrinsicElements['body'];
+  htmlAttributes: JSX.IntrinsicElements['html'];
+  titleAttributes: JSX.IntrinsicElements['title'];
 }
 
 export interface TitleState {
   title: string | string[] | undefined;
 }
 
-export interface HelmetState extends TagState, AttributeState, TitleState {}
+export interface HeadState extends TagState, AttributeState, TitleState {}
 
 export interface TagProps extends Partial<TagState> {}
 
@@ -28,12 +28,12 @@ export interface AttributeProps extends Partial<AttributeState> {}
 
 export interface TitleProps extends Partial<TitleState> {}
 
-export interface HelmetProps extends Partial<HelmetState> {}
+export interface HeadProps extends Partial<HeadState> {}
 
-const getInnermostProperty = <T extends keyof HelmetProps>(
-  propsList: HelmetProps[],
+const getInnermostProperty = <T extends keyof HeadProps>(
+  propsList: HeadProps[],
   property: T
-): HelmetProps[T] | undefined => {
+): HeadProps[T] | undefined => {
   for (const props of [...propsList].reverse()) {
     if (props[property] != null) {
       return props[property];
@@ -154,7 +154,7 @@ const getBaseTagFromPropsList = (propsList: TagProps[]): TagState['base'] => {
   return [];
 };
 
-export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
+export const instancePropsToState = (propsList: HeadProps[]): HeadState => {
   return {
     base: getBaseTagFromPropsList(propsList),
     bodyAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.BODY),

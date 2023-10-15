@@ -1,4 +1,4 @@
-import { AllHTMLAttributes } from 'react';
+import { AllHTMLAttributes, JSX } from 'react';
 import { AttributeState } from './state';
 
 export const TAG_NAMES = {
@@ -12,13 +12,13 @@ export const TAG_NAMES = {
   SCRIPT: 'script',
   STYLE: 'style',
   TITLE: 'title',
-} as const satisfies Record<string, keyof React.JSX.IntrinsicElements>;
+} as const satisfies Record<string, keyof JSX.IntrinsicElements>;
 
 export const NON_SELF_CLOSING_TAGS: string[] = [
   TAG_NAMES.NOSCRIPT,
   TAG_NAMES.SCRIPT,
   TAG_NAMES.STYLE,
-] satisfies readonly (keyof React.JSX.IntrinsicElements)[];
+] satisfies readonly (keyof JSX.IntrinsicElements)[];
 
 export const ATTRIBUTE_NAMES = {
   BODY: 'bodyAttributes',
@@ -81,4 +81,4 @@ export const TAG_PROPERTIES = {
   SRC: 'src',
 } as const satisfies Record<string, keyof AllHTMLAttributes<HTMLElement>>;
 
-export const HELMET_ATTRIBUTE = 'data-rh';
+export const TRACKING_ATTRIBUTE = 'data-ht';

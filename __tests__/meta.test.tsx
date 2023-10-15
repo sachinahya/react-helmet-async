@@ -1,29 +1,28 @@
-import { Helmet } from '../src';
-import { HelmetClientCache } from '../src/client/client-cache';
-import { HELMET_ATTRIBUTE } from '../src/constants';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { Head } from '../src/Head';
+import { HeadClientCache } from '../src/client/client-cache';
+import { HeadServerCache } from '../src/server/server-cache';
 import { getInjectedElementsByTagName, renderClient, renderResult, renderServer } from './utils';
 
 describe('meta tags', () => {
-  let serverCache: HelmetServerCache;
-  let clientCache: HelmetClientCache;
+  let serverCache: HeadServerCache;
+  let clientCache: HeadClientCache;
 
   beforeEach(() => {
-    serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache({ sync: true });
+    serverCache = new HeadServerCache();
+    clientCache = new HeadClientCache({ sync: true });
   });
 
   describe('determine meta tags based on deepest nested component', () => {
     const DeepestNestedMeta = () => (
       <>
-        <Helmet>
+        <Head>
           <meta charSet="utf-8" />
           <meta name="description" content="Test description" />
-        </Helmet>
-        <Helmet>
+        </Head>
+        <Head>
           <meta name="description" content="Inner description" />
           <meta name="keywords" content="test,meta,tags" />
-        </Helmet>
+        </Head>
       </>
     );
 
@@ -33,10 +32,10 @@ describe('meta tags', () => {
       const head = serverCache.getOutput();
 
       expect(head.meta.toString()).toBe(
-        '<meta data-rh="true" charset="utf-8"/><meta data-rh="true" name="description" content="Inner description"/><meta data-rh="true" name="keywords" content="test,meta,tags"/>'
+        '<meta data-ht="true" charset="utf-8"/><meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="keywords" content="test,meta,tags"/>'
       );
       expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-rh="true" charSet="utf-8"/><meta data-rh="true" name="description" content="Inner description"/><meta data-rh="true" name="keywords" content="test,meta,tags"/>'
+        '<meta data-ht="true" charSet="utf-8"/><meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="keywords" content="test,meta,tags"/>'
       );
     });
 
@@ -53,28 +52,28 @@ describe('meta tags', () => {
       expect(tagNodes).toHaveLength(3);
 
       expect(firstTag?.getAttribute('charset')).toBe('utf-8');
-      expect(firstTag?.outerHTML).toBe('<meta charset="utf-8" data-rh="true">');
+      expect(firstTag?.outerHTML).toBe('<meta charset="utf-8" data-ht="true">');
 
       expect(secondTag?.getAttribute('name')).toBe('description');
       expect(secondTag?.getAttribute('content')).toBe('Inner description');
       expect(secondTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner description" data-rh="true">'
+        '<meta name="description" content="Inner description" data-ht="true">'
       );
 
       expect(thirdTag?.getAttribute('name')).toBe('keywords');
       expect(thirdTag?.getAttribute('content')).toBe('test,meta,tags');
       expect(thirdTag?.outerHTML).toBe(
-        '<meta name="keywords" content="test,meta,tags" data-rh="true">'
+        '<meta name="keywords" content="test,meta,tags" data-ht="true">'
       );
     });
   });
 
   describe('allows duplicate meta tags if specified in the same component', () => {
     const MultipleMetaTags = () => (
-      <Helmet>
+      <Head>
         <meta name="description" content="Test description" />
         <meta name="description" content="Duplicate description" />
-      </Helmet>
+      </Head>
     );
 
     it('server', () => {
@@ -83,10 +82,10 @@ describe('meta tags', () => {
       const head = serverCache.getOutput();
 
       expect(head.meta.toString()).toBe(
-        '<meta data-rh="true" name="description" content="Test description"/><meta data-rh="true" name="description" content="Duplicate description"/>'
+        '<meta data-ht="true" name="description" content="Test description"/><meta data-ht="true" name="description" content="Duplicate description"/>'
       );
       expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-rh="true" name="description" content="Test description"/><meta data-rh="true" name="description" content="Duplicate description"/>'
+        '<meta data-ht="true" name="description" content="Test description"/><meta data-ht="true" name="description" content="Duplicate description"/>'
       );
     });
 
@@ -102,13 +101,13 @@ describe('meta tags', () => {
       expect(firstTag?.getAttribute('name')).toBe('description');
       expect(firstTag?.getAttribute('content')).toBe('Test description');
       expect(firstTag?.outerHTML).toBe(
-        '<meta name="description" content="Test description" data-rh="true">'
+        '<meta name="description" content="Test description" data-ht="true">'
       );
 
       expect(secondTag?.getAttribute('name')).toBe('description');
       expect(secondTag?.getAttribute('content')).toBe('Duplicate description');
       expect(secondTag?.outerHTML).toBe(
-        '<meta name="description" content="Duplicate description" data-rh="true">'
+        '<meta name="description" content="Duplicate description" data-ht="true">'
       );
     });
   });
@@ -116,13 +115,13 @@ describe('meta tags', () => {
   describe('overrides duplicate meta tags with single meta tag in a nested component', () => {
     const MultipleNestedMetaOverride = () => (
       <>
-        <Helmet>
+        <Head>
           <meta name="description" content="Test description" />
           <meta name="description" content="Duplicate description" />
-        </Helmet>
-        <Helmet>
+        </Head>
+        <Head>
           <meta name="description" content="Inner description" />
-        </Helmet>
+        </Head>
       </>
     );
 
@@ -132,10 +131,10 @@ describe('meta tags', () => {
       const head = serverCache.getOutput();
 
       expect(head.meta.toString()).toBe(
-        '<meta data-rh="true" name="description" content="Inner description"/>'
+        '<meta data-ht="true" name="description" content="Inner description"/>'
       );
       expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-rh="true" name="description" content="Inner description"/>'
+        '<meta data-ht="true" name="description" content="Inner description"/>'
       );
     });
 
@@ -150,7 +149,7 @@ describe('meta tags', () => {
       expect(firstTag?.getAttribute('name')).toBe('description');
       expect(firstTag?.getAttribute('content')).toBe('Inner description');
       expect(firstTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner description" data-rh="true">'
+        '<meta name="description" content="Inner description" data-ht="true">'
       );
     });
   });
@@ -158,13 +157,13 @@ describe('meta tags', () => {
   describe('overrides single meta tag with duplicate meta tags in a nested component', () => {
     const MultipleNestedMetaOverride = () => (
       <>
-        <Helmet>
+        <Head>
           <meta name="description" content="Test description" />
-        </Helmet>
-        <Helmet>
+        </Head>
+        <Head>
           <meta name="description" content="Inner description" />
           <meta name="description" content="Inner duplicate description" />
-        </Helmet>
+        </Head>
       </>
     );
 
@@ -174,10 +173,10 @@ describe('meta tags', () => {
       const head = serverCache.getOutput();
 
       expect(head.meta.toString()).toBe(
-        '<meta data-rh="true" name="description" content="Inner description"/><meta data-rh="true" name="description" content="Inner duplicate description"/>'
+        '<meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="description" content="Inner duplicate description"/>'
       );
       expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-rh="true" name="description" content="Inner description"/><meta data-rh="true" name="description" content="Inner duplicate description"/>'
+        '<meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="description" content="Inner duplicate description"/>'
       );
     });
 
@@ -193,22 +192,22 @@ describe('meta tags', () => {
       expect(firstTag?.getAttribute('name')).toBe('description');
       expect(firstTag?.getAttribute('content')).toBe('Inner description');
       expect(firstTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner description" data-rh="true">'
+        '<meta name="description" content="Inner description" data-ht="true">'
       );
 
       expect(secondTag?.getAttribute('name')).toBe('description');
       expect(secondTag?.getAttribute('content')).toBe('Inner duplicate description');
       expect(secondTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner duplicate description" data-rh="true">'
+        '<meta name="description" content="Inner duplicate description" data-ht="true">'
       );
     });
   });
 
   describe('encodes special characters', () => {
     const AttributeSpecialCharacters = () => (
-      <Helmet>
+      <Head>
         <meta name="description" content={'This is "quoted" text and & and \'.'} />
-      </Helmet>
+      </Head>
     );
 
     it('server', () => {
@@ -217,10 +216,10 @@ describe('meta tags', () => {
       const head = serverCache.getOutput();
 
       expect(head.meta.toString()).toBe(
-        '<meta data-rh="true" name="description" content="This is &quot;quoted&quot; text and &amp; and &#x27;."/>'
+        '<meta data-ht="true" name="description" content="This is &quot;quoted&quot; text and &amp; and &#x27;."/>'
       );
       expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-rh="true" name="description" content="This is &quot;quoted&quot; text and &amp; and &#x27;."/>'
+        '<meta data-ht="true" name="description" content="This is &quot;quoted&quot; text and &amp; and &#x27;."/>'
       );
     });
 
@@ -235,7 +234,7 @@ describe('meta tags', () => {
       expect(existingTag?.getAttribute('name')).toBe('description');
       expect(existingTag?.getAttribute('content')).toBe('This is "quoted" text and & and \'.');
       expect(existingTag?.outerHTML).toMatchInlineSnapshot(
-        `"<meta name="description" content="This is &quot;quoted&quot; text and &amp; and '." data-rh="true">"`
+        `"<meta name="description" content="This is &quot;quoted&quot; text and &amp; and '." data-ht="true">"`
       );
     });
   });

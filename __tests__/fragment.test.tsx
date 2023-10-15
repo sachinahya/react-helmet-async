@@ -1,25 +1,25 @@
 import { renderClient, renderResult, renderServer } from './utils';
-import { Helmet } from '../src';
-import { HelmetClientCache } from '../src/client/client-cache';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { Head } from '../src/Head';
+import { HeadClientCache } from '../src/client/client-cache';
+import { HeadServerCache } from '../src/server/server-cache';
 
 describe('Fragments', () => {
-  let serverCache: HelmetServerCache;
-  let clientCache: HelmetClientCache;
+  let serverCache: HeadServerCache;
+  let clientCache: HeadClientCache;
 
   beforeEach(() => {
-    serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache({ sync: true });
+    serverCache = new HeadServerCache();
+    clientCache = new HeadClientCache({ sync: true });
   });
 
   describe('should parse Fragments', () => {
     const WithFragments = () => (
-      <Helmet>
+      <Head>
         <>
           <title>Hello</title>
           <meta charSet="utf-8" />
         </>
-      </Helmet>
+      </Head>
     );
 
     it('server', () => {
@@ -27,11 +27,11 @@ describe('Fragments', () => {
 
       const head = serverCache.getOutput();
 
-      expect(head.title.toString()).toBe('<title data-rh="true">Hello</title>');
-      expect(renderResult(head.title.toElements())).toBe('<title data-rh="true">Hello</title>');
+      expect(head.title.toString()).toBe('<title data-ht="true">Hello</title>');
+      expect(renderResult(head.title.toElements())).toBe('<title data-ht="true">Hello</title>');
 
-      expect(head.meta.toString()).toBe('<meta data-rh="true" charset="utf-8"/>');
-      expect(renderResult(head.meta.toElements())).toBe('<meta data-rh="true" charSet="utf-8"/>');
+      expect(head.meta.toString()).toBe('<meta data-ht="true" charset="utf-8"/>');
+      expect(renderResult(head.meta.toElements())).toBe('<meta data-ht="true" charSet="utf-8"/>');
     });
 
     it('client', () => {
@@ -44,7 +44,7 @@ describe('Fragments', () => {
   describe('should traverse multiple levels of nested Fragments', () => {
     it('server', () => {
       renderServer(
-        <Helmet>
+        <Head>
           <>
             <title>Foo</title>
             <>
@@ -54,19 +54,19 @@ describe('Fragments', () => {
               </>
             </>
           </>
-        </Helmet>,
+        </Head>,
         serverCache
       );
 
       const head = serverCache.getOutput();
 
-      expect(head.title.toString()).toBe('<title data-rh="true">Baz</title>');
-      expect(renderResult(head.title.toElements())).toBe('<title data-rh="true">Baz</title>');
+      expect(head.title.toString()).toBe('<title data-ht="true">Baz</title>');
+      expect(renderResult(head.title.toElements())).toBe('<title data-ht="true">Baz</title>');
     });
 
     it('client', () => {
       renderClient(
-        <Helmet>
+        <Head>
           <>
             <title>Foo</title>
             <>
@@ -76,7 +76,7 @@ describe('Fragments', () => {
               </>
             </>
           </>
-        </Helmet>,
+        </Head>,
         clientCache
       );
 

@@ -1,8 +1,8 @@
 import { ReactElement } from 'react';
-import { Helmet } from '../src';
-import { HelmetClientCache } from '../src/client/client-cache';
+import { Head } from '../src/Head';
+import { HeadClientCache } from '../src/client/client-cache';
 import { getInjectedElementsByTagName, renderClient, renderServer } from './utils';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { HeadServerCache } from '../src/server/server-cache';
 import { TagState } from '../src/state';
 
 const validTags: Record<keyof TagState, ReactElement> = {
@@ -88,29 +88,29 @@ describe('tag validation', () => {
     },
   ])('$case', ({ tag, element }) => {
     it('should render no tags on client', () => {
-      const cache = new HelmetClientCache({ sync: true });
+      const cache = new HeadClientCache({ sync: true });
 
-      renderClient(<Helmet>{element}</Helmet>, cache);
+      renderClient(<Head>{element}</Head>, cache);
 
       expect(getInjectedElementsByTagName(tag)).toHaveLength(0);
     });
 
     it('should remove a previously valid tag', () => {
-      const cache = new HelmetClientCache({ sync: true });
+      const cache = new HeadClientCache({ sync: true });
 
-      renderClient(<Helmet>{validTags[tag]}</Helmet>, cache);
+      renderClient(<Head>{validTags[tag]}</Head>, cache);
 
       expect(getInjectedElementsByTagName(tag)).toHaveLength(1);
 
-      renderClient(<Helmet>{element}</Helmet>, cache);
+      renderClient(<Head>{element}</Head>, cache);
 
       expect(getInjectedElementsByTagName(tag)).toHaveLength(0);
     });
 
     it('should render no tags on server', () => {
-      const cache = new HelmetServerCache();
+      const cache = new HeadServerCache();
 
-      renderServer(<Helmet>{element}</Helmet>, cache);
+      renderServer(<Head>{element}</Head>, cache);
 
       const head = cache.getOutput();
 

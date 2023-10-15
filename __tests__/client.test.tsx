@@ -1,8 +1,8 @@
 import { nextTick } from 'node:process';
 import { promisify } from 'node:util';
-import { Helmet } from '../src/Helmet';
-import { HelmetClientCache } from '../src/client/client-cache';
-import { HELMET_ATTRIBUTE } from '../src/constants';
+import { Head } from '../src/Head';
+import { HeadClientCache } from '../src/client/client-cache';
+import { TRACKING_ATTRIBUTE } from '../src/constants';
 import { getInjectedElementsByTagName, renderClient } from './utils';
 
 const nextTickPromise = promisify(nextTick);
@@ -11,16 +11,16 @@ describe('client', () => {
   beforeEach(() => {});
 
   it('does not write the DOM if the client and server are identical', () => {
-    const cache = new HelmetClientCache({ sync: true });
+    const cache = new HeadClientCache({ sync: true });
 
-    const initialHead = `<script ${HELMET_ATTRIBUTE}="true" src="http://localhost/test.js" type="text/javascript"></script>`;
+    const initialHead = `<script ${TRACKING_ATTRIBUTE}="true" src="http://localhost/test.js" type="text/javascript"></script>`;
 
     document.head.innerHTML = initialHead;
 
     renderClient(
-      <Helmet>
+      <Head>
         <script src="http://localhost/test.js" type="text/javascript" />
-      </Helmet>,
+      </Head>,
       cache
     );
 
@@ -35,12 +35,12 @@ describe('client', () => {
     const observer = new MutationObserver(mutations);
     observer.observe(document.head, { childList: true });
 
-    const cache = new HelmetClientCache();
+    const cache = new HeadClientCache();
 
     renderClient(
-      <Helmet>
+      <Head>
         <script src="http://localhost/test.js" type="text/javascript" />
-      </Helmet>,
+      </Head>,
       cache
     );
 

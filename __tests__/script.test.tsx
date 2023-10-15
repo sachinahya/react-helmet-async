@@ -1,22 +1,22 @@
-import { Helmet } from '../src';
-import { HelmetClientCache } from '../src/client/client-cache';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { Head } from '../src/Head';
+import { HeadClientCache } from '../src/client/client-cache';
+import { HeadServerCache } from '../src/server/server-cache';
 import { getInjectedElementsByTagName, renderClient, renderResult, renderServer } from './utils';
 
 describe('script tags', () => {
-  let serverCache: HelmetServerCache;
-  let clientCache: HelmetClientCache;
+  let serverCache: HeadServerCache;
+  let clientCache: HeadClientCache;
 
   beforeEach(() => {
-    serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache({ sync: true });
+    serverCache = new HeadServerCache();
+    clientCache = new HeadClientCache({ sync: true });
   });
 
   describe('should not render undefined attribute values', () => {
     const UndefinedAttributeValue = () => (
-      <Helmet>
+      <Head>
         <script src="foo.js" async={undefined} />
-      </Helmet>
+      </Head>
     );
 
     it('client', () => {
@@ -27,7 +27,7 @@ describe('script tags', () => {
       expect(scriptTags).toHaveLength(1);
 
       expect(scriptTags[0]?.getAttribute('async')).toBeNull();
-      expect(scriptTags[0]?.outerHTML).toBe('<script src="foo.js" data-rh="true"></script>');
+      expect(scriptTags[0]?.outerHTML).toBe('<script src="foo.js" data-ht="true"></script>');
     });
 
     it('server', () => {
@@ -35,7 +35,7 @@ describe('script tags', () => {
 
       const head = serverCache.getOutput();
 
-      const expected = '<script data-rh="true" src="foo.js"></script>';
+      const expected = '<script data-ht="true" src="foo.js"></script>';
 
       expect(head.script.toString()).toBe(expected);
       expect(renderResult(head.script.toElements())).toBe(expected);
@@ -44,9 +44,9 @@ describe('script tags', () => {
 
   describe('should render boolean attributes', () => {
     const BooleanAttributes = () => (
-      <Helmet>
+      <Head>
         <script src="foo.js" async />
-      </Helmet>
+      </Head>
     );
 
     it('client', () => {
@@ -58,7 +58,7 @@ describe('script tags', () => {
 
       expect(scriptTags[0]?.getAttribute('async')).toBe('true');
       expect(scriptTags[0]?.outerHTML).toBe(
-        '<script src="foo.js" async="true" data-rh="true"></script>'
+        '<script src="foo.js" async="true" data-ht="true"></script>'
       );
     });
 
@@ -68,10 +68,10 @@ describe('script tags', () => {
       const head = serverCache.getOutput();
 
       expect(head.script.toString()).toBe(
-        '<script data-rh="true" src="foo.js" async="true"></script>'
+        '<script data-ht="true" src="foo.js" async="true"></script>'
       );
       expect(renderResult(head.script.toElements())).toBe(
-        '<script data-rh="true" src="foo.js" async=""></script>'
+        '<script data-ht="true" src="foo.js" async=""></script>'
       );
     });
   });

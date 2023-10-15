@@ -1,12 +1,12 @@
-import { Helmet } from '../src/Helmet';
-import { HelmetServerCache } from '../src/server/server-cache';
+import { Head } from '../src/Head';
+import { HeadServerCache } from '../src/server/server-cache';
 import { renderResult, renderServer } from './utils';
 
 describe('server', () => {
-  let serverCache: HelmetServerCache;
+  let serverCache: HeadServerCache;
 
   beforeEach(() => {
-    serverCache = new HelmetServerCache();
+    serverCache = new HeadServerCache();
   });
 
   it('should provide an empty server output when no tags were rendered', () => {
@@ -20,8 +20,8 @@ describe('server', () => {
     expect(head.htmlAttributes.toString()).toBe('');
     expect(head.htmlAttributes.toProps()).toStrictEqual({});
 
-    expect(head.title.toString()).toBe('<title data-rh="true"></title>');
-    expect(renderResult(head.title.toElements())).toBe('<title data-rh="true"></title>');
+    expect(head.title.toString()).toBe('<title data-ht="true"></title>');
+    expect(renderResult(head.title.toElements())).toBe('<title data-ht="true"></title>');
 
     expect(head.base.toString()).toBe('');
     expect(head.base.toElements()).toHaveLength(0);
@@ -47,15 +47,15 @@ describe('server', () => {
 
   it('should not render undefined attribute values', () => {
     renderServer(
-      <Helmet>
+      <Head>
         <script src="foo.js" async={undefined} />
-      </Helmet>,
+      </Head>,
       serverCache
     );
 
     const head = serverCache.getOutput();
 
-    const expected = '<script data-rh="true" src="foo.js"></script>';
+    const expected = '<script data-ht="true" src="foo.js"></script>';
 
     expect(head.script.toString()).toBe(expected);
     expect(renderResult(head.script.toElements())).toBe(expected);

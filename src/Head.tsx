@@ -1,4 +1,5 @@
-import React, {
+import {
+  Children,
   Component,
   ContextType,
   PropsWithChildren,
@@ -9,11 +10,11 @@ import React, {
 import { isFragment } from 'react-is';
 import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
-import { Context } from './Provider';
+import { HeadContext } from './HeadContext';
 import { NON_SELF_CLOSING_TAGS, TAG_NAMES, VALID_TAG_NAMES } from './constants';
-import { HelmetProps } from './state';
+import { HeadProps } from './state';
 
-export interface HelmetComponentProps {
+export interface HeadComponentProps {
   children?: ReactNode;
 }
 
@@ -41,9 +42,9 @@ function flattenArrayTypeChildren(
 }
 
 function mapObjectTypeChildren(
-  mappedProps: HelmetProps,
+  mappedProps: HeadProps,
   child: ReactElement<PropsWithChildren>
-): HelmetProps {
+): HeadProps {
   const { children: nestedChildren, ...newChildProps } = child.props;
 
   switch (child.type) {
@@ -81,12 +82,12 @@ function mapObjectTypeChildren(
   return mappedProps;
 }
 
-function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): HelmetProps {
+function mapChildrenToProps(componentProps: Readonly<HeadComponentProps>): HeadProps {
   const arrayTypeChildren: Record<string, unknown[]> = {};
 
   const { children, ...mappedProps } = componentProps;
 
-  React.Children.forEach(children as ReactElement<PropsWithChildren>[], child => {
+  Children.forEach(children as ReactElement<PropsWithChildren>[], child => {
     if (!isValidElement(child)) {
       return;
     }
@@ -105,10 +106,10 @@ function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): Hel
       invariant(
         VALID_TAG_NAMES.some(name => child.type === name),
         typeof child.type === 'function'
-          ? `You may be attempting to nest <Helmet> components within each other, which is not allowed. Refer to our API for more information.`
+          ? `You may be attempting to nest <Head> components within each other, which is not allowed. Refer to our API for more information.`
           : `Only elements types ${VALID_TAG_NAMES.join(
               ', '
-            )} are allowed. Helmet does not support rendering <${
+            )} are allowed. Head does not support rendering <${
               child.type
             }> elements. Refer to our API for more information.`
       );
@@ -118,7 +119,7 @@ function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): Hel
           typeof child.props.children === 'string' ||
           (Array.isArray(child.props.children) &&
             !child.props.children.some(nestedChild => typeof nestedChild !== 'string')),
-        `Helmet expects a string as a child of <${child.type}>. Did you forget to wrap your children in braces? ( <${child.type}>{\`\`}</${child.type}> ) Refer to our API for more information.`
+        `Head expects a string as a child of <${child.type}>. Did you forget to wrap your children in braces? ( <${child.type}>{\`\`}</${child.type}> ) Refer to our API for more information.`
       );
 
       switch (child.type) {
@@ -145,20 +146,20 @@ function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): Hel
   return mappedProps;
 }
 
-const assertContext = (context: ContextType<typeof Context>) => {
+const assertContext = (context: ContextType<typeof HeadContext>) => {
   invariant(context, 'Missing HeadProvider');
   return context;
 };
 
-export class Helmet extends Component<HelmetComponentProps> {
-  static override contextType = Context;
+export class Head extends Component<HeadComponentProps> {
+  static override contextType = HeadContext;
 
   // @ts-expect-error
-  override context!: ContextType<typeof Context>;
+  override context!: ContextType<typeof HeadContext>;
 
   rendered: boolean = false;
 
-  override shouldComponentUpdate(nextProps: HelmetComponentProps) {
+  override shouldComponentUpdate(nextProps: HeadComponentProps) {
     return !fastCompare(this.props, nextProps);
   }
 

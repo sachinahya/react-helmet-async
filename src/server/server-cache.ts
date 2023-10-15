@@ -1,30 +1,30 @@
-import { HelmetProps, reducePropsToState } from '../state';
+import { HeadProps, instancePropsToState } from '../state';
 import { prioritiseState } from '../seo';
-import { HelmetCache } from '../cache';
-import { HelmetServerOutput, getServerOutput } from './server-output';
+import { HeadCache } from '../cache';
+import { HeadServerOutput, getServerOutput } from './server-output';
 
-export interface HelmetServerCacheOptions {
+export interface HeadServerCacheOptions {
   prioritiseSeoTags?: boolean;
 }
 
-export class HelmetServerCache implements HelmetCache {
-  #instances = new Map<unknown, HelmetProps>();
+export class HeadServerCache implements HeadCache {
+  #instances = new Map<unknown, HeadProps>();
 
   #prioritiseSeoTags: boolean;
 
-  constructor(options?: HelmetServerCacheOptions) {
+  constructor(options?: HeadServerCacheOptions) {
     this.#prioritiseSeoTags = options?.prioritiseSeoTags ?? false;
   }
 
-  getOutput(): HelmetServerOutput {
+  getOutput(): HeadServerOutput {
     const propsList = [...this.#instances.values()];
-    const state = reducePropsToState(propsList);
+    const state = instancePropsToState(propsList);
     const prioritisedState = this.#prioritiseSeoTags ? prioritiseState(state) : state;
 
     return getServerOutput(prioritisedState);
   }
 
-  update(instance: unknown, props: HelmetProps): void {
+  update(instance: unknown, props: HeadProps): void {
     this.#instances.set(instance, props);
   }
 
