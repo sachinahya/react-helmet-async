@@ -92,7 +92,10 @@ describe('title', () => {
     it('client', () => {
       renderClient(<Component />, clientCache);
 
-      expect(document.title).toBe('Dangerous &lt;script&gt; include');
+      expect(document.title).toBe('Dangerous <script> include');
+      expect(document.querySelector('title')?.outerHTML).toBe(
+        '<title>Dangerous &lt;script&gt; include</title>'
+      );
     });
   });
 
@@ -274,38 +277,61 @@ describe('title', () => {
     });
   });
 
-  it('retains existing title tag when no title tag is defined', () => {
-    document.head.innerHTML = `<title>Existing Title</title>`;
+  describe('client updates', () => {
+    it('retains existing title tag when no title tag is defined', () => {
+      document.head.innerHTML = `<title>Existing Title</title>`;
 
-    renderClient(
-      <Helmet>
-        <meta name="keywords" content="stuff" />
-      </Helmet>,
-      clientCache
-    );
+      renderClient(
+        <Helmet>
+          <meta name="keywords" content="stuff" />
+        </Helmet>,
+        clientCache
+      );
 
-    expect(document.title).toBe('Existing Title');
-  });
+      expect(document.title).toBe('Existing Title');
+    });
 
-  it.skip('clears title tag if empty title is defined', () => {
-    renderClient(
-      <Helmet>
-        <title>Existing Title</title>
-        <meta name="keywords" content="stuff" />
-      </Helmet>,
-      clientCache
-    );
+    it('clears title tag when updated with empty title', () => {
+      renderClient(
+        <Helmet>
+          <title>Existing Title</title>
+          <meta name="keywords" content="stuff" />
+        </Helmet>,
+        clientCache
+      );
 
-    expect(document.title).toBe('Existing Title');
+      expect(document.title).toBe('Existing Title');
 
-    renderClient(
-      <Helmet>
-        <title />
-        <meta name="keywords" content="stuff" />
-      </Helmet>,
-      clientCache
-    );
+      renderClient(
+        <Helmet>
+          <title />
+          <meta name="keywords" content="stuff" />
+        </Helmet>,
+        clientCache
+      );
 
-    expect(document.title).toBe('');
+      expect(document.title).toBe('');
+    });
+
+    it('clears title tag when updated with no title', () => {
+      renderClient(
+        <Helmet>
+          <title>Existing Title</title>
+          <meta name="keywords" content="stuff" />
+        </Helmet>,
+        clientCache
+      );
+
+      expect(document.title).toBe('Existing Title');
+
+      renderClient(
+        <Helmet>
+          <meta name="keywords" content="stuff" />
+        </Helmet>,
+        clientCache
+      );
+
+      expect(document.title).toBe('');
+    });
   });
 });
