@@ -1,4 +1,3 @@
-import { ReactElement } from 'react';
 import { Helmet } from '../src/Helmet';
 import { HelmetClientCache } from '../src/client/client-cache';
 import { HelmetServerCache } from '../src/server/server-cache';
@@ -16,100 +15,19 @@ describe('title', () => {
     clientCache = new HelmetClientCache();
   });
 
-  describe.each<{
-    test: string;
-    Component: () => ReactElement;
-    expected: string;
-  }>([
-    {
-      test: 'should render title tag',
-      Component: () => (
-        <Helmet>
-          <title>Amazing Title</title>
-        </Helmet>
-      ),
-      expected: 'Amazing Title',
-    },
-    {
-      test: 'should render title and allows children containing expressions',
-      Component: () => (
-        <Helmet>
-          <title>Title: {`${'Some Great Title'}`} 1234</title>
-        </Helmet>
-      ),
-      expected: 'Title: Some Great Title 1234',
-    },
-    {
-      test: 'should encode HTML characters in title',
-      Component: () => (
-        <Helmet>
-          <title>{`Dangerous <script> include`}</title>
-        </Helmet>
-      ),
-      expected: 'Dangerous &lt;script&gt; include',
-    },
-    {
-      test: 'should still encode HTML characters in title with encoding disabled',
-      Component: () => (
-        <Helmet encodeSpecialCharacters={false}>
-          <title>{`Dangerous <script> include`}</title>
-        </Helmet>
-      ),
-      expected: 'Dangerous <script> include',
-    },
-    {
-      test: 'should not encode non-HTML characters when opt out of string encoding',
-      Component: () => (
-        <Helmet encodeSpecialCharacters={false}>
-          {/* eslint-disable-next-line react/no-unescaped-entities */}
-          <title>This is text and & and '.</title>
-        </Helmet>
-      ),
-      expected: `This is text and & and '.`,
-    },
-    {
-      test: 'does not encode all characters with HTML character entity equivalents',
-      Component: () => (
-        <Helmet>
-          <title>膣膗 鍆錌雔</title>
-        </Helmet>
-      ),
-      expected: '膣膗 鍆錌雔',
-    },
-    {
-      test: 'updates page title with multiple children',
-      Component: () => (
-        <>
-          <Helmet>
-            <title>Test Title</title>
-          </Helmet>
-          <Helmet>
-            <title>Child One Title</title>
-          </Helmet>
-          <Helmet>
-            <title>Child Two Title</title>
-          </Helmet>
-        </>
-      ),
-      expected: 'Child Two Title',
-    },
-    {
-      test: 'sets title using deepest nested component with a defined title',
-      Component: () => (
-        <>
-          <Helmet>
-            <title>Main Title</title>
-          </Helmet>
-          <Helmet />
-        </>
-      ),
-      expected: 'Main Title',
-    },
-  ])('$test', ({ Component, expected }) => {
+  describe('should render title tag', () => {
+    const Component = () => (
+      <Helmet>
+        <title>Amazing Title</title>
+      </Helmet>
+    );
+
     it('server', () => {
       renderServer(<Component />, serverCache);
 
       const head = serverCache.getOutput();
+
+      const expected = 'Amazing Title';
 
       expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
       expect(renderResult(head.title.toElements())).toBe(
@@ -120,7 +38,208 @@ describe('title', () => {
     it('client', () => {
       renderClient(<Component />, clientCache);
 
-      expect(document.title).toBe(expected);
+      expect(document.title).toBe('Amazing Title');
+    });
+  });
+
+  describe('should render title and allows children containing expressions', () => {
+    const Component = () => (
+      <Helmet>
+        <title>Title: {`${'Some Great Title'}`} 1234</title>
+      </Helmet>
+    );
+
+    it('server', () => {
+      renderServer(<Component />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = 'Title: Some Great Title 1234';
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<Component />, clientCache);
+
+      expect(document.title).toBe('Title: Some Great Title 1234');
+    });
+  });
+
+  describe('should encode HTML characters in title', () => {
+    const Component = () => (
+      <Helmet>
+        <title>{`Dangerous <script> include`}</title>
+      </Helmet>
+    );
+
+    it('server', () => {
+      renderServer(<Component />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = 'Dangerous &lt;script&gt; include';
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<Component />, clientCache);
+
+      expect(document.title).toBe('Dangerous &lt;script&gt; include');
+    });
+  });
+
+  describe('should still encode HTML characters in title with encoding disabled', () => {
+    const Component = () => (
+      <Helmet encodeSpecialCharacters={false}>
+        <title>{`Dangerous <script> include`}</title>
+      </Helmet>
+    );
+
+    it('server', () => {
+      renderServer(<Component />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = 'Dangerous <script> include';
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<Component />, clientCache);
+
+      expect(document.title).toBe('Dangerous <script> include');
+    });
+  });
+
+  describe('should not encode non-HTML characters when opt out of string encoding', () => {
+    const Component = () => (
+      <Helmet encodeSpecialCharacters={false}>
+        {/* eslint-disable-next-line react/no-unescaped-entities */}
+        <title>This is text and & and '.</title>
+      </Helmet>
+    );
+
+    it('server', () => {
+      renderServer(<Component />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = `This is text and & and '.`;
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<Component />, clientCache);
+
+      expect(document.title).toBe(`This is text and & and '.`);
+    });
+  });
+
+  describe('does not encode all characters with HTML character entity equivalents', () => {
+    const Chinese = () => (
+      <Helmet>
+        <title>膣膗 鍆錌雔</title>
+      </Helmet>
+    );
+
+    it('server', () => {
+      renderServer(<Chinese />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = '膣膗 鍆錌雔';
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<Chinese />, clientCache);
+
+      expect(document.title).toBe('膣膗 鍆錌雔');
+    });
+  });
+
+  describe('updates page title with multiple children', () => {
+    const MultipleChildren = () => (
+      <>
+        <Helmet>
+          <title>Test Title</title>
+        </Helmet>
+        <Helmet>
+          <title>Child One Title</title>
+        </Helmet>
+        <Helmet>
+          <title>Child Two Title</title>
+        </Helmet>
+      </>
+    );
+
+    it('server', () => {
+      renderServer(<MultipleChildren />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = 'Child Two Title';
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<MultipleChildren />, clientCache);
+
+      expect(document.title).toBe('Child Two Title');
+    });
+  });
+
+  describe('sets title using deepest nested component with a defined title', () => {
+    const DeepestNestedDefinedTitle = () => (
+      <>
+        <Helmet>
+          <title>Main Title</title>
+        </Helmet>
+        <Helmet />
+      </>
+    );
+
+    it('server', () => {
+      renderServer(<DeepestNestedDefinedTitle />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = 'Main Title';
+
+      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
+      expect(renderResult(head.title.toElements())).toBe(
+        `<title data-rh="true">${expected}</title>`
+      );
+    });
+
+    it('client', () => {
+      renderClient(<DeepestNestedDefinedTitle />, clientCache);
+
+      expect(document.title).toBe('Main Title');
     });
   });
 
