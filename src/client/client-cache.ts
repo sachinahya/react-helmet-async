@@ -1,6 +1,6 @@
 import { HelmetProps, reducePropsToState } from '../state';
 import { HelmetCache } from '../cache';
-import { handleStateChangeOnClient } from './client-output';
+import { handleStateChange } from './client-output';
 
 export interface HelmetClientCacheOptions {
   sync?: boolean;
@@ -29,6 +29,6 @@ export class HelmetClientCache implements HelmetCache {
     const propsList = [...this.#instances.values()];
     const state = reducePropsToState(propsList);
 
-    handleStateChangeOnClient(state, this.#sync);
+    handleStateChange(state, this.#sync);
   }
 }

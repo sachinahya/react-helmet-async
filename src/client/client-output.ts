@@ -148,20 +148,20 @@ const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
   cb?.();
 };
 
-let handle: number;
+let handle: NodeJS.Timeout;
 
-export const handleStateChangeOnClient = (newState: HelmetState, sync: boolean): void => {
+export const handleStateChange = (state: HelmetState, sync: boolean): void => {
   if (handle) {
-    cancelAnimationFrame(handle);
+    clearTimeout(handle);
   }
 
   if (sync) {
-    commitTagChanges(newState);
+    commitTagChanges(state);
   } else {
-    handle = requestAnimationFrame(() => {
-      commitTagChanges(newState, () => {
-        handle = 0;
-      });
-    });
+    // Batched updates
+    // https://github.com/nuxt/vue-meta/issues/313
+    handle = setTimeout(() => {
+      commitTagChanges(state);
+    }, 10);
   }
 };
