@@ -2,6 +2,7 @@ import 'raf/polyfill';
 import { configure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import ReactDOM from 'react-dom';
+import { Helmet } from './src/Helmet';
 
 configure({ adapter: new Adapter() });
 
@@ -34,10 +35,14 @@ copyProps(window, global);
 
 const mount = document.getElementById('mount');
 
+const defaultHelmetDefer = Helmet.defaultProps.defer;
+
 beforeEach(() => {
+  Helmet.defaultProps.defer = false;
   document.head.innerHTML = '';
 });
 
 afterEach(() => {
+  Helmet.defaultProps.defer = defaultHelmetDefer;
   ReactDOM.unmountComponentAtNode(mount);
 });
