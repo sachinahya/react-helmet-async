@@ -3,23 +3,19 @@ import { HelmetServerCache } from '../src/server/server-cache';
 import { renderServer } from './utils';
 
 describe('SEO prioritisation', () => {
-  let state: HelmetServerCache;
-
-  beforeEach(() => {
-    state = new HelmetServerCache();
-  });
-
   it('prioritizes SEO tags when asked to', () => {
+    const cache = new HelmetServerCache({ prioritiseSeoTags: true });
+
     renderServer(
-      <Helmet prioritizeSeoTags>
+      <Helmet>
         <link rel="notImportant" href="https://www.chipotle.com" />
         <link rel="canonical" href="https://www.tacobell.com" />
         <meta property="og:title" content="A very important title" />
       </Helmet>,
-      state
+      cache
     );
 
-    const head = state.getOutput();
+    const head = cache.getOutput();
 
     expect(head.priority.toString()).toContain('rel="canonical" href="https://www.tacobell.com"');
     expect(head.priority.toString()).toContain(
@@ -33,16 +29,18 @@ describe('SEO prioritisation', () => {
   });
 
   it('does not prioritize SEO unless asked to', () => {
+    const cache = new HelmetServerCache();
+
     renderServer(
       <Helmet>
         <link rel="notImportant" href="https://www.chipotle.com" />
         <link rel="canonical" href="https://www.tacobell.com" />
         <meta property="og:title" content="A very important title" />
       </Helmet>,
-      state
+      cache
     );
 
-    const head = state.getOutput();
+    const head = cache.getOutput();
 
     expect(head.priority.toString()).not.toContain(
       'rel="canonical" href="https://www.tacobell.com"'

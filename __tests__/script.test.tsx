@@ -3,15 +3,13 @@ import { HelmetClientCache } from '../src/client/client-cache';
 import { HelmetServerCache } from '../src/server/server-cache';
 import { getInjectedElementsByTagName, renderClient, renderResult, renderServer } from './utils';
 
-Helmet.defaultProps.defer = false;
-
 describe('script tags', () => {
   let serverCache: HelmetServerCache;
   let clientCache: HelmetClientCache;
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
   });
 
   describe('should not render undefined attribute values', () => {

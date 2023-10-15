@@ -1,5 +1,5 @@
 import { LinkHTMLAttributes } from 'react';
-import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES, HELMET_PROPS } from './constants';
+import { TAG_NAMES, TAG_PROPERTIES, ATTRIBUTE_NAMES } from './constants';
 
 export interface TagState {
   base: React.JSX.IntrinsicElements['base'][];
@@ -20,21 +20,13 @@ export interface TitleState {
   title: string | string[];
 }
 
-export interface OptionsState {
-  defer: boolean;
-  onChangeClientState: (newState: any, addedTags: any, removedTags: any) => void;
-  prioritizeSeoTags: boolean;
-}
-
-export interface HelmetState extends TagState, AttributeState, TitleState, OptionsState {}
+export interface HelmetState extends TagState, AttributeState, TitleState {}
 
 export interface TagProps extends Partial<TagState> {}
 
 export interface AttributeProps extends Partial<AttributeState> {}
 
 export interface TitleProps extends Partial<TitleState> {}
-
-export interface OptionsProps extends Partial<OptionsState> {}
 
 export interface HelmetProps extends Partial<HelmetState> {}
 
@@ -148,13 +140,6 @@ const getTagsFromPropsList = <T extends keyof TagProps>(
   return approvedTags;
 };
 
-const getAnyTruthyFromPropsList = (
-  propsList: HelmetProps[],
-  checkedTag: keyof HelmetProps
-): boolean => {
-  return propsList.some(props => props[checkedTag]);
-};
-
 const getBaseTagFromPropsList = (propsList: TagProps[]): TagState['base'] => {
   for (const props of [...propsList].reverse()) {
     if (props.base) {
@@ -173,7 +158,6 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
   return {
     base: getBaseTagFromPropsList(propsList),
     bodyAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.BODY),
-    defer: getInnermostProperty(propsList, HELMET_PROPS.DEFER)!,
     htmlAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.HTML),
     link: getTagsFromPropsList(propsList, TAG_NAMES.LINK, [
       TAG_PROPERTIES.REL,
@@ -187,7 +171,6 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
       TAG_PROPERTIES.ITEM_PROP,
     ]),
     noscript: getTagsFromPropsList(propsList, TAG_NAMES.NOSCRIPT, [TAG_PROPERTIES.CHILDREN]),
-    onChangeClientState: getInnermostProperty(propsList, HELMET_PROPS.ON_CHANGE_CLIENT_STATE)!,
     script: getTagsFromPropsList(propsList, TAG_NAMES.SCRIPT, [
       TAG_PROPERTIES.SRC,
       TAG_PROPERTIES.CHILDREN,
@@ -195,6 +178,5 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
     style: getTagsFromPropsList(propsList, TAG_NAMES.STYLE, [TAG_PROPERTIES.CHILDREN]),
     title: getInnermostProperty(propsList, TAG_NAMES.TITLE)!,
     titleAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.TITLE),
-    prioritizeSeoTags: getAnyTruthyFromPropsList(propsList, HELMET_PROPS.PRIORITIZE_SEO_TAGS),
   };
 };

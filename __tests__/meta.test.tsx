@@ -4,15 +4,13 @@ import { HELMET_ATTRIBUTE } from '../src/constants';
 import { HelmetServerCache } from '../src/server/server-cache';
 import { getInjectedElementsByTagName, renderClient, renderResult, renderServer } from './utils';
 
-Helmet.defaultProps.defer = false;
-
 describe('meta tags', () => {
   let serverCache: HelmetServerCache;
   let clientCache: HelmetClientCache;
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
   });
 
   describe('determine meta tags based on deepest nested component', () => {

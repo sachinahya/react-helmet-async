@@ -1,5 +1,6 @@
 import React, {
   Component,
+  ContextType,
   PropsWithChildren,
   ReactElement,
   ReactNode,
@@ -10,18 +11,9 @@ import fastCompare from 'react-fast-compare';
 import invariant from 'tiny-invariant';
 import { Context } from './Provider';
 import { NON_SELF_CLOSING_TAGS, TAG_NAMES, VALID_TAG_NAMES } from './constants';
-import { HelmetProps, OptionsProps } from './state';
+import { HelmetProps } from './state';
 
-export interface HelmetTags {
-  baseTag: Array<any>;
-  linkTags: Array<HTMLLinkElement>;
-  metaTags: Array<HTMLMetaElement>;
-  noscriptTags: Array<any>;
-  scriptTags: Array<HTMLScriptElement>;
-  styleTags: Array<HTMLStyleElement>;
-}
-
-export interface HelmetComponentProps extends OptionsProps {
+export interface HelmetComponentProps {
   children?: ReactNode;
 }
 
@@ -153,18 +145,18 @@ function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): Hel
   return mappedProps;
 }
 
-export class Helmet extends Component<HelmetComponentProps> {
-  static defaultProps: Partial<HelmetComponentProps> = {
-    defer: true,
-    prioritizeSeoTags: false,
-  };
+const assertContext = (context: ContextType<typeof Context>) => {
+  invariant(context, 'Missing HeadProvider');
+  return context;
+};
 
+export class Helmet extends Component<HelmetComponentProps> {
   static override contextType = Context;
 
   // @ts-expect-error
-  override context!: React.ContextType<typeof Context>;
+  override context!: ContextType<typeof Context>;
 
-  rendered = false;
+  rendered: boolean = false;
 
   override shouldComponentUpdate(nextProps: HelmetComponentProps) {
     return !fastCompare(this.props, nextProps);
@@ -172,11 +164,11 @@ export class Helmet extends Component<HelmetComponentProps> {
 
   override componentDidUpdate() {
     const mappedProps = mapChildrenToProps(this.props);
-    this.context.update(this, mappedProps);
+    assertContext(this.context).update(this, mappedProps);
   }
 
   override componentWillUnmount() {
-    this.context.remove(this);
+    assertContext(this.context).remove(this);
   }
 
   override render() {
@@ -184,7 +176,7 @@ export class Helmet extends Component<HelmetComponentProps> {
       this.rendered = true;
 
       const mappedProps = mapChildrenToProps(this.props);
-      this.context.update(this, mappedProps);
+      assertContext(this.context).update(this, mappedProps);
     }
 
     return null;

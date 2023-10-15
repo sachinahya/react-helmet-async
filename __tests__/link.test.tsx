@@ -10,7 +10,7 @@ describe('link tags', () => {
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
   });
 
   describe("tags 'rel' and 'href' properly use 'rel' as the primary identification for this tag, regardless of ordering", () => {

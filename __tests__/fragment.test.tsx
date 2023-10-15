@@ -3,15 +3,13 @@ import { Helmet } from '../src';
 import { HelmetClientCache } from '../src/client/client-cache';
 import { HelmetServerCache } from '../src/server/server-cache';
 
-Helmet.defaultProps.defer = false;
-
 describe('Fragments', () => {
   let serverCache: HelmetServerCache;
   let clientCache: HelmetClientCache;
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
   });
 
   describe('should parse Fragments', () => {

@@ -1,4 +1,3 @@
-import { HelmetTags } from '../Helmet';
 import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } from '../constants';
 import { flattenArray } from '../utils';
 import { HelmetState } from '../state';
@@ -127,7 +126,6 @@ const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
     link,
     meta,
     noscript,
-    onChangeClientState,
     script,
     style,
     title,
@@ -138,52 +136,30 @@ const commitTagChanges = (newState: HelmetState, cb?: () => void) => {
 
   updateTitle(title, titleAttributes);
 
-  const tagUpdates = {
-    baseTag: updateTagsByType(TAG_NAMES.BASE, base),
-    linkTags: updateTagsByType(TAG_NAMES.LINK, link),
-    metaTags: updateTagsByType(TAG_NAMES.META, meta),
-    noscriptTags: updateTagsByType(TAG_NAMES.NOSCRIPT, noscript),
-    scriptTags: updateTagsByType(TAG_NAMES.SCRIPT, script),
-    styleTags: updateTagsByType(TAG_NAMES.STYLE, style),
-  };
+  updateTagsByType(TAG_NAMES.BASE, base);
+  updateTagsByType(TAG_NAMES.LINK, link);
+  updateTagsByType(TAG_NAMES.META, meta);
+  updateTagsByType(TAG_NAMES.NOSCRIPT, noscript);
+  updateTagsByType(TAG_NAMES.SCRIPT, script);
+  updateTagsByType(TAG_NAMES.STYLE, style);
 
-  const addedTags = {} as Record<keyof HelmetTags, HTMLElement[]>;
-  const removedTags = {} as Record<keyof HelmetTags, HTMLElement[]>;
-
-  (Object.keys(tagUpdates) as (keyof typeof tagUpdates)[]).forEach(tagType => {
-    const { newTags, oldTags } = tagUpdates[tagType];
-
-    if (newTags.length) {
-      addedTags[tagType] = newTags;
-    }
-    if (oldTags.length) {
-      removedTags[tagType] = oldTags;
-    }
-  });
-
-  if (cb) {
-    cb();
-  }
-
-  onChangeClientState?.(newState, addedTags as HelmetTags, removedTags as HelmetTags);
+  cb?.();
 };
 
-// eslint-disable-next-line
-let _helmetCallback: number | null = null;
+let handle: number;
 
-export const handleStateChangeOnClient = (newState: HelmetState): void => {
-  if (_helmetCallback) {
-    cancelAnimationFrame(_helmetCallback);
+export const handleStateChangeOnClient = (newState: HelmetState, sync: boolean): void => {
+  if (handle) {
+    cancelAnimationFrame(handle);
   }
 
-  if (newState.defer) {
-    _helmetCallback = requestAnimationFrame(() => {
+  if (sync) {
+    commitTagChanges(newState);
+  } else {
+    handle = requestAnimationFrame(() => {
       commitTagChanges(newState, () => {
-        _helmetCallback = null;
+        handle = 0;
       });
     });
-  } else {
-    commitTagChanges(newState);
-    _helmetCallback = null;
   }
 };

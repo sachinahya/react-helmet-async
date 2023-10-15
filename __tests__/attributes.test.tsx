@@ -4,8 +4,6 @@ import { HELMET_ATTRIBUTE } from '../src/constants';
 import { HelmetServerCache } from '../src/server/server-cache';
 import { renderClient, renderResult, renderServer } from './utils';
 
-Helmet.defaultProps.defer = false;
-
 describe.each([
   {
     tag: 'body',
@@ -23,7 +21,7 @@ describe.each([
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
     document.head.innerHTML = `<title>Test Title</title>`;
   });
 

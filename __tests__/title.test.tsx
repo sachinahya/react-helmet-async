@@ -4,15 +4,13 @@ import { HelmetServerCache } from '../src/server/server-cache';
 import { renderClient, renderResult, renderServer } from './utils';
 import { HELMET_ATTRIBUTE } from '../src/constants';
 
-Helmet.defaultProps.defer = true;
-
 describe('title', () => {
   let serverCache: HelmetServerCache;
   let clientCache: HelmetClientCache;
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
   });
 
   describe('should render title tag', () => {

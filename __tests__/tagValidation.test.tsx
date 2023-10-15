@@ -88,7 +88,7 @@ describe('tag validation', () => {
     },
   ])('$case', ({ tag, element }) => {
     it('should render no tags on client', () => {
-      const cache = new HelmetClientCache();
+      const cache = new HelmetClientCache({ sync: true });
 
       renderClient(<Helmet>{element}</Helmet>, cache);
 
@@ -96,7 +96,7 @@ describe('tag validation', () => {
     });
 
     it('should remove a previously valid tag', () => {
-      const cache = new HelmetClientCache();
+      const cache = new HelmetClientCache({ sync: true });
 
       renderClient(<Helmet>{validTags[tag]}</Helmet>, cache);
 

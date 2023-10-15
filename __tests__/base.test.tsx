@@ -10,7 +10,7 @@ describe('base', () => {
 
   beforeEach(() => {
     serverCache = new HelmetServerCache();
-    clientCache = new HelmetClientCache();
+    clientCache = new HelmetClientCache({ sync: true });
   });
 
   describe('determine base tag based on deepest nested component', () => {

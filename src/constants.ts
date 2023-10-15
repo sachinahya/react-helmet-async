@@ -1,11 +1,5 @@
 import { AllHTMLAttributes } from 'react';
-import { AttributeState, HelmetState } from './state';
-
-export const HELMET_PROPS = {
-  DEFER: 'defer',
-  ON_CHANGE_CLIENT_STATE: 'onChangeClientState',
-  PRIORITIZE_SEO_TAGS: 'prioritizeSeoTags',
-} as const satisfies Record<string, keyof HelmetState>;
+import { AttributeState } from './state';
 
 export const TAG_NAMES = {
   BASE: 'base',

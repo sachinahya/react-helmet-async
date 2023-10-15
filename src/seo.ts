@@ -45,23 +45,19 @@ const prioritise = <T extends HelmetState[SeoPriorityOptions][number]>(
 };
 
 export const prioritiseState = (state: HelmetState): PrioritisedHelmetState => {
-  if (state.prioritizeSeoTags) {
-    const metaP = prioritise(state.meta, SEO_PRIORITY_TAGS.meta);
-    const linkP = prioritise(state.link, SEO_PRIORITY_TAGS.link);
-    const scriptP = prioritise(state.script, SEO_PRIORITY_TAGS.script);
+  const metaP = prioritise(state.meta, SEO_PRIORITY_TAGS.meta);
+  const linkP = prioritise(state.link, SEO_PRIORITY_TAGS.link);
+  const scriptP = prioritise(state.script, SEO_PRIORITY_TAGS.script);
 
-    return {
-      ...state,
-      meta: metaP.default,
-      link: linkP.default,
-      script: scriptP.default,
-      priority: {
-        meta: metaP.priority,
-        link: linkP.priority,
-        script: scriptP.priority,
-      },
-    };
-  }
-
-  return state;
+  return {
+    ...state,
+    meta: metaP.default,
+    link: linkP.default,
+    script: scriptP.default,
+    priority: {
+      meta: metaP.priority,
+      link: linkP.priority,
+      script: scriptP.priority,
+    },
+  };
 };

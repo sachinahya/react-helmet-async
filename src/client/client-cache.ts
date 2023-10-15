@@ -2,8 +2,18 @@ import { HelmetProps, reducePropsToState } from '../state';
 import { HelmetCache } from '../cache';
 import { handleStateChangeOnClient } from './client-output';
 
+export interface HelmetClientCacheOptions {
+  sync?: boolean;
+}
+
 export class HelmetClientCache implements HelmetCache {
   #instances = new Map<unknown, HelmetProps>();
+
+  #sync: boolean;
+
+  constructor(options?: HelmetClientCacheOptions) {
+    this.#sync = options?.sync ?? false;
+  }
 
   update(instance: unknown, props: HelmetProps): void {
     this.#instances.set(instance, props);
@@ -19,6 +29,6 @@ export class HelmetClientCache implements HelmetCache {
     const propsList = [...this.#instances.values()];
     const state = reducePropsToState(propsList);
 
-    handleStateChangeOnClient(state);
+    handleStateChangeOnClient(state, this.#sync);
   }
 }

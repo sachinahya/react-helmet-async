@@ -222,7 +222,7 @@ describe.each<{
   });
 
   it('should render and then remove tags on the client', () => {
-    const clientCache = new HelmetClientCache();
+    const clientCache = new HelmetClientCache({ sync: true });
 
     renderClient(<Helmet>{mapElements()}</Helmet>, clientCache);
 
@@ -236,7 +236,7 @@ describe.each<{
   it.each([...elements.entries()].map(([index, element]) => ({ index, ...element })))(
     'should render on the client - $expectedServerString',
     ({ index, expectedAttributes, expectedInnerHTML }) => {
-      const clientCache = new HelmetClientCache();
+      const clientCache = new HelmetClientCache({ sync: true });
 
       renderClient(<Helmet>{mapElements()}</Helmet>, clientCache);
 

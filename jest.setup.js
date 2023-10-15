@@ -35,14 +35,10 @@ copyProps(window, global);
 
 const mount = document.getElementById('mount');
 
-const defaultHelmetDefer = Helmet.defaultProps.defer;
-
 beforeEach(() => {
-  Helmet.defaultProps.defer = false;
   document.head.innerHTML = '';
 });
 
 afterEach(() => {
-  Helmet.defaultProps.defer = defaultHelmetDefer;
   ReactDOM.unmountComponentAtNode(mount);
 });

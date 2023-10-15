@@ -1,7 +1,7 @@
-import React, { FC, ReactNode } from 'react';
+import { FC, ReactNode, createContext } from 'react';
 import { HelmetCache } from './cache';
 
-export const Context = React.createContext<HelmetCache>({} as HelmetCache);
+export const Context = createContext<HelmetCache | undefined>(undefined);
 
 export interface HelmetProviderProps {
   state: HelmetCache;
