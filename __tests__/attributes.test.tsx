@@ -95,7 +95,7 @@ describe.each([
     });
   });
 
-  describe('handles valueless attributes', () => {
+  describe('should not render undefined attribute values', () => {
     const ValuelessAttributes = () => (
       <Helmet>
         <Component about={undefined} draggable />
@@ -107,7 +107,7 @@ describe.each([
 
       const head = serverCache.getOutput();
 
-      const expected = 'about draggable="true"';
+      const expected = 'draggable="true"';
 
       expect(head[cacheKey].toString()).toBe(expected);
 
@@ -121,9 +121,9 @@ describe.each([
 
       const element = getElement();
 
-      expect(element.getAttribute('about')).toBe('');
+      expect(element.getAttribute('about')).toBeNull();
       expect(element.getAttribute('draggable')).toBe('true');
-      expect(element.getAttribute(HELMET_ATTRIBUTE)).toBe('about,draggable');
+      expect(element.getAttribute(HELMET_ATTRIBUTE)).toBe('draggable');
     });
   });
 
@@ -197,8 +197,9 @@ describe.each([
 
       const element = getElement();
 
+      expect(element.getAttribute('about')).toBeNull();
+
       expect(element.getAttribute('lang')).not.toBeNull();
-      expect(element.getAttribute('about')).not.toBeNull();
       expect(element.getAttribute('draggable')).not.toBeNull();
       expect(element.getAttribute(HELMET_ATTRIBUTE)).not.toBeNull();
 
@@ -272,9 +273,9 @@ describe.each([
 
       const element = getElement();
 
-      expect(element.getAttribute('about')).toBe('');
+      expect(element.getAttribute('about')).toBeNull();
       expect(element.getAttribute('lang')).toBe('en');
-      expect(element.getAttribute(HELMET_ATTRIBUTE)).toBe('lang,about');
+      expect(element.getAttribute(HELMET_ATTRIBUTE)).toBe('lang');
 
       renderClient(
         <Helmet>

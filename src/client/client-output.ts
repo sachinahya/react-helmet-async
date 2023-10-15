@@ -3,7 +3,7 @@ import { HELMET_ATTRIBUTE, TAG_NAMES, TAG_PROPERTIES, getHtmlAttributeName } fro
 import { flattenArray } from '../utils';
 import { HelmetState } from '../state';
 
-const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: any[]) => {
+const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: object[]) => {
   const headElement = document.head;
   const tagNodes = headElement.querySelectorAll<HTMLElementTagNameMap[T]>(
     `${type}[${HELMET_ATTRIBUTE}]`
@@ -16,7 +16,7 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
     tags.forEach(tag => {
       const newElement = document.createElement(type);
 
-      for (const attribute of Object.keys(tag)) {
+      for (const [attribute, value] of Object.entries(tag)) {
         if (attribute === TAG_PROPERTIES.CHILDREN) {
           if (type === TAG_NAMES.SCRIPT || type === TAG_NAMES.NOSCRIPT) {
             newElement.innerHTML = tag.children;
@@ -24,8 +24,13 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
             (newElement as HTMLStyleElement).appendChild(document.createTextNode(tag.children));
           }
         } else {
-          const value = typeof tag[attribute] === 'undefined' ? '' : tag[attribute];
-          newElement.setAttribute(getHtmlAttributeName(attribute), value);
+          const htmlAttributeName = getHtmlAttributeName(attribute);
+
+          if (value === undefined) {
+            newElement.removeAttribute(htmlAttributeName);
+          } else {
+            newElement.setAttribute(htmlAttributeName, String(value));
+          }
         }
       }
 
@@ -69,7 +74,11 @@ const updateAttributes = (
 
   const attributesToRemove = [...helmetAttributes].map(getHtmlAttributeName);
 
-  for (const [key, value = ''] of Object.entries(attributes)) {
+  for (const [key, value] of Object.entries(attributes)) {
+    if (value === undefined) {
+      continue;
+    }
+
     const htmlAttribute = getHtmlAttributeName(key);
 
     if (elementTag.getAttribute(htmlAttribute) !== value) {
@@ -90,7 +99,11 @@ const updateAttributes = (
     elementTag.removeAttribute(attribute);
   }
 
-  const attributeKeyHash = Object.keys(attributes).map(getHtmlAttributeName).join(',');
+  const attributeKeyHash = Object.entries(attributes)
+    .filter(([, value]) => value !== undefined)
+    .map(([attribute]) => getHtmlAttributeName(attribute))
+    .join(',');
+
   if (helmetAttributes.length === attributesToRemove.length) {
     elementTag.removeAttribute(HELMET_ATTRIBUTE);
   } else if (elementTag.getAttribute(HELMET_ATTRIBUTE) !== attributeKeyHash) {

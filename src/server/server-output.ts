@@ -54,7 +54,7 @@ const generateElementAttributesAsString = (attributes: object, encode?: boolean)
   let str = '';
 
   for (const [key, value] of Object.entries(attributes)) {
-    if (key === TAG_PROPERTIES.CHILDREN) {
+    if (key === TAG_PROPERTIES.CHILDREN || value === undefined) {
       continue;
     }
 

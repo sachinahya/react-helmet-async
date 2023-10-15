@@ -1,6 +1,5 @@
 import { Helmet } from '../src';
 import { HelmetClientCache } from '../src/client/client-cache';
-import { HELMET_ATTRIBUTE } from '../src/constants';
 import { HelmetServerCache } from '../src/server/server-cache';
 import { getInjectedElementsByTagName, renderClient, renderResult, renderServer } from './utils';
 
@@ -15,33 +14,67 @@ describe('script tags', () => {
     clientCache = new HelmetClientCache();
   });
 
-  it('should not render undefined attribute values on client', () => {
-    renderClient(
+  describe('should not render undefined attribute values', () => {
+    const UndefinedAttributeValue = () => (
       <Helmet>
         <script src="foo.js" async={undefined} />
-      </Helmet>,
-      clientCache
+      </Helmet>
     );
 
-    const scriptTags = getInjectedElementsByTagName('script');
+    it('client', () => {
+      renderClient(<UndefinedAttributeValue />, clientCache);
 
-    expect(scriptTags).toHaveLength(1);
-    expect(scriptTags[1]?.outerHTML).toBe('<script src="foo.js" data-rh="true"></script>');
+      const scriptTags = getInjectedElementsByTagName('script');
+
+      expect(scriptTags).toHaveLength(1);
+
+      expect(scriptTags[0]?.getAttribute('async')).toBeNull();
+      expect(scriptTags[0]?.outerHTML).toBe('<script src="foo.js" data-rh="true"></script>');
+    });
+
+    it('server', () => {
+      renderServer(<UndefinedAttributeValue />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      const expected = '<script data-rh="true" src="foo.js"></script>';
+
+      expect(head.script.toString()).toBe(expected);
+      expect(renderResult(head.script.toElements())).toBe(expected);
+    });
   });
 
-  it('should not render undefined attribute values on server', () => {
-    renderServer(
+  describe('should render boolean attributes', () => {
+    const BooleanAttributes = () => (
       <Helmet>
-        <script src="foo.js" async={undefined} />
-      </Helmet>,
-      serverCache
+        <script src="foo.js" async />
+      </Helmet>
     );
 
-    const head = serverCache.getOutput();
+    it('client', () => {
+      renderClient(<BooleanAttributes />, clientCache);
 
-    const expected = '<script data-rh="true" src="foo.js"></script>';
+      const scriptTags = getInjectedElementsByTagName('script');
 
-    expect(head.script.toString()).toBe(expected);
-    expect(renderResult(head.script.toElements())).toBe(expected);
+      expect(scriptTags).toHaveLength(1);
+
+      expect(scriptTags[0]?.getAttribute('async')).toBe('true');
+      expect(scriptTags[0]?.outerHTML).toBe(
+        '<script src="foo.js" async="true" data-rh="true"></script>'
+      );
+    });
+
+    it('server', () => {
+      renderServer(<BooleanAttributes />, serverCache);
+
+      const head = serverCache.getOutput();
+
+      expect(head.script.toString()).toBe(
+        '<script data-rh="true" src="foo.js" async="true"></script>'
+      );
+      expect(renderResult(head.script.toElements())).toBe(
+        '<script data-rh="true" src="foo.js" async=""></script>'
+      );
+    });
   });
 });

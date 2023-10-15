@@ -3,16 +3,16 @@ import { HelmetServerCache } from '../src/server/server-cache';
 import { renderResult, renderServer } from './utils';
 
 describe('server', () => {
-  let state: HelmetServerCache;
+  let serverCache: HelmetServerCache;
 
   beforeEach(() => {
-    state = new HelmetServerCache();
+    serverCache = new HelmetServerCache();
   });
 
   it('should provide an empty server output when no tags were rendered', () => {
-    renderServer(<div />, state);
+    renderServer(<div />, serverCache);
 
-    const head = state.getOutput();
+    const head = serverCache.getOutput();
 
     expect(head.bodyAttributes.toString()).toBe('');
     expect(head.bodyAttributes.toProps()).toStrictEqual({});
@@ -50,12 +50,12 @@ describe('server', () => {
       <Helmet>
         <script src="foo.js" async={undefined} />
       </Helmet>,
-      state
+      serverCache
     );
 
-    const head = state.getOutput();
+    const head = serverCache.getOutput();
 
-    const expected = '<script data-rh="true" src="foo.js" async></script>';
+    const expected = '<script data-rh="true" src="foo.js"></script>';
 
     expect(head.script.toString()).toBe(expected);
     expect(renderResult(head.script.toElements())).toBe(expected);
