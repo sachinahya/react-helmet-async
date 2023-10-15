@@ -3,7 +3,6 @@ import { AttributeState, HelmetState } from './state';
 
 export const HELMET_PROPS = {
   DEFER: 'defer',
-  ENCODE_SPECIAL_CHARACTERS: 'encodeSpecialCharacters',
   ON_CHANGE_CLIENT_STATE: 'onChangeClientState',
   PRIORITIZE_SEO_TAGS: 'prioritizeSeoTags',
 } as const satisfies Record<string, keyof HelmetState>;

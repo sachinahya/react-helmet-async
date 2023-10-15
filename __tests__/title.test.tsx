@@ -99,61 +99,6 @@ describe('title', () => {
     });
   });
 
-  describe('should still encode HTML characters in title with encoding disabled', () => {
-    const Component = () => (
-      <Helmet encodeSpecialCharacters={false}>
-        <title>{`Dangerous <script> include`}</title>
-      </Helmet>
-    );
-
-    it('server', () => {
-      renderServer(<Component />, serverCache);
-
-      const head = serverCache.getOutput();
-
-      const expected = 'Dangerous <script> include';
-
-      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
-      expect(renderResult(head.title.toElements())).toBe(
-        `<title data-rh="true">${expected}</title>`
-      );
-    });
-
-    it('client', () => {
-      renderClient(<Component />, clientCache);
-
-      expect(document.title).toBe('Dangerous <script> include');
-    });
-  });
-
-  describe('should not encode non-HTML characters when opt out of string encoding', () => {
-    const Component = () => (
-      <Helmet encodeSpecialCharacters={false}>
-        {/* eslint-disable-next-line react/no-unescaped-entities */}
-        <title>This is text and & and '.</title>
-      </Helmet>
-    );
-
-    it('server', () => {
-      renderServer(<Component />, serverCache);
-
-      const head = serverCache.getOutput();
-
-      const expected = `This is text and & and '.`;
-
-      expect(head.title.toString()).toBe(`<title data-rh="true">${expected}</title>`);
-      expect(renderResult(head.title.toElements())).toBe(
-        `<title data-rh="true">${expected}</title>`
-      );
-    });
-
-    it('client', () => {
-      renderClient(<Component />, clientCache);
-
-      expect(document.title).toBe(`This is text and & and '.`);
-    });
-  });
-
   describe('does not encode all characters with HTML character entity equivalents', () => {
     const Chinese = () => (
       <Helmet>

@@ -22,7 +22,6 @@ export interface TitleState {
 
 export interface OptionsState {
   defer: boolean;
-  encodeSpecialCharacters: boolean;
   onChangeClientState: (newState: any, addedTags: any, removedTags: any) => void;
   prioritizeSeoTags: boolean;
 }
@@ -175,10 +174,6 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
     base: getBaseTagFromPropsList(propsList),
     bodyAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.BODY),
     defer: getInnermostProperty(propsList, HELMET_PROPS.DEFER)!,
-    encodeSpecialCharacters: getInnermostProperty(
-      propsList,
-      HELMET_PROPS.ENCODE_SPECIAL_CHARACTERS
-    )!,
     htmlAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.HTML),
     link: getTagsFromPropsList(propsList, TAG_NAMES.LINK, [
       TAG_PROPERTIES.REL,

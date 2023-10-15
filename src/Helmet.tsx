@@ -156,7 +156,6 @@ function mapChildrenToProps(componentProps: Readonly<HelmetComponentProps>): Hel
 export class Helmet extends Component<HelmetComponentProps> {
   static defaultProps: Partial<HelmetComponentProps> = {
     defer: true,
-    encodeSpecialCharacters: true,
     prioritizeSeoTags: false,
   };
 
