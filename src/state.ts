@@ -17,7 +17,7 @@ export interface AttributeState {
 }
 
 export interface TitleState {
-  title: string | string[];
+  title: string | string[] | undefined;
 }
 
 export interface HelmetState extends TagState, AttributeState, TitleState {}
@@ -176,7 +176,7 @@ export const reducePropsToState = (propsList: HelmetProps[]): HelmetState => {
       TAG_PROPERTIES.CHILDREN,
     ]),
     style: getTagsFromPropsList(propsList, TAG_NAMES.STYLE, [TAG_PROPERTIES.CHILDREN]),
-    title: getInnermostProperty(propsList, TAG_NAMES.TITLE)!,
+    title: getInnermostProperty(propsList, TAG_NAMES.TITLE),
     titleAttributes: getAttributesFromPropsList(propsList, ATTRIBUTE_NAMES.TITLE),
   };
 };

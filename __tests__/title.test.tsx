@@ -221,19 +221,6 @@ describe('title', () => {
   });
 
   describe('client updates', () => {
-    it('retains existing title tag when no title tag is defined', () => {
-      document.head.innerHTML = `<title>Existing Title</title>`;
-
-      renderClient(
-        <Helmet>
-          <meta name="keywords" content="stuff" />
-        </Helmet>,
-        clientCache
-      );
-
-      expect(document.title).toBe('Existing Title');
-    });
-
     it('clears title tag when updated with empty title', () => {
       renderClient(
         <Helmet>

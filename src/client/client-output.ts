@@ -60,7 +60,7 @@ const updateTagsByType = <T extends keyof HTMLElementTagNameMap>(type: T, tags: 
 
 const updateAttributes = (
   tagName: string,
-  attributes: NonNullable<HelmetState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']>
+  attributes: HelmetState['bodyAttributes' | 'htmlAttributes' | 'titleAttributes']
 ) => {
   const elementTag = document.getElementsByTagName(tagName)[0];
 
@@ -110,8 +110,10 @@ const updateAttributes = (
   }
 };
 
-const updateTitle = (title: HelmetState['title'], attributes: any) => {
-  if (typeof title !== 'undefined' && document.title !== title) {
+const updateTitle = (title: HelmetState['title'], attributes: HelmetState['titleAttributes']) => {
+  title ??= '';
+
+  if (document.title !== title) {
     document.title = flattenArray(title);
   }
 
