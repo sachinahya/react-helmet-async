@@ -93,7 +93,7 @@ const updateAttributes = (
     }
   }
 
-  for (const attribute of [...attributesToRemove.reverse()]) {
+  for (const attribute of attributesToRemove) {
     elementTag.removeAttribute(attribute);
   }
 
@@ -120,7 +120,7 @@ const updateTitle = (title: HeadState['title'], attributes: HeadState['titleAttr
   updateAttributes(TAG_NAMES.TITLE, attributes);
 };
 
-const commitTagChanges = (newState: HeadState, cb?: () => void) => {
+const commitTagChanges = (newState: HeadState) => {
   const {
     base,
     bodyAttributes,
@@ -144,8 +144,6 @@ const commitTagChanges = (newState: HeadState, cb?: () => void) => {
   updateTagsByType(TAG_NAMES.NOSCRIPT, noscript);
   updateTagsByType(TAG_NAMES.SCRIPT, script);
   updateTagsByType(TAG_NAMES.STYLE, style);
-
-  cb?.();
 };
 
 let handle: NodeJS.Timeout;

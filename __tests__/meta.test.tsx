@@ -31,12 +31,32 @@ describe('meta tags', () => {
 
       const head = serverCache.getOutput();
 
-      expect(head.meta.toString()).toBe(
-        '<meta data-ht="true" charset="utf-8"/><meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="keywords" content="test,meta,tags"/>'
+      expect(head.meta.toString()).toMatchInlineSnapshot(
+        `"<meta data-ht="true" charset="utf-8"/><meta data-ht="true" name="description" content="Test description"/><meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="keywords" content="test,meta,tags"/>"`
       );
-      expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-ht="true" charSet="utf-8"/><meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="keywords" content="test,meta,tags"/>'
-      );
+      expect(head.meta.toElements()).toMatchInlineSnapshot(`
+        [
+          <meta
+            charSet="utf-8"
+            data-ht={true}
+          />,
+          <meta
+            content="Test description"
+            data-ht={true}
+            name="description"
+          />,
+          <meta
+            content="Inner description"
+            data-ht={true}
+            name="description"
+          />,
+          <meta
+            content="test,meta,tags"
+            data-ht={true}
+            name="keywords"
+          />,
+        ]
+      `);
     });
 
     it('client', () => {
@@ -44,27 +64,29 @@ describe('meta tags', () => {
 
       const tagNodes = getInjectedElementsByTagName('meta');
 
-      const firstTag = tagNodes[0];
-      const secondTag = tagNodes[1];
-      const thirdTag = tagNodes[2];
-
-      expect(tagNodes).toBeDefined();
-      expect(tagNodes).toHaveLength(3);
-
-      expect(firstTag?.getAttribute('charset')).toBe('utf-8');
-      expect(firstTag?.outerHTML).toBe('<meta charset="utf-8" data-ht="true">');
-
-      expect(secondTag?.getAttribute('name')).toBe('description');
-      expect(secondTag?.getAttribute('content')).toBe('Inner description');
-      expect(secondTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner description" data-ht="true">'
-      );
-
-      expect(thirdTag?.getAttribute('name')).toBe('keywords');
-      expect(thirdTag?.getAttribute('content')).toBe('test,meta,tags');
-      expect(thirdTag?.outerHTML).toBe(
-        '<meta name="keywords" content="test,meta,tags" data-ht="true">'
-      );
+      expect(tagNodes).toMatchInlineSnapshot(`
+        NodeList [
+          <meta
+            charset="utf-8"
+            data-ht="true"
+          />,
+          <meta
+            content="Test description"
+            data-ht="true"
+            name="description"
+          />,
+          <meta
+            content="Inner description"
+            data-ht="true"
+            name="description"
+          />,
+          <meta
+            content="test,meta,tags"
+            data-ht="true"
+            name="keywords"
+          />,
+        ]
+      `);
     });
   });
 
@@ -112,8 +134,8 @@ describe('meta tags', () => {
     });
   });
 
-  describe('overrides duplicate meta tags with single meta tag in a nested component', () => {
-    const MultipleNestedMetaOverride = () => (
+  describe('combines duplicate meta tags with single meta tag in a nested component', () => {
+    const MultipleNestedMetaCombine = () => (
       <>
         <Head>
           <meta name="description" content="Test description" />
@@ -126,36 +148,63 @@ describe('meta tags', () => {
     );
 
     it('server', () => {
-      renderServer(<MultipleNestedMetaOverride />, serverCache);
+      renderServer(<MultipleNestedMetaCombine />, serverCache);
 
       const head = serverCache.getOutput();
 
-      expect(head.meta.toString()).toBe(
-        '<meta data-ht="true" name="description" content="Inner description"/>'
+      expect(head.meta.toString()).toMatchInlineSnapshot(
+        `"<meta data-ht="true" name="description" content="Test description"/><meta data-ht="true" name="description" content="Duplicate description"/><meta data-ht="true" name="description" content="Inner description"/>"`
       );
-      expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-ht="true" name="description" content="Inner description"/>'
-      );
+      expect(head.meta.toElements()).toMatchInlineSnapshot(`
+        [
+          <meta
+            content="Test description"
+            data-ht={true}
+            name="description"
+          />,
+          <meta
+            content="Duplicate description"
+            data-ht={true}
+            name="description"
+          />,
+          <meta
+            content="Inner description"
+            data-ht={true}
+            name="description"
+          />,
+        ]
+      `);
     });
 
     it('client', () => {
-      renderClient(<MultipleNestedMetaOverride />, clientCache);
+      renderClient(<MultipleNestedMetaCombine />, clientCache);
 
       const tagNodes = getInjectedElementsByTagName('meta');
-      const firstTag = tagNodes[0];
 
-      expect(tagNodes).toHaveLength(1);
-
-      expect(firstTag?.getAttribute('name')).toBe('description');
-      expect(firstTag?.getAttribute('content')).toBe('Inner description');
-      expect(firstTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner description" data-ht="true">'
-      );
+      expect(tagNodes).toMatchInlineSnapshot(`
+        NodeList [
+          <meta
+            content="Test description"
+            data-ht="true"
+            name="description"
+          />,
+          <meta
+            content="Duplicate description"
+            data-ht="true"
+            name="description"
+          />,
+          <meta
+            content="Inner description"
+            data-ht="true"
+            name="description"
+          />,
+        ]
+      `);
     });
   });
 
-  describe('overrides single meta tag with duplicate meta tags in a nested component', () => {
-    const MultipleNestedMetaOverride = () => (
+  describe('combines single meta tag with duplicate meta tags in a nested component', () => {
+    const MultipleNestedMetaCombine = () => (
       <>
         <Head>
           <meta name="description" content="Test description" />
@@ -168,38 +217,58 @@ describe('meta tags', () => {
     );
 
     it('server', () => {
-      renderServer(<MultipleNestedMetaOverride />, serverCache);
+      renderServer(<MultipleNestedMetaCombine />, serverCache);
 
       const head = serverCache.getOutput();
 
-      expect(head.meta.toString()).toBe(
-        '<meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="description" content="Inner duplicate description"/>'
+      expect(head.meta.toString()).toMatchInlineSnapshot(
+        `"<meta data-ht="true" name="description" content="Test description"/><meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="description" content="Inner duplicate description"/>"`
       );
-      expect(renderResult(head.meta.toElements())).toBe(
-        '<meta data-ht="true" name="description" content="Inner description"/><meta data-ht="true" name="description" content="Inner duplicate description"/>'
-      );
+      expect(head.meta.toElements()).toMatchInlineSnapshot(`
+        [
+          <meta
+            content="Test description"
+            data-ht={true}
+            name="description"
+          />,
+          <meta
+            content="Inner description"
+            data-ht={true}
+            name="description"
+          />,
+          <meta
+            content="Inner duplicate description"
+            data-ht={true}
+            name="description"
+          />,
+        ]
+      `);
     });
 
     it('client', () => {
-      renderClient(<MultipleNestedMetaOverride />, clientCache);
+      renderClient(<MultipleNestedMetaCombine />, clientCache);
 
       const tagNodes = getInjectedElementsByTagName('meta');
-      const firstTag = tagNodes[0];
-      const secondTag = tagNodes[1];
 
-      expect(tagNodes).toHaveLength(2);
-
-      expect(firstTag?.getAttribute('name')).toBe('description');
-      expect(firstTag?.getAttribute('content')).toBe('Inner description');
-      expect(firstTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner description" data-ht="true">'
-      );
-
-      expect(secondTag?.getAttribute('name')).toBe('description');
-      expect(secondTag?.getAttribute('content')).toBe('Inner duplicate description');
-      expect(secondTag?.outerHTML).toBe(
-        '<meta name="description" content="Inner duplicate description" data-ht="true">'
-      );
+      expect(tagNodes).toMatchInlineSnapshot(`
+        NodeList [
+          <meta
+            content="Test description"
+            data-ht="true"
+            name="description"
+          />,
+          <meta
+            content="Inner description"
+            data-ht="true"
+            name="description"
+          />,
+          <meta
+            content="Inner duplicate description"
+            data-ht="true"
+            name="description"
+          />,
+        ]
+      `);
     });
   });
 

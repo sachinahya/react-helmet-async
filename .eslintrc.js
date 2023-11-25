@@ -21,6 +21,7 @@ module.exports = {
     'react/no-unused-prop-types': 0,
     'react/default-props-match-prop-types': 0,
     'prefer-object-spread': 0,
+    'no-plusplus': 0,
   },
 
   overrides: [
